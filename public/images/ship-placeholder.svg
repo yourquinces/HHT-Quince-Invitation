@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Placeholder ship image">
+  <defs>
+    <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FBF1F2"/>
+      <stop offset="100%" stop-color="#BBA5D3"/>
+    </linearGradient>
+    <linearGradient id="sea2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#684A8B"/>
+      <stop offset="100%" stop-color="#43305A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#sky2)"/>
+  <circle cx="620" cy="140" r="60" fill="#F6EED8" opacity="0.9"/>
+  <rect y="400" width="800" height="200" fill="url(#sea2)"/>
+  <g fill="#FDFAF9" opacity="0.95">
+    <path d="M140 400 L660 400 L620 460 L180 460 Z"/>
+    <rect x="220" y="345" width="360" height="55" rx="10"/>
+    <rect x="270" y="300" width="260" height="45" rx="10"/>
+    <rect x="345" y="265" width="110" height="35" rx="8"/>
+  </g>
+  <g fill="#684A8B" opacity="0.85">
+    <circle cx="260" cy="372" r="6"/><circle cx="300" cy="372" r="6"/><circle cx="340" cy="372" r="6"/>
+    <circle cx="380" cy="372" r="6"/><circle cx="420" cy="372" r="6"/><circle cx="460" cy="372" r="6"/>
+    <circle cx="500" cy="372" r="6"/><circle cx="540" cy="372" r="6"/>
+  </g>
+  <path d="M0 470 Q100 452 200 470 T400 470 T600 470 T800 470" stroke="#EBAFC4" stroke-width="5" fill="none" opacity="0.5"/>
+  <text x="400" y="545" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#F6EED8" letter-spacing="4">REPLACE WITH SHIP PHOTO</text>
+</svg>

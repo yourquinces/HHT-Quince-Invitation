@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-blush-50 font-body text-slate-700 antialiased;
+}
+
+/* Consistent, visible keyboard focus everywhere */
+:focus-visible {
+  @apply outline-none ring-2 ring-royal-500 ring-offset-2 ring-offset-blush-50;
+}

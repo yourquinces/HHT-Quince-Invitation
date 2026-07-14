@@ -1,0 +1,12 @@
+# Netlify configuration for the HHT Quinceañera Cruise Invitation.
+# Deploy: connect this repo to Netlify (or drag-and-drop the dist folder).
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Single-page-app redirect so all routes serve the React app.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

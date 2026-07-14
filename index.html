@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+
+    <!-- ================================================================
+         SOCIAL SHARING METADATA
+         WhatsApp, Facebook, and iMessage read these tags directly from
+         this file (they do not run JavaScript), so when you create a new
+         invitation, update the title / description / image below to
+         match src/data/invitation.ts. See README.md → "Social sharing".
+         The og:image URL must be an ABSOLUTE https URL to a JPG or PNG.
+         ================================================================ -->
+    <title>Celebrate Sofia’s Quinceañera Cruise | Icon of the Seas</title>
+    <meta
+      name="description"
+      content="Join Sofia, her family and friends aboard Icon of the Seas July 17–24, 2027. View cruise details, pricing and reservation information."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Celebrate Sofia’s Quinceañera Cruise | Icon of the Seas" />
+    <meta
+      property="og:description"
+      content="Join Sofia, her family and friends aboard Icon of the Seas July 17–24, 2027. View cruise details, pricing and reservation information."
+    />
+    <!-- Replace with your deployed site URL + a real JPG/PNG share image. -->
+    <meta property="og:image" content="https://YOUR-SITE.netlify.app/images/social-share.jpg" />
+    <meta property="og:url" content="https://YOUR-SITE.netlify.app/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Celebrate Sofia’s Quinceañera Cruise | Icon of the Seas" />
+    <meta
+      name="twitter:description"
+      content="Join Sofia, her family and friends aboard Icon of the Seas July 17–24, 2027. View cruise details, pricing and reservation information."
+    />
+    <meta name="twitter:image" content="https://YOUR-SITE.netlify.app/images/social-share.jpg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- ================================================================
+         NETLIFY FORMS REGISTRATION (do not delete)
+         Netlify scans the deployed HTML for this hidden form to know
+         which fields to accept from the React interest form.
+         If you change `leadFormName` in src/data/invitation.ts, change
+         the name="" and value below to match — they must be identical.
+         ================================================================ -->
+    <form name="quince-cruise-interest" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="quince-cruise-interest" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="tel" name="phone" />
+      <input type="text" name="preferred-contact" />
+      <input type="text" name="guests" />
+      <input type="text" name="cabin-interest" />
+      <textarea name="comments"></textarea>
+      <input type="checkbox" name="consent" />
+      <input type="hidden" name="quinceanera-name" />
+      <input type="hidden" name="group-name" />
+      <input type="hidden" name="sailing-date" />
+      <input type="hidden" name="page-url" />
+    </form>
+
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
