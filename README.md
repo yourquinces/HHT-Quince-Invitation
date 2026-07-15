@@ -114,6 +114,23 @@ sheet and the page shows the new numbers on its own, **no redeploy needed**.
 - The sheet must stay **published to the web** (File → Share → Publish to web)
   for this to work.
 
+## 4b. Live per-quinceañera pages (/i/name) — created from HHT-QRS
+
+Besides the sample invitation at `/`, the site serves a live page per
+quinceañera at `/i/<slug>` (e.g. `/i/sofia-garcia`). These pages load their
+content from the `invitations` table in the HHT Supabase project:
+
+- **HHT-QRS creates the row automatically** the first time an agent approves
+  a cabin marked as a quinceañera (or via the 💌 INVITE button on the
+  reservation). The dialog it shows contains the shareable link.
+- New pages appear **instantly — no redeploy**.
+- Fields left empty in the row (message, photo, registry link, starting
+  price) fall back to the defaults in `src/data/invitation.ts`, so a
+  brand-new page is complete from the start.
+- To personalize a page (photo, family message, registry link), edit its row
+  in Supabase → Table Editor → `invitations`.
+- One-time setup: run `supabase/invitations.sql` in the Supabase SQL editor.
+
 ## 5. Connecting the existing HHT links
 
 In `src/data/invitation.ts`:
