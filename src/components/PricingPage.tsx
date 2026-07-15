@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invitation } from "../data/invitation";
+import { cabinPhotoFor, fetchCabinPhotoMap } from "../lib/cabinPhotos";
 import { fetchCabinSections, formatUsd } from "../lib/pricingSheet";
 import type { CabinSection } from "../lib/pricingSheet";
 import Header from "./Header";
@@ -24,8 +25,20 @@ export default function PricingPage() {
   const [activeTab, setActiveTab] = useState(() => initialTabIndex(pricingSheet.tabs.length));
   const [tabData, setTabData] = useState<Record<string, TabState>>({});
   const [reloadKey, setReloadKey] = useState(0);
+  const [photos, setPhotos] = useState<Map<string, string>>(() => new Map());
 
   const tab = pricingSheet.tabs[activeTab];
+
+  // Cabin photos uploaded by HHT staff (Supabase Storage → cabin-photos).
+  useEffect(() => {
+    let cancelled = false;
+    fetchCabinPhotoMap().then((map) => {
+      if (!cancelled && map.size > 0) setPhotos(map);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const gid = tab.gid;
@@ -149,11 +162,21 @@ export default function PricingPage() {
                     {section.name}
                   </h2>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {section.cabins.map((cabin) => (
+                    {section.cabins.map((cabin) => {
+                      const photo = cabinPhotoFor(photos, cabin);
+                      return (
                       <div
                         key={`${cabin.category}-${cabin.type}`}
                         className="flex flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-blush-200"
                       >
+                        {photo && (
+                          <img
+                            src={photo}
+                            alt={`${cabin.type} cabin`}
+                            className="mb-5 aspect-[16/10] w-full rounded-2xl object-cover ring-1 ring-blush-200"
+                            loading="lazy"
+                          />
+                        )}
                         <div className="flex items-start justify-between gap-3">
                           <h3 className="font-display text-lg font-semibold leading-snug text-royal-800">
                             {cabin.type}
@@ -195,7 +218,8 @@ export default function PricingPage() {
                           )}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}

@@ -114,6 +114,24 @@ sheet and the page shows the new numbers on its own, **no redeploy needed**.
 - The sheet must stay **published to the web** (File → Share → Publish to web)
   for this to work.
 
+### Cabin photos on the pricing cards
+
+Each cabin card can show a photo of the room. Photos live in Supabase
+Storage (bucket `cabin-photos`) so staff can add or change them with **no
+code and no redeploy**:
+
+1. One-time setup: run `supabase/cabin-photos.sql` in the Supabase SQL editor.
+2. In Supabase → **Storage → cabin-photos**, upload photos (drag and drop).
+3. Name each file after what it should match:
+   - `Ocean View Balcony.jpg` — every cabin of that type, on all guest tabs
+     (spaces/capitals don't matter; `ocean-view-balcony.jpg` works too)
+   - `V4.jpg` — only the specific category-V4 card (overrides a type match)
+4. Refresh the pricing page — the photos appear on the matching cards.
+
+JPG, PNG, and WebP all work. Keep files under ~300 KB for fast loading
+(https://squoosh.app is an easy compressor). Cards without a matching photo
+simply render without an image.
+
 ## 4b. Live per-quinceañera pages (/i/name) — created from HHT-QRS
 
 Besides the sample invitation at `/`, the site serves a live page per

@@ -8,9 +8,7 @@
 // security only exposes rows with status = 'active'.
 
 import { invitation } from "../data/invitation";
-
-const SUPABASE_URL = "https://jpgwcfswnfytyqzklrba.supabase.co";
-const SUPABASE_KEY = "sb_publishable_122S5BZIb5_yjD2ofGDuuA_nDeB7fuZ";
+import { SUPABASE_KEY, SUPABASE_URL } from "./supabase";
 
 export interface InvitationRow {
   slug: string;
