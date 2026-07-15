@@ -130,7 +130,8 @@ Each cabin card can show a photo of the room. Photos live in Supabase
 Storage (bucket `cabin-photos`) so staff can add or change them with **no
 code and no redeploy**:
 
-1. One-time setup: run `supabase/cabin-photos.sql` in the Supabase SQL editor.
+1. One-time setup: run `supabase/complete-setup.sql` in the Supabase SQL
+   editor (covers this bucket too).
 2. In Supabase → **Storage → cabin-photos**, upload photos (drag and drop).
 3. Name each file after what it should match:
    - `Ocean View Balcony.jpg` — every cabin of that type, on all guest tabs
@@ -162,8 +163,10 @@ content from the `invitations` table in the HHT Supabase project:
   with no account. Agents only forward the link once.
 - Agents can also edit any field directly in Supabase → Table Editor →
   `invitations` if ever needed.
-- One-time setup: run `supabase/invitations.sql`, then `supabase/add-sail-date.sql`,
-  then `supabase/family-edit.sql` in the Supabase SQL editor.
+- One-time setup: run `supabase/complete-setup.sql` in the Supabase SQL
+  editor. It is idempotent (safe to re-run) and covers everything — the
+  table, sail_date, edit keys, the family update function, and both photo
+  buckets — superseding the older per-feature SQL files.
 
 ## 5. Connecting the existing HHT links
 
