@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Placeholder invitation image">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FBF1F2"/>
-      <stop offset="45%" stop-color="#EBAFC4"/>
-      <stop offset="100%" stop-color="#684A8B"/>
+      <stop offset="0%" stop-color="#FBF0F8"/>
+      <stop offset="45%" stop-color="#EF97D5"/>
+      <stop offset="100%" stop-color="#1479A6"/>
     </linearGradient>
     <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#553C72"/>
-      <stop offset="100%" stop-color="#312343"/>
+      <stop offset="0%" stop-color="#10618B"/>
+      <stop offset="100%" stop-color="#093750"/>
     </linearGradient>
   </defs>
   <rect width="800" height="1000" fill="url(#sky)"/>
@@ -15,19 +15,19 @@
   <circle cx="560" cy="300" r="120" fill="#DEC684" opacity="0.25"/>
   <rect y="640" width="800" height="360" fill="url(#sea)"/>
   <!-- simple ship silhouette -->
-  <g fill="#FDFAF9" opacity="0.95">
+  <g fill="#FDFAFC" opacity="0.95">
     <path d="M150 640 L650 640 L610 700 L190 700 Z"/>
     <rect x="230" y="580" width="340" height="60" rx="10"/>
     <rect x="280" y="530" width="240" height="50" rx="10"/>
     <rect x="350" y="490" width="100" height="40" rx="8"/>
   </g>
-  <g fill="#684A8B" opacity="0.85">
+  <g fill="#1479A6" opacity="0.85">
     <circle cx="270" cy="610" r="7"/><circle cx="310" cy="610" r="7"/><circle cx="350" cy="610" r="7"/>
     <circle cx="390" cy="610" r="7"/><circle cx="430" cy="610" r="7"/><circle cx="470" cy="610" r="7"/>
     <circle cx="510" cy="610" r="7"/>
   </g>
-  <path d="M0 720 Q100 700 200 720 T400 720 T600 720 T800 720" stroke="#EBAFC4" stroke-width="6" fill="none" opacity="0.5"/>
-  <path d="M0 780 Q100 760 200 780 T400 780 T600 780 T800 780" stroke="#EBAFC4" stroke-width="6" fill="none" opacity="0.3"/>
+  <path d="M0 720 Q100 700 200 720 T400 720 T600 720 T800 720" stroke="#EF97D5" stroke-width="6" fill="none" opacity="0.5"/>
+  <path d="M0 780 Q100 760 200 780 T400 780 T600 780 T800 780" stroke="#EF97D5" stroke-width="6" fill="none" opacity="0.3"/>
   <text x="400" y="880" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#F6EED8" letter-spacing="8">HAPPY HOLIDAYS TRAVEL</text>
-  <text x="400" y="930" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#EBAFC4" letter-spacing="2">Replace this image — see README</text>
+  <text x="400" y="930" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#EF97D5" letter-spacing="2">Replace this image — see README</text>
 </svg>

@@ -23,7 +23,7 @@ export default function RegistrySection() {
             href={registry.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rosa-500 to-royal-500 px-10 py-4 text-sm font-semibold uppercase tracking-wider text-white shadow-lg shadow-rosa-500/25 transition hover:from-rosa-600 hover:to-royal-600 sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rosa-600 to-royal-600 px-10 py-4 text-sm font-semibold uppercase tracking-wider text-white shadow-lg shadow-rosa-500/25 transition hover:from-rosa-500 hover:to-royal-500 sm:w-auto"
           >
             <Icon name="gift" className="h-4 w-4" />
             {registry.buttonLabel}

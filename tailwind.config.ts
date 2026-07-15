@@ -5,30 +5,34 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Very light backgrounds with a soft fuchsia tint
         blush: {
-          50: "#FDFAF9",
-          100: "#FBF1F2",
-          200: "#F7E4E8",
+          50: "#FDFAFC",
+          100: "#FBF0F8",
+          200: "#F5DFEE",
         },
+        // Vice Fuchsia — base brand pink is 500 (#DB3EB1)
         rosa: {
-          100: "#F9E3EA",
-          200: "#F3CBD8",
-          300: "#EBAFC4",
-          400: "#DE8AA8",
-          500: "#CE6A8F",
-          600: "#B34E75",
+          100: "#FBE3F4",
+          200: "#F6C3E7",
+          300: "#EF97D5",
+          400: "#E566C2",
+          500: "#DB3EB1",
+          600: "#A81F84",
         },
+        // Vice Blue — base brand blue is 500 (#41B6E6);
+        // 600+ are darker steps for buttons, headings and dark sections
         royal: {
-          50: "#F6F3FA",
-          100: "#EDE7F5",
-          200: "#D9CCE8",
-          300: "#BBA5D3",
-          400: "#9A7CBB",
-          500: "#7E5DA3",
-          600: "#684A8B",
-          700: "#553C72",
-          800: "#43305A",
-          900: "#312343",
+          50: "#F0FAFE",
+          100: "#E1F4FC",
+          200: "#BCE7F8",
+          300: "#8ED7F2",
+          400: "#62C6EC",
+          500: "#41B6E6",
+          600: "#1479A6",
+          700: "#10618B",
+          800: "#0D4A6B",
+          900: "#093750",
         },
         gold: {
           100: "#F6EED8",
