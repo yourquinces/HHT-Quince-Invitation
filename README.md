@@ -108,6 +108,9 @@ sheet and the page shows the new numbers on its own, **no redeploy needed**.
   published workbook), and tabs switch between One/Two/Three/Four guests per
   cabin (the One Guest tab appears only on sailings whose sheet has a
   Singles tab).
+- Links that specify a sailing (`?sailing=...`) — which is how invitation
+  pages link here — **lock the page to that cruise**: the sailing dropdown
+  is hidden so a family only sees prices for the sailing they're invited to.
 - Sailings are configured under `pricingSheet.sailings` in
   `src/data/invitation.ts` — to add a new sailing, publish its sheet to the
   web, copy an existing entry, and fill in the dates, ship, publishedId and

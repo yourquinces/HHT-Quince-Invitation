@@ -30,6 +30,13 @@ function initialGuests(): string {
 
 export default function PricingPage() {
   const { reservationFormUrl } = invitation;
+  // Links from an invitation carry her ?sailing= — lock the page to that
+  // cruise so guests only see prices for the sailing they're invited to.
+  // The dropdown appears only when /pricing is opened without a sailing.
+  const [locked] = useState(() => {
+    const wanted = new URLSearchParams(window.location.search).get("sailing");
+    return sailings.some((s) => s.id === wanted);
+  });
   const [sailingIdx, setSailingIdx] = useState(initialSailingIndex);
   const [guests, setGuests] = useState(initialGuests);
   const [tabData, setTabData] = useState<Record<string, TabState>>({});
@@ -104,7 +111,7 @@ export default function PricingPage() {
               {sailing.nights} Night {sailing.itineraryName} Cruise from {sailing.departurePort}
             </p>
 
-            {sailings.length > 1 && (
+            {!locked && sailings.length > 1 && (
               <div className="mt-8">
                 <label
                   htmlFor="sailing-select"
