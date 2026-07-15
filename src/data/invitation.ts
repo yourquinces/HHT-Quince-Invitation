@@ -136,21 +136,31 @@ export const invitation: InvitationConfig = {
   pricing: {
     // Shown as "Cabins starting at $___ per person". Leave "" to hide.
     startingPricePerPerson: "",
-    // Replace with the full pricing sheet / flyer link for this group.
-    fullPricingUrl: "https://example.com/full-pricing",
+    // Full pricing sheet / flyer link for this group.
+    fullPricingUrl:
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=1762296528&single=true",
     occupancyLinks: [
-      // Replace each URL with the matching pricing link for this group.
-      { label: "Two Guests Per Cabin", url: "https://example.com/pricing-double" },
-      { label: "Three Guests Per Cabin", url: "https://example.com/pricing-triple" },
-      { label: "Four Guests Per Cabin", url: "https://example.com/pricing-quad" },
+      // Per-occupancy pricing links for this group.
+      {
+        label: "Two Guests Per Cabin",
+        url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=1774284890&single=true",
+      },
+      {
+        label: "Three Guests Per Cabin",
+        url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=832346416&single=true",
+      },
+      {
+        label: "Four Guests Per Cabin",
+        url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=807433313&single=true",
+      },
     ],
   },
 
-  // Replace this URL with the existing Happy Holidays Travel reservation form.
-  reservationFormUrl: "https://example.com/reservation-form",
+  // The existing Happy Holidays Travel reservation form.
+  reservationFormUrl: "https://hht-booking.netlify.app/",
 
-  // Replace this URL with the existing Happy Holidays Travel deposit-payment link.
-  depositPaymentUrl: "https://example.com/deposit",
+  // The existing Happy Holidays Travel deposit-payment link.
+  depositPaymentUrl: "https://hhtcruises.net/deposit.php",
 
   // ------------------------------------------------------------------
   // DEPOSIT
