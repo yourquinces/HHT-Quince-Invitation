@@ -37,6 +37,71 @@ export function liveSlugFromPath(pathname: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+/** Returns the slug for a family edit URL (/i/<slug>/edit), or null. */
+export function editSlugFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/i\/([^/]+)\/edit\/?$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+export interface FamilyEditFields {
+  family_message: string;
+  signature: string;
+  hero_image_url: string;
+  image_position: string;
+  registry_url: string;
+}
+
+/**
+ * Saves the family-editable fields via the update_invitation_by_key
+ * function, which validates the secret edit key server-side.
+ * Returns false when the key doesn't match.
+ */
+export async function updateInvitationByKey(
+  slug: string,
+  key: string,
+  fields: FamilyEditFields,
+): Promise<boolean> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/update_invitation_by_key`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      p_slug: slug,
+      p_key: key,
+      p_family_message: fields.family_message,
+      p_signature: fields.signature,
+      p_hero_image_url: fields.hero_image_url,
+      p_image_position: fields.image_position,
+      p_registry_url: fields.registry_url,
+    }),
+  });
+  if (!res.ok) throw new Error(`Save failed (${res.status})`);
+  return (await res.json()) === true;
+}
+
+/** Uploads a family photo to the public bucket; returns its public URL. */
+export async function uploadInvitationPhoto(slug: string, file: File): Promise<string> {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const name = `inv-${slug}-${Date.now()}.${ext}`;
+  const res = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/invitation-photos/${encodeURIComponent(name)}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": file.type || "image/jpeg",
+      },
+      body: file,
+    },
+  );
+  if (!res.ok) throw new Error(`Photo upload failed (${res.status})`);
+  return `${SUPABASE_URL}/storage/v1/object/public/invitation-photos/${encodeURIComponent(name)}`;
+}
+
 /** Fetches one active invitation row by slug. Null when none exists. */
 export async function fetchInvitationRow(slug: string): Promise<InvitationRow | null> {
   const url =

@@ -155,9 +155,15 @@ content from the `invitations` table in the HHT Supabase project:
 - Fields left empty in the row (message, photo, registry link, starting
   price) fall back to the defaults in `src/data/invitation.ts`, so a
   brand-new page is complete from the start.
-- To personalize a page (photo, family message, registry link), edit its row
-  in Supabase → Table Editor → `invitations`.
-- One-time setup: run `supabase/invitations.sql` in the Supabase SQL editor.
+- **Families personalize their own page** — every invitation has a secret
+  family edit link (`/i/<slug>/edit?key=…`, shown in the QRS approval dialog
+  and the QRS Reports → 💌 Invitations tab). Anyone with that link can change
+  the photo, welcome message, signature, and registry link — nothing else —
+  with no account. Agents only forward the link once.
+- Agents can also edit any field directly in Supabase → Table Editor →
+  `invitations` if ever needed.
+- One-time setup: run `supabase/invitations.sql`, then `supabase/add-sail-date.sql`,
+  then `supabase/family-edit.sql` in the Supabase SQL editor.
 
 ## 5. Connecting the existing HHT links
 

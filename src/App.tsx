@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { invitation } from "./data/invitation";
 import {
   applyInvitationRow,
+  editSlugFromPath,
   fetchInvitationRow,
   liveSlugFromPath,
 } from "./lib/liveInvitation";
+import FamilyEditPage from "./components/FamilyEditPage";
 import PricingPage from "./components/PricingPage";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -110,6 +112,7 @@ function LiveInvitation({ slug }: { slug: string }) {
 export default function App() {
   const pathname = window.location.pathname;
   const isPricingPage = pathname.replace(/\/+$/, "") === "/pricing";
+  const editSlug = editSlugFromPath(pathname);
   const liveSlug = liveSlugFromPath(pathname);
 
   // Keep the browser-tab title/description in sync with the config.
@@ -123,6 +126,7 @@ export default function App() {
   }, [isPricingPage]);
 
   if (isPricingPage) return <PricingPage />;
+  if (editSlug) return <FamilyEditPage slug={editSlug} />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;
   return <InvitationPage />;
 }
