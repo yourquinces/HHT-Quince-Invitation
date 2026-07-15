@@ -14,20 +14,33 @@ type TabState =
   | { status: "error" }
   | { status: "ready"; sections: CabinSection[] };
 
-function initialTabIndex(tabCount: number): number {
+const { sailings, defaultSailingId } = invitation.pricingSheet;
+
+function initialSailingIndex(): number {
+  const wanted = new URLSearchParams(window.location.search).get("sailing");
+  let index = sailings.findIndex((s) => s.id === wanted);
+  if (index < 0) index = sailings.findIndex((s) => s.id === defaultSailingId);
+  return index < 0 ? 0 : index;
+}
+
+function initialGuests(): string {
   const guests = new URLSearchParams(window.location.search).get("guests");
-  const index = invitation.pricingSheet.tabs.findIndex((t) => t.guests === guests);
-  return index >= 0 && index < tabCount ? index : 0;
+  return guests && ["1", "2", "3", "4"].includes(guests) ? guests : "2";
 }
 
 export default function PricingPage() {
-  const { pricingSheet, cruise, reservationFormUrl } = invitation;
-  const [activeTab, setActiveTab] = useState(() => initialTabIndex(pricingSheet.tabs.length));
+  const { reservationFormUrl } = invitation;
+  const [sailingIdx, setSailingIdx] = useState(initialSailingIndex);
+  const [guests, setGuests] = useState(initialGuests);
   const [tabData, setTabData] = useState<Record<string, TabState>>({});
   const [reloadKey, setReloadKey] = useState(0);
   const [photos, setPhotos] = useState<Map<string, string>>(() => new Map());
 
-  const tab = pricingSheet.tabs[activeTab];
+  const sailing = sailings[sailingIdx];
+  // Fall back gracefully when this sailing has no tab for the chosen count
+  // (e.g. One Guest exists only on some sailings).
+  const tab = sailing.tabs.find((t) => t.guests === guests) ?? sailing.tabs[0];
+  const cacheKey = `${sailing.publishedId}:${tab.gid}`;
 
   // Cabin photos uploaded by HHT staff (Supabase Storage → cabin-photos).
   useEffect(() => {
@@ -40,28 +53,33 @@ export default function PricingPage() {
     };
   }, []);
 
+  // Keep the URL shareable: /pricing?sailing=2027-07-17&guests=2
   useEffect(() => {
-    const gid = tab.gid;
+    window.history.replaceState(null, "", `/pricing?sailing=${sailing.id}&guests=${tab.guests}`);
+  }, [sailing.id, tab.guests]);
+
+  useEffect(() => {
     let cancelled = false;
     setTabData((d) =>
-      d[gid]?.status === "ready" ? d : { ...d, [gid]: { status: "loading" } },
+      d[cacheKey]?.status === "ready" ? d : { ...d, [cacheKey]: { status: "loading" } },
     );
-    fetchCabinSections(pricingSheet.publishedId, gid)
+    fetchCabinSections(sailing.publishedId, tab.gid)
       .then((sections) => {
-        if (!cancelled) setTabData((d) => ({ ...d, [gid]: { status: "ready", sections } }));
+        if (!cancelled)
+          setTabData((d) => ({ ...d, [cacheKey]: { status: "ready", sections } }));
       })
       .catch(() => {
         if (!cancelled)
           setTabData((d) =>
-            d[gid]?.status === "ready" ? d : { ...d, [gid]: { status: "error" } },
+            d[cacheKey]?.status === "ready" ? d : { ...d, [cacheKey]: { status: "error" } },
           );
       });
     return () => {
       cancelled = true;
     };
-  }, [tab.gid, pricingSheet.publishedId, reloadKey]);
+  }, [cacheKey, sailing.publishedId, tab.gid, reloadKey]);
 
-  const state: TabState = tabData[tab.gid] ?? { status: "loading" };
+  const state: TabState = tabData[cacheKey] ?? { status: "loading" };
 
   return (
     <>
@@ -80,25 +98,50 @@ export default function PricingPage() {
               Cabin Pricing
             </h1>
             <p className="mt-4 text-slate-600">
-              {cruise.ship} · {cruise.sailingDates}
+              {sailing.ship} · {sailing.label}
             </p>
             <p className="text-slate-600">
-              {cruise.nights} Night {cruise.itineraryName} Cruise from {cruise.departurePort}
+              {sailing.nights} Night {sailing.itineraryName} Cruise from {sailing.departurePort}
             </p>
 
+            {sailings.length > 1 && (
+              <div className="mt-8">
+                <label
+                  htmlFor="sailing-select"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gold-600"
+                >
+                  Choose Your Sailing
+                </label>
+                <select
+                  id="sailing-select"
+                  value={sailing.id}
+                  onChange={(e) =>
+                    setSailingIdx(Math.max(0, sailings.findIndex((s) => s.id === e.target.value)))
+                  }
+                  className="mx-auto w-full max-w-md rounded-full border border-blush-200 bg-white px-5 py-3.5 text-center font-medium text-royal-800 shadow-sm"
+                >
+                  {sailings.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label} · {s.ship}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div
-              className="mx-auto mt-9 inline-flex max-w-full flex-col gap-1.5 rounded-3xl bg-white p-1.5 shadow-sm ring-1 ring-blush-200 sm:flex-row sm:rounded-full"
+              className="mx-auto mt-6 inline-flex max-w-full flex-col gap-1.5 rounded-3xl bg-white p-1.5 shadow-sm ring-1 ring-blush-200 sm:flex-row sm:rounded-full"
               role="group"
               aria-label="Guests per cabin"
             >
-              {pricingSheet.tabs.map((t, i) => (
+              {sailing.tabs.map((t) => (
                 <button
                   key={t.gid}
                   type="button"
-                  onClick={() => setActiveTab(i)}
-                  aria-pressed={i === activeTab}
+                  onClick={() => setGuests(t.guests)}
+                  aria-pressed={t.guests === tab.guests}
                   className={`rounded-full px-6 py-3 text-sm font-semibold transition ${
-                    i === activeTab
+                    t.guests === tab.guests
                       ? "bg-royal-600 text-white shadow"
                       : "text-royal-700 hover:bg-royal-50"
                   }`}
@@ -144,7 +187,7 @@ export default function PricingPage() {
                   You can view them directly on our pricing sheet, or try again in a moment.
                 </p>
                 <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row">
-                  <SecondaryButton href={pricingSheet.backupUrl}>
+                  <SecondaryButton href={sailing.backupUrl}>
                     Open the Pricing Sheet
                     <Icon name="externalLink" className="h-4 w-4" />
                   </SecondaryButton>
@@ -164,60 +207,62 @@ export default function PricingPage() {
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {section.cabins.map((cabin) => {
                       const photo = cabinPhotoFor(photos, cabin);
+                      const mainPrice = cabin.totalPerPerson || cabin.cabinTotal;
+                      const mainLabel = cabin.totalPerPerson ? "Total per person" : "Cabin total";
                       return (
-                      <div
-                        key={`${cabin.category}-${cabin.type}`}
-                        className="flex flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-blush-200"
-                      >
-                        {photo && (
-                          <img
-                            src={photo}
-                            alt={`${cabin.type} cabin`}
-                            className="mb-5 aspect-[16/10] w-full rounded-2xl object-cover ring-1 ring-blush-200"
-                            loading="lazy"
-                          />
-                        )}
-                        <div className="flex items-start justify-between gap-3">
-                          <h3 className="font-display text-lg font-semibold leading-snug text-royal-800">
-                            {cabin.type}
-                          </h3>
-                          <span className="shrink-0 rounded-full bg-gold-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gold-600">
-                            {cabin.category}
-                          </span>
-                        </div>
-                        {cabin.floor && (
-                          <p className="mt-1.5 text-sm text-slate-500">Decks {cabin.floor}</p>
-                        )}
-
-                        <dl className="mt-4 space-y-1.5 border-t border-blush-200 pt-4 text-sm">
-                          <div className="flex justify-between">
-                            <dt className="text-slate-500">Base rate</dt>
-                            <dd className="font-medium text-slate-700">
-                              {formatUsd(cabin.baseRate)}
-                            </dd>
-                          </div>
-                          <div className="flex justify-between">
-                            <dt className="text-slate-500">Port and taxes</dt>
-                            <dd className="font-medium text-slate-700">
-                              {formatUsd(cabin.portTaxes)}
-                            </dd>
-                          </div>
-                        </dl>
-
-                        <div className="mt-4 rounded-2xl bg-blush-50 p-4 text-center">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-gold-600">
-                            Total per person
-                          </p>
-                          <p className="mt-1 font-display text-2xl font-bold text-royal-800">
-                            {formatUsd(cabin.totalPerPerson)}
-                          </p>
-                          {cabin.cabinTotal && (
-                            <p className="mt-1 text-xs text-slate-500">
-                              Cabin total {formatUsd(cabin.cabinTotal)}
-                            </p>
+                        <div
+                          key={`${cabin.category}-${cabin.type}`}
+                          className="flex flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-blush-200"
+                        >
+                          {photo && (
+                            <img
+                              src={photo}
+                              alt={`${cabin.type} cabin`}
+                              className="mb-5 aspect-[16/10] w-full rounded-2xl object-cover ring-1 ring-blush-200"
+                              loading="lazy"
+                            />
                           )}
+                          <div className="flex items-start justify-between gap-3">
+                            <h3 className="font-display text-lg font-semibold leading-snug text-royal-800">
+                              {cabin.type}
+                            </h3>
+                            <span className="shrink-0 rounded-full bg-gold-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gold-600">
+                              {cabin.category}
+                            </span>
+                          </div>
+                          {cabin.floor && (
+                            <p className="mt-1.5 text-sm text-slate-500">Decks {cabin.floor}</p>
+                          )}
+
+                          <dl className="mt-4 space-y-1.5 border-t border-blush-200 pt-4 text-sm">
+                            <div className="flex justify-between">
+                              <dt className="text-slate-500">Base rate</dt>
+                              <dd className="font-medium text-slate-700">
+                                {formatUsd(cabin.baseRate)}
+                              </dd>
+                            </div>
+                            <div className="flex justify-between">
+                              <dt className="text-slate-500">Port and taxes</dt>
+                              <dd className="font-medium text-slate-700">
+                                {formatUsd(cabin.portTaxes)}
+                              </dd>
+                            </div>
+                          </dl>
+
+                          <div className="mt-4 rounded-2xl bg-blush-50 p-4 text-center">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-gold-600">
+                              {mainLabel}
+                            </p>
+                            <p className="mt-1 font-display text-2xl font-bold text-royal-800">
+                              {formatUsd(mainPrice)}
+                            </p>
+                            {cabin.totalPerPerson && cabin.cabinTotal && (
+                              <p className="mt-1 text-xs text-slate-500">
+                                Cabin total {formatUsd(cabin.cabinTotal)}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
                       );
                     })}
                   </div>

@@ -23,6 +23,8 @@ export interface InvitationRow {
   starting_price: string | null;
   ship: string | null;
   sailing_dates: string | null;
+  /** ISO sail date from QRS — matches pricingSheet.sailings ids. */
+  sail_date?: string | null;
   agent_name: string | null;
   agent_phone: string | null;
   agent_whatsapp: string | null;
@@ -82,6 +84,26 @@ export function applyInvitationRow(row: InvitationRow): void {
   if (row.starting_price) invitation.pricing.startingPricePerPerson = row.starting_price;
   if (row.ship) invitation.cruise.ship = row.ship;
   if (row.sailing_dates) invitation.cruise.sailingDates = row.sailing_dates;
+
+  // When the reservation's sail date matches a configured sailing, the
+  // whole page follows that sailing: cruise details and pricing links.
+  const sailing = invitation.pricingSheet.sailings.find((s) => s.id === row.sail_date);
+  if (sailing) {
+    if (!row.ship) invitation.cruise.ship = sailing.ship;
+    if (!row.sailing_dates) invitation.cruise.sailingDates = sailing.label;
+    invitation.cruise.nights = sailing.nights;
+    invitation.cruise.itineraryName = sailing.itineraryName;
+    invitation.cruise.departurePort = sailing.departurePort;
+    invitation.cruise.destinations = sailing.destinations;
+    invitation.pricing.fullPricingUrl = `/pricing?sailing=${sailing.id}`;
+    const GUEST_WORDS: Record<string, string> = { "2": "Two", "3": "Three", "4": "Four" };
+    invitation.pricing.occupancyLinks = sailing.tabs
+      .filter((t) => GUEST_WORDS[t.guests])
+      .map((t) => ({
+        label: `${GUEST_WORDS[t.guests]} Guests Per Cabin`,
+        url: `/pricing?sailing=${sailing.id}&guests=${t.guests}`,
+      }));
+  }
 
   if (row.agent_name) invitation.agent.name = row.agent_name;
   if (row.agent_phone) {

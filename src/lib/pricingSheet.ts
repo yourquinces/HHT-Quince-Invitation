@@ -92,7 +92,9 @@ export function parseCabins(rows: string[][]): CabinSection[] {
   let current: Partial<Cabin> | null = null;
 
   const commit = () => {
-    if (current && current.category && current.type && current.totalPerPerson) {
+    // Singles tabs have no "Total Per Person" row — Cabin Total is the
+    // per-person price for one guest — so either total makes a valid cabin.
+    if (current && current.category && current.type && (current.totalPerPerson || current.cabinTotal)) {
       const cabin: Cabin = {
         section: currentSection,
         category: current.category ?? "",

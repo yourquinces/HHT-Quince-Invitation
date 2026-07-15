@@ -148,22 +148,130 @@ export const invitation: InvitationConfig = {
 
   // ------------------------------------------------------------------
   // LIVE PRICING PAGE (/pricing)
-  // Rates come straight from the published Google Sheet — edit prices
-  // in the sheet and the page updates on its own, no redeploy needed.
-  // publishedId is the long id after /d/e/ in the published sheet URL.
-  // Each tab's gid is in the sheet URL when you click that tab.
+  // Rates come straight from the published Google Sheets — edit prices
+  // in a sheet and the page updates on its own, no redeploy needed.
+  // One entry below per group sailing. publishedId is the long id after
+  // /d/e/ in that sailing's published sheet URL; each tab's gid is in
+  // the sheet URL when you click that tab.
+  // Invitation pages pick their sailing automatically from the
+  // reservation's sail date; guests can also switch sailings on the
+  // pricing page itself.
   // ------------------------------------------------------------------
   pricingSheet: {
-    publishedId:
-      "2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw",
-    tabs: [
-      { label: "Two Guests", guests: "2", gid: "1774284890" },
-      { label: "Three Guests", guests: "3", gid: "832346416" },
-      { label: "Four Guests", guests: "4", gid: "807433313" },
+    defaultSailingId: "2027-07-17",
+    sailings: [
+      {
+        id: "2027-06-19",
+        label: "June 19–26, 2027",
+        ship: "Icon of the Seas",
+        nights: 7,
+        itineraryName: "Eastern Caribbean",
+        departurePort: "Miami, Florida",
+        destinations: ["St. Maarten", "St. Thomas", "Perfect Day at CocoCay"],
+        publishedId:
+          "2PACX-1vQsFMJ1Hcm4fqLYZ8D4u0ygh9SCrf5Ptneux5f1bEFpMCe3kJrxIWr8p9K5SFdyK7rDoEt9clsDpw6F",
+        tabs: [
+          { label: "One Guest", guests: "1", gid: "864754033" },
+          { label: "Two Guests", guests: "2", gid: "1774284890" },
+          { label: "Three Guests", guests: "3", gid: "832346416" },
+          { label: "Four Guests", guests: "4", gid: "807433313" },
+        ],
+        backupUrl:
+          "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsFMJ1Hcm4fqLYZ8D4u0ygh9SCrf5Ptneux5f1bEFpMCe3kJrxIWr8p9K5SFdyK7rDoEt9clsDpw6F/pubhtml?gid=1774284890&single=true",
+      },
+      {
+        id: "2027-06-26",
+        label: "June 26 – July 3, 2027",
+        ship: "Icon of the Seas",
+        nights: 7,
+        itineraryName: "Eastern Caribbean",
+        departurePort: "Miami, Florida",
+        destinations: ["St. Maarten", "St. Thomas", "Perfect Day at CocoCay"],
+        publishedId:
+          "2PACX-1vRAwFV-2v3cxREhZjBpFX92w6Vb9VL2LgJVmxbpi6aGBanxw3mCbLuGVCBpBgyEeYIl_Jge58vnWzdM",
+        tabs: [
+          { label: "One Guest", guests: "1", gid: "864754033" },
+          { label: "Two Guests", guests: "2", gid: "1774284890" },
+          { label: "Three Guests", guests: "3", gid: "832346416" },
+          { label: "Four Guests", guests: "4", gid: "807433313" },
+        ],
+        backupUrl:
+          "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAwFV-2v3cxREhZjBpFX92w6Vb9VL2LgJVmxbpi6aGBanxw3mCbLuGVCBpBgyEeYIl_Jge58vnWzdM/pubhtml?gid=1774284890&single=true",
+      },
+      {
+        id: "2027-07-10",
+        label: "July 10–18, 2027",
+        ship: "Allure of the Seas",
+        nights: 8,
+        itineraryName: "Southern Caribbean",
+        departurePort: "Fort Lauderdale, Florida",
+        destinations: ["Curaçao", "Aruba", "Dominican Republic", "Perfect Day at CocoCay"],
+        publishedId:
+          "2PACX-1vTg6CL03oAnpadMo1BBki52ZyiskuOxETOzHxhO1dLv_hiv2Jt4Qr8wBQELxiZGa8KaShUl2mjWsSM9",
+        tabs: [
+          { label: "One Guest", guests: "1", gid: "1448037444" },
+          { label: "Two Guests", guests: "2", gid: "650291518" },
+          { label: "Three Guests", guests: "3", gid: "159841704" },
+          { label: "Four Guests", guests: "4", gid: "1756313995" },
+        ],
+        backupUrl:
+          "https://docs.google.com/spreadsheets/d/e/2PACX-1vTg6CL03oAnpadMo1BBki52ZyiskuOxETOzHxhO1dLv_hiv2Jt4Qr8wBQELxiZGa8KaShUl2mjWsSM9/pubhtml?gid=650291518&single=true",
+      },
+      {
+        id: "2027-07-17",
+        label: "July 17–24, 2027",
+        ship: "Icon of the Seas",
+        nights: 7,
+        itineraryName: "Eastern Caribbean",
+        departurePort: "Miami, Florida",
+        destinations: ["St. Maarten", "St. Thomas", "Perfect Day at CocoCay"],
+        publishedId:
+          "2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw",
+        tabs: [
+          { label: "Two Guests", guests: "2", gid: "1774284890" },
+          { label: "Three Guests", guests: "3", gid: "832346416" },
+          { label: "Four Guests", guests: "4", gid: "807433313" },
+        ],
+        backupUrl:
+          "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=1774284890&single=true",
+      },
+      {
+        id: "2027-07-24",
+        label: "July 24–31, 2027",
+        ship: "Icon of the Seas",
+        nights: 7,
+        itineraryName: "Western Caribbean",
+        departurePort: "Miami, Florida",
+        destinations: ["Costa Maya", "Roatán", "Cozumel", "Perfect Day at CocoCay"],
+        publishedId:
+          "2PACX-1vQW1yww-pg1EbW0NdkxTEkIGg-qt-ZZe_zGUHSC4AH9yul3tbNOdV4tpzV5R2gh16iHzOumRZVWxgWn",
+        tabs: [
+          { label: "Two Guests", guests: "2", gid: "1774284890" },
+          { label: "Three Guests", guests: "3", gid: "832346416" },
+          { label: "Four Guests", guests: "4", gid: "807433313" },
+        ],
+        backupUrl:
+          "https://docs.google.com/spreadsheets/d/e/2PACX-1vQW1yww-pg1EbW0NdkxTEkIGg-qt-ZZe_zGUHSC4AH9yul3tbNOdV4tpzV5R2gh16iHzOumRZVWxgWn/pubhtml?gid=1774284890&single=true",
+      },
+      {
+        id: "2027-08-01",
+        label: "August 1–8, 2027",
+        ship: "Odyssey of the Seas",
+        nights: 7,
+        itineraryName: "Eastern Mediterranean",
+        departurePort: "Rome, Italy",
+        destinations: ["Santorini", "Ephesus", "Mykonos", "Naples"],
+        publishedId:
+          "2PACX-1vTWkOFoPOlNdfdCi0uhEskduK7XoXq-bNnoZaS-wBFslKxW9uoGF9aCfRBHnOOk9Fhh5bYSKwCAyy1k",
+        tabs: [
+          { label: "Two Guests", guests: "2", gid: "1386768225" },
+          { label: "Three Guests", guests: "3", gid: "748526258" },
+          { label: "Four Guests", guests: "4", gid: "141211820" },
+        ],
+        backupUrl:
+          "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWkOFoPOlNdfdCi0uhEskduK7XoXq-bNnoZaS-wBFslKxW9uoGF9aCfRBHnOOk9Fhh5bYSKwCAyy1k/pubhtml?gid=1386768225&single=true",
+      },
     ],
-    // Shown as a backup link if the live prices fail to load.
-    backupUrl:
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=1774284890&single=true",
   },
 
   // The existing Happy Holidays Travel reservation form.

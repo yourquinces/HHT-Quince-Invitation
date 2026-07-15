@@ -26,6 +26,23 @@ export interface PricingSheetTab {
   gid: string;
 }
 
+export interface PricingSailing {
+  /** ISO sail date, e.g. "2027-07-17" — matches the QRS sail_date. */
+  id: string;
+  /** Human dates shown to guests, e.g. "July 17–24, 2027". */
+  label: string;
+  ship: string;
+  nights: number;
+  itineraryName: string;
+  departurePort: string;
+  destinations: string[];
+  /** The long id after /d/e/ in this sailing's published sheet URL. */
+  publishedId: string;
+  tabs: PricingSheetTab[];
+  /** Link to the sheet itself, shown if the live fetch fails. */
+  backupUrl: string;
+}
+
 export interface InvitationConfig {
   quinceanera: {
     fullName: string;
@@ -77,13 +94,12 @@ export interface InvitationConfig {
     occupancyLinks: PricingLink[];
   };
 
-  /** Live pricing page (/pricing) — pulls rates from the published Google Sheet. */
+  /** Live pricing page (/pricing) — pulls rates from published Google Sheets. */
   pricingSheet: {
-    /** The long id in the published sheet URL, after /d/e/. */
-    publishedId: string;
-    tabs: PricingSheetTab[];
-    /** Link to the sheet itself, shown if the live fetch fails. */
-    backupUrl: string;
+    /** One entry per group sailing, each with its own published workbook. */
+    sailings: PricingSailing[];
+    /** Sailing shown when a link doesn't specify one (?sailing=...). */
+    defaultSailingId: string;
   };
 
   /** Existing HHT reservation form — buttons across the page use this. */

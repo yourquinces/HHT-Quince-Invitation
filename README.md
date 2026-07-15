@@ -101,18 +101,25 @@ Tips:
 ## 4. Live pricing page (/pricing)
 
 The site has a pricing page at `/pricing` that pulls cabin rates **live from
-the published Google Sheet** every time a guest opens it — edit prices in the
+the published Google Sheets** every time a guest opens it — edit prices in a
 sheet and the page shows the new numbers on its own, **no redeploy needed**.
 
-- Tabs switch between Two, Three, and Four guests per cabin.
-- The sheet id and tab `gid`s are configured under `pricingSheet` in
-  `src/data/invitation.ts`.
-- The "View Full Pricing" and per-occupancy buttons on the invitation link to
-  this page (`/pricing?guests=2`, `?guests=3`, `?guests=4`).
-- If the sheet ever fails to load, guests see a friendly message with a direct
-  link to the Google Sheet (`pricingSheet.backupUrl`).
-- The sheet must stay **published to the web** (File → Share → Publish to web)
-  for this to work.
+- A dropdown switches between **group sailings** (each sailing has its own
+  published workbook), and tabs switch between One/Two/Three/Four guests per
+  cabin (the One Guest tab appears only on sailings whose sheet has a
+  Singles tab).
+- Sailings are configured under `pricingSheet.sailings` in
+  `src/data/invitation.ts` — to add a new sailing, publish its sheet to the
+  web, copy an existing entry, and fill in the dates, ship, publishedId and
+  tab gids.
+- Links can target a sailing directly:
+  `/pricing?sailing=2027-07-17&guests=2`. Live invitation pages pick their
+  sailing automatically from the reservation's sail date (their cruise
+  details and pricing buttons follow it).
+- If a sheet ever fails to load, guests see a friendly message with a direct
+  link to that sailing's Google Sheet.
+- Every sheet must stay **published to the web** (File → Share → Publish to
+  web) for this to work.
 
 ### Cabin photos on the pricing cards
 
