@@ -17,6 +17,15 @@ export interface PricingLink {
   url: string;
 }
 
+export interface PricingSheetTab {
+  /** Tab button label on the pricing page, e.g. "Two Guests". */
+  label: string;
+  /** Guests per cabin as a string ("2") — used by ?guests= links. */
+  guests: string;
+  /** The gid of this tab in the published Google Sheet. */
+  gid: string;
+}
+
 export interface InvitationConfig {
   quinceanera: {
     fullName: string;
@@ -66,6 +75,15 @@ export interface InvitationConfig {
     /** Leave any URL "" to hide that button. */
     fullPricingUrl: string;
     occupancyLinks: PricingLink[];
+  };
+
+  /** Live pricing page (/pricing) — pulls rates from the published Google Sheet. */
+  pricingSheet: {
+    /** The long id in the published sheet URL, after /d/e/. */
+    publishedId: string;
+    tabs: PricingSheetTab[];
+    /** Link to the sheet itself, shown if the live fetch fails. */
+    backupUrl: string;
   };
 
   /** Existing HHT reservation form — buttons across the page use this. */

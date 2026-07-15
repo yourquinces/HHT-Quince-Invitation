@@ -1,5 +1,4 @@
 import { invitation } from "../data/invitation";
-import Icon from "./Icon";
 import PrimaryButton from "./PrimaryButton";
 import Section from "./Section";
 import SecondaryButton from "./SecondaryButton";
@@ -29,10 +28,7 @@ export default function PricingSection() {
 
         <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap">
           {pricing.fullPricingUrl && (
-            <SecondaryButton href={pricing.fullPricingUrl}>
-              View Full Pricing
-              <Icon name="externalLink" className="h-4 w-4" />
-            </SecondaryButton>
+            <SecondaryButton href={pricing.fullPricingUrl}>View Full Pricing</SecondaryButton>
           )}
           {occupancyLinks.map((link) => (
             <SecondaryButton key={link.label} href={link.url}>

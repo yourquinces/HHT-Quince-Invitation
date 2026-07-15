@@ -136,24 +136,34 @@ export const invitation: InvitationConfig = {
   pricing: {
     // Shown as "Cabins starting at $___ per person". Leave "" to hide.
     startingPricePerPerson: "",
-    // Full pricing sheet / flyer link for this group.
-    fullPricingUrl:
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=1762296528&single=true",
+    // These buttons open the live pricing page (/pricing), which pulls
+    // current rates straight from the Google Sheet below.
+    fullPricingUrl: "/pricing",
     occupancyLinks: [
-      // Per-occupancy pricing links for this group.
-      {
-        label: "Two Guests Per Cabin",
-        url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=1774284890&single=true",
-      },
-      {
-        label: "Three Guests Per Cabin",
-        url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=832346416&single=true",
-      },
-      {
-        label: "Four Guests Per Cabin",
-        url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=807433313&single=true",
-      },
+      { label: "Two Guests Per Cabin", url: "/pricing?guests=2" },
+      { label: "Three Guests Per Cabin", url: "/pricing?guests=3" },
+      { label: "Four Guests Per Cabin", url: "/pricing?guests=4" },
     ],
+  },
+
+  // ------------------------------------------------------------------
+  // LIVE PRICING PAGE (/pricing)
+  // Rates come straight from the published Google Sheet — edit prices
+  // in the sheet and the page updates on its own, no redeploy needed.
+  // publishedId is the long id after /d/e/ in the published sheet URL.
+  // Each tab's gid is in the sheet URL when you click that tab.
+  // ------------------------------------------------------------------
+  pricingSheet: {
+    publishedId:
+      "2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw",
+    tabs: [
+      { label: "Two Guests", guests: "2", gid: "1774284890" },
+      { label: "Three Guests", guests: "3", gid: "832346416" },
+      { label: "Four Guests", guests: "4", gid: "807433313" },
+    ],
+    // Shown as a backup link if the live prices fail to load.
+    backupUrl:
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQxDS4NriPy1Igl2X7zVmDAkeIOYZ2HMgZXVQtR_NK9YB4BZFhA7ZK1KdbxgKl8wn9K9H8qkqq6N9Tw/pubhtml?gid=1774284890&single=true",
   },
 
   // The existing Happy Holidays Travel reservation form.

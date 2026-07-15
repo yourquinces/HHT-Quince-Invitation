@@ -63,7 +63,7 @@ comment explaining what it does. Highlights:
 publish a button that goes nowhere.
 
 > Also update the `<title>` and `<meta>` tags in `index.html` — see
-> [Social sharing](#7-social-sharing-whatsapp--facebook-previews).
+> [Social sharing](#8-social-sharing-whatsapp--facebook-previews).
 
 ---
 
@@ -98,7 +98,23 @@ Tips:
 
 ---
 
-## 4. Connecting the existing HHT links
+## 4. Live pricing page (/pricing)
+
+The site has a pricing page at `/pricing` that pulls cabin rates **live from
+the published Google Sheet** every time a guest opens it — edit prices in the
+sheet and the page shows the new numbers on its own, **no redeploy needed**.
+
+- Tabs switch between Two, Three, and Four guests per cabin.
+- The sheet id and tab `gid`s are configured under `pricingSheet` in
+  `src/data/invitation.ts`.
+- The "View Full Pricing" and per-occupancy buttons on the invitation link to
+  this page (`/pricing?guests=2`, `?guests=3`, `?guests=4`).
+- If the sheet ever fails to load, guests see a friendly message with a direct
+  link to the Google Sheet (`pricingSheet.backupUrl`).
+- The sheet must stay **published to the web** (File → Share → Publish to web)
+  for this to work.
+
+## 5. Connecting the existing HHT links
 
 In `src/data/invitation.ts`:
 
@@ -116,7 +132,7 @@ the URLs under `pricing`.
 
 ---
 
-## 5. Deploying to Netlify
+## 6. Deploying to Netlify
 
 **Option A — connect a Git repo (recommended):**
 
@@ -142,7 +158,7 @@ family, each from its own copy of this project with its own
 
 ---
 
-## 6. Lead email notifications (Netlify Forms)
+## 7. Lead email notifications (Netlify Forms)
 
 Interest-form submissions are stored automatically in Netlify:
 **Site → Forms → quince-cruise-interest**.
@@ -169,7 +185,7 @@ Spam protection: the form includes a Netlify honeypot field (`bot-field`).
 
 ---
 
-## 7. Social sharing (WhatsApp / Facebook previews)
+## 8. Social sharing (WhatsApp / Facebook previews)
 
 WhatsApp, Facebook, and iMessage build their link previews from the `<meta>`
 tags in **`index.html`** (they can't run the app's JavaScript). When you create
@@ -190,7 +206,7 @@ The browser-tab title also follows `social.title` in `src/data/invitation.ts`.
 
 ---
 
-## 8. Project structure
+## 9. Project structure
 
 ```
 index.html                  ← social meta tags + hidden Netlify form registration
@@ -208,7 +224,7 @@ Deposit Notice → Gift Registry → Contact → Footer.
 
 ---
 
-## 9. What this project intentionally does NOT do
+## 10. What this project intentionally does NOT do
 
 - No new reservation form (uses HHT's existing one via link)
 - No payment processing (uses HHT's existing deposit link)
