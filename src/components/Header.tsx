@@ -3,6 +3,15 @@ import Icon from "./Icon";
 
 export default function Header() {
   const { agent, office, reservationFormUrl } = invitation;
+  // On the public marketing page the visitor has no invitation and no
+  // agent yet, so sending her straight to the booking form skips the
+  // lead capture entirely. Point her at the inquiry form instead.
+  const isMarketingPage =
+    typeof window !== "undefined" &&
+    window.location.pathname.replace(/\/+$/, "") === "/quince-cruises";
+  const ctaHref = isMarketingPage ? "#inquire" : reservationFormUrl;
+  const ctaLabel = isMarketingPage ? "Get My Free Quote" : "Reserve Your Cabin";
+
   return (
     <header className="sticky top-0 z-40 border-b border-blush-200/70 bg-white/85 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-5 sm:px-8">
@@ -32,14 +41,14 @@ export default function Header() {
           >
             <Icon name="whatsapp" className="h-5 w-5" />
           </a>
-          {reservationFormUrl && (
+          {ctaHref && (
             <a
-              href={reservationFormUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={ctaHref}
+              target={isMarketingPage ? undefined : "_blank"}
+              rel={isMarketingPage ? undefined : "noopener noreferrer"}
               className="ml-1 hidden rounded-full bg-royal-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow transition hover:bg-royal-700 sm:inline-flex"
             >
-              Reserve Your Cabin
+              {ctaLabel}
             </a>
           )}
         </nav>

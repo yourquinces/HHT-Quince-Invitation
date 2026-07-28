@@ -8,6 +8,7 @@ import {
 } from "./lib/liveInvitation";
 import FamilyEditPage from "./components/FamilyEditPage";
 import PricingPage from "./components/PricingPage";
+import QuinceCruisesPage from "./components/QuinceCruisesPage";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import PersonalMessage from "./components/PersonalMessage";
@@ -109,22 +110,38 @@ function LiveInvitation({ slug }: { slug: string }) {
   return <InvitationPage />;
 }
 
+const MARKETING_TITLE = "2027 Quinceañera Cruises | Happy Holidays Travel";
+const MARKETING_DESCRIPTION =
+  "Celebrate her quinceañera at sea in 2027. Live cabin pricing for our Caribbean and Mediterranean group sailings, plus free quotes and payment plans from Happy Holidays Travel.";
+
 export default function App() {
   const pathname = window.location.pathname;
-  const isPricingPage = pathname.replace(/\/+$/, "") === "/pricing";
+  const route = pathname.replace(/\/+$/, "");
+  const isPricingPage = route === "/pricing";
+  // Public landing page for email and ad traffic — belongs to no family.
+  const isQuinceCruisesPage = route === "/quince-cruises";
   const editSlug = editSlugFromPath(pathname);
   const liveSlug = liveSlugFromPath(pathname);
 
   // Keep the browser-tab title/description in sync with the config.
   // (Share previews read index.html — see README → Social sharing.)
   useEffect(() => {
-    document.title = isPricingPage
-      ? `Cabin Pricing | ${invitation.social.title}`
-      : invitation.social.title;
+    if (isQuinceCruisesPage) {
+      document.title = MARKETING_TITLE;
+    } else if (isPricingPage) {
+      document.title = `Cabin Pricing | ${invitation.social.title}`;
+    } else {
+      document.title = invitation.social.title;
+    }
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", invitation.social.description);
-  }, [isPricingPage]);
+    if (meta)
+      meta.setAttribute(
+        "content",
+        isQuinceCruisesPage ? MARKETING_DESCRIPTION : invitation.social.description,
+      );
+  }, [isPricingPage, isQuinceCruisesPage]);
 
+  if (isQuinceCruisesPage) return <QuinceCruisesPage />;
   if (isPricingPage) return <PricingPage />;
   if (editSlug) return <FamilyEditPage slug={editSlug} />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;

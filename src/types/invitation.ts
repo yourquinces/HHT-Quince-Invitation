@@ -26,6 +26,11 @@ export interface PricingSheetTab {
   gid: string;
 }
 
+/** Which product family a sailing belongs to. Mediterranean sailings get
+ *  their own featured treatment on /quince-cruises instead of sitting in
+ *  the Caribbean picker. */
+export type SailingRegion = "Caribbean" | "Mediterranean";
+
 export interface PricingSailing {
   /** ISO sail date, e.g. "2027-07-17" — matches the QRS sail_date. */
   id: string;
@@ -41,6 +46,12 @@ export interface PricingSailing {
   tabs: PricingSheetTab[];
   /** Link to the sheet itself, shown if the live fetch fails. */
   backupUrl: string;
+  /** Groups the sailing on the marketing page. Defaults to Caribbean. */
+  region?: SailingRegion;
+  /** Set false to pull a sailing off /quince-cruises without deleting it.
+   *  Invitation links (/pricing?sailing=…) keep working either way, so a
+   *  family already booked on it never loses their pricing page. */
+  active?: boolean;
 }
 
 export interface InvitationConfig {
