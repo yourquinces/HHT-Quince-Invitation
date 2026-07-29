@@ -57,7 +57,9 @@ function preferredSailing(): PricingSailing {
 }
 
 function initialSailing(): PricingSailing {
-  const wanted = sailingById(new URLSearchParams(window.location.search).get("sailing"));
+  const wanted = sailingById(
+    new URLSearchParams(window.location.search).get("sailing"),
+  );
   if (wanted && ALL.some((s) => s.id === wanted.id)) return wanted;
   return preferredSailing();
 }
@@ -122,7 +124,9 @@ export default function QuinceCruisesPage() {
 
   const showPricing = (id: string) => {
     changeSailing(id);
-    document.getElementById("cabin-pricing")?.scrollIntoView({ behavior: "smooth" });
+    document
+      .getElementById("cabin-pricing")
+      ?.scrollIntoView({ behavior: "smooth" });
   };
 
   /** A cabin card was clicked — carry it to the form and scroll there. */
@@ -157,16 +161,18 @@ export default function QuinceCruisesPage() {
               <br className="hidden sm:block" /> at Sea
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-slate-600">
-              A quinceañera the whole family actually gets to enjoy — one price per person, one
-              ship, and every guest celebrating together for a week instead of five hours in a
-              ballroom.
+              A quinceañera the whole family actually gets to enjoy — one price
+              per person, one ship, and every guest celebrating together for a
+              week instead of five hours in a ballroom.
             </p>
 
             <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row">
               <PrimaryButton href="#inquire" className="px-10">
                 Get My Free Quote
               </PrimaryButton>
-              <SecondaryButton href="#cabin-pricing">See Cabin Pricing</SecondaryButton>
+              <SecondaryButton href="#cabin-pricing">
+                See Cabin Pricing
+              </SecondaryButton>
             </div>
 
             <dl className="mt-12 grid grid-cols-1 gap-4 text-left sm:grid-cols-3">
@@ -226,10 +232,12 @@ export default function QuinceCruisesPage() {
                       The most spectacular ship in the world
                     </p>
                     <p className="mt-4 max-w-xl leading-relaxed text-blush-100/90">
-                      If she wants the celebration everyone will be talking about, this is it.
-                      The newest and most exciting way to mark a quinceañera at sea — a ship built
-                      around exactly the kind of week a fifteen-year-old and her friends will
-                      never stop retelling, with plenty for the adults in the group too.
+                      If she wants the celebration everyone will be talking
+                      about, this is it. The newest and most exciting way to
+                      mark a quinceañera at sea — a ship built around exactly
+                      the kind of week a fifteen-year-old and her friends will
+                      never stop retelling, with plenty for the adults in the
+                      group too.
                     </p>
 
                     <ul className="mt-6 flex flex-wrap gap-2">
@@ -238,7 +246,10 @@ export default function QuinceCruisesPage() {
                           key={d}
                           className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-sm text-white ring-1 ring-white/15"
                         >
-                          <Icon name="mapPin" className="h-3.5 w-3.5 text-gold-300" />
+                          <Icon
+                            name="mapPin"
+                            className="h-3.5 w-3.5 text-gold-300"
+                          />
                           {d}
                         </li>
                       ))}
@@ -282,8 +293,8 @@ export default function QuinceCruisesPage() {
                       {featuredLead.departurePort.split(",")[0]}
                     </p>
                     <p className="mt-2 text-sm text-slate-600">
-                      {FEATURED.length} sailing {FEATURED.length === 1 ? "date" : "dates"} in
-                      summer 2027
+                      {FEATURED.length} sailing{" "}
+                      {FEATURED.length === 1 ? "date" : "dates"} in summer 2027
                     </p>
                     <div className="mt-6 flex flex-col gap-3">
                       <button
@@ -312,6 +323,16 @@ export default function QuinceCruisesPage() {
           <section className="px-5 pb-14 sm:px-8">
             <div className="mx-auto max-w-content">
               <div className="overflow-hidden rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-blush-200 sm:p-10">
+                {/* Same photo as the warm-lead email, so the page reads as a
+                    continuation of it rather than a second, different pitch. */}
+                <img
+                  src="/images/allure.jpg"
+                  alt={`${SECONDARY_SHIP} at sea`}
+                  className="mb-8 aspect-[21/9] w-full rounded-3xl object-cover ring-1 ring-blush-200"
+                  loading="lazy"
+                  width={1600}
+                  height={1050}
+                />
                 <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-center">
                   <div>
                     <span className="inline-flex items-center gap-2 rounded-full bg-gold-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-gold-600">
@@ -325,9 +346,10 @@ export default function QuinceCruisesPage() {
                       The best-value quince cruise on the market
                     </p>
                     <p className="mt-4 max-w-xl leading-relaxed text-slate-600">
-                      The strongest itinerary we sell, and the one families come back to when they
-                      want the most celebration for the money. A longer sailing, more ports, and a
-                      ship with more than enough to keep a group of teenagers happy all week.
+                      The strongest itinerary we sell, and the one families come
+                      back to when they want the most celebration for the money.
+                      A longer sailing, more ports, and a ship with more than
+                      enough to keep a group of teenagers happy all week.
                     </p>
 
                     <ul className="mt-6 flex flex-wrap gap-2">
@@ -336,7 +358,10 @@ export default function QuinceCruisesPage() {
                           key={d}
                           className="inline-flex items-center gap-1.5 rounded-full bg-blush-50 px-3.5 py-1.5 text-sm text-royal-800 ring-1 ring-blush-200"
                         >
-                          <Icon name="mapPin" className="h-3.5 w-3.5 text-gold-600" />
+                          <Icon
+                            name="mapPin"
+                            className="h-3.5 w-3.5 text-gold-600"
+                          />
                           {d}
                         </li>
                       ))}
@@ -351,7 +376,9 @@ export default function QuinceCruisesPage() {
                       {secondaryLead.nights} Nights from{" "}
                       {secondaryLead.departurePort.split(",")[0]}
                     </p>
-                    <p className="mt-2 text-sm text-slate-600">{secondaryLead.label}</p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      {secondaryLead.label}
+                    </p>
                     <div className="mt-6">
                       <button
                         type="button"
@@ -392,7 +419,8 @@ export default function QuinceCruisesPage() {
                 {sailing.ship} · {sailing.label}
               </p>
               <p className="text-slate-600">
-                {sailing.nights} Night {sailing.itineraryName} Cruise from {sailing.departurePort}
+                {sailing.nights} Night {sailing.itineraryName} Cruise from{" "}
+                {sailing.departurePort}
               </p>
             </>
           }
@@ -406,8 +434,8 @@ export default function QuinceCruisesPage() {
                 What Those Prices Actually Cover
               </h2>
               <p className="mt-4 text-slate-600">
-                Cruising is one of the few ways to give her a real celebration without an
-                open-ended budget.
+                Cruising is one of the few ways to give her a real celebration
+                without an open-ended budget.
               </p>
             </div>
 
@@ -423,14 +451,17 @@ export default function QuinceCruisesPage() {
                   <h3 className="mt-4 font-display text-xl font-semibold text-royal-800">
                     {item.title}
                   </h3>
-                  <p className="mt-2 leading-relaxed text-slate-600">{item.body}</p>
+                  <p className="mt-2 leading-relaxed text-slate-600">
+                    {item.body}
+                  </p>
                 </div>
               ))}
             </div>
 
             <p className="mt-8 text-center text-sm text-slate-500">
-              Gratuities, drink packages, shore excursions and airfare are not included in the
-              cabin rates above. Ask us and we will price the whole trip, not just the cruise.
+              Gratuities, drink packages, shore excursions and airfare are not
+              included in the cabin rates above. Ask us and we will price the
+              whole trip, not just the cruise.
             </p>
           </div>
         </section>
@@ -442,45 +473,60 @@ export default function QuinceCruisesPage() {
               {MEDITERRANEAN.map((med) => (
                 <div
                   key={med.id}
-                  className="rounded-3xl border border-gold-200 bg-white p-7 shadow-sm sm:p-8"
+                  className="overflow-hidden rounded-3xl border border-gold-200 bg-white shadow-sm sm:grid sm:grid-cols-[0.85fr_1.15fr] sm:items-stretch"
                 >
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-gold-100 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-gold-600">
-                      <Icon name="sparkles" className="h-3.5 w-3.5" />
-                      Once in a Lifetime
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-rosa-100 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-rosa-600">
-                      Very Limited Availability
-                    </span>
-                  </div>
+                  {/* Deliberately a side panel, not a banner — Europe stays a
+                      mention. A full-width hero here would out-shout Icon. */}
+                  <img
+                    src="/images/europe.jpg"
+                    alt="Blue-domed churches above the sea in Santorini, Greece"
+                    className="h-48 w-full object-cover sm:h-full"
+                    loading="lazy"
+                    width={1216}
+                    height={810}
+                  />
 
-                  <h2 className="mt-5 font-display text-2xl font-bold text-royal-800 sm:text-3xl">
-                    A European Quinceañera
-                  </h2>
-                  <p className="mt-2 text-sm font-medium text-slate-500">
-                    {med.ship} · {med.label} · {med.nights} nights from {med.departurePort}
-                  </p>
-                  <p className="mt-4 leading-relaxed text-slate-600">
-                    For the rare family who wants her fifteenth marked in the Mediterranean —{" "}
-                    {med.destinations.slice(0, -1).join(", ")} and{" "}
-                    {med.destinations[med.destinations.length - 1]}. We only run this sailing once,
-                    and it is close to full. If it interests you, ask early rather than late.
-                  </p>
+                  <div className="p-7 sm:p-8">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-gold-100 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-gold-600">
+                        <Icon name="sparkles" className="h-3.5 w-3.5" />
+                        Once in a Lifetime
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-rosa-100 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-rosa-600">
+                        Very Limited Availability
+                      </span>
+                    </div>
 
-                  <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row">
-                    <button
-                      type="button"
-                      onClick={() => showPricing(med.id)}
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-royal-300 bg-white px-6 py-3.5 text-sm font-semibold uppercase tracking-wider text-royal-700 shadow-sm transition hover:border-royal-400 hover:bg-royal-50"
-                    >
-                      See Remaining Cabins
-                    </button>
-                    <a
-                      href="#inquire"
-                      className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold uppercase tracking-wider text-royal-700 underline decoration-royal-300 underline-offset-4 transition hover:text-royal-800"
-                    >
-                      Ask About Availability
-                    </a>
+                    <h2 className="mt-5 font-display text-2xl font-bold text-royal-800 sm:text-3xl">
+                      A European Quinceañera
+                    </h2>
+                    <p className="mt-2 text-sm font-medium text-slate-500">
+                      {med.ship} · {med.label} · {med.nights} nights from{" "}
+                      {med.departurePort}
+                    </p>
+                    <p className="mt-4 leading-relaxed text-slate-600">
+                      For the rare family who wants her fifteenth marked in the
+                      Mediterranean — {med.destinations.slice(0, -1).join(", ")}{" "}
+                      and {med.destinations[med.destinations.length - 1]}. We
+                      only run this sailing once, and it is close to full. If it
+                      interests you, ask early rather than late.
+                    </p>
+
+                    <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={() => showPricing(med.id)}
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-royal-300 bg-white px-6 py-3.5 text-sm font-semibold uppercase tracking-wider text-royal-700 shadow-sm transition hover:border-royal-400 hover:bg-royal-50"
+                      >
+                        See Remaining Cabins
+                      </button>
+                      <a
+                        href="#inquire"
+                        className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold uppercase tracking-wider text-royal-700 underline decoration-royal-300 underline-offset-4 transition hover:text-royal-800"
+                      >
+                        Ask About Availability
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -503,8 +549,8 @@ export default function QuinceCruisesPage() {
               Still deciding? Just ask us.
             </h2>
             <p className="mt-3 text-blush-100/80">
-              No pressure and no obligation — we will answer questions even if you book a year
-              from now.
+              No pressure and no obligation — we will answer questions even if
+              you book a year from now.
             </p>
             <div className="mt-7 flex flex-col items-stretch justify-center gap-3 sm:flex-row">
               <a
