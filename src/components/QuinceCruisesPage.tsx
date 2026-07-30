@@ -107,6 +107,12 @@ export default function QuinceCruisesPage() {
   // she has a way back to the Caribbean list without hunting for it.
   const pickerSailings = isMed ? ALL : CARIBBEAN;
 
+  // Email links arrive as ?sailing=…#cabin-pricing so a reader who liked the
+  // Allure or Mediterranean panel lands on THAT ship's rates, not Icon's.
+  // Captured on first render because the URL rewrite below drops the hash,
+  // and the browser's own hash scroll fires before React has mounted anything.
+  const [initialHash] = useState(() => window.location.hash.slice(1));
+
   useEffect(() => {
     window.history.replaceState(
       null,
@@ -114,6 +120,23 @@ export default function QuinceCruisesPage() {
       `/quince-cruises?sailing=${sailing.id}&guests=${tab.guests}`,
     );
   }, [sailing.id, tab.guests]);
+
+  useEffect(() => {
+    if (!initialHash) return;
+    // The target section renders immediately (skeletons included), but poll
+    // briefly rather than assume — a missed scroll looks like a broken link.
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      const el = document.getElementById(initialHash);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.clearInterval(timer);
+      } else if (++tries > 40) {
+        window.clearInterval(timer);
+      }
+    }, 50);
+    return () => window.clearInterval(timer);
+  }, [initialHash]);
 
   const changeSailing = (id: string) => {
     const next = ALL.find((s) => s.id === id);
