@@ -176,10 +176,14 @@ export const invitation: InvitationConfig = {
   // GIFT REGISTRY (optional)
   // Link to the family's page on the HHT Quince Gift Registry, e.g.
   //   https://quinces-registry.netlify.app/r/sofia
-  // Set enabled: false to hide this section completely.
+  //
+  // ⚠ `enabled` is the MASTER SWITCH for every invitation, including live
+  //   /i/<slug> pages that already have a registry link saved. While it is
+  //   false the gift-registry section never appears anywhere. Flip it to
+  //   true once the registry is finalized.
   // ------------------------------------------------------------------
   registry: {
-    enabled: true,
+    enabled: false,
     url: "https://quinces-registry.netlify.app/r/your-registry-slug",
     heading: "", // Leave "" to auto-generate "Sofia's Gift Registry".
     description:

@@ -15,12 +15,24 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-blush-200/70 bg-white/85 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-5 sm:px-8">
-        <a href="#top" className="flex items-baseline gap-2" aria-label={`${office.name} home`}>
-          <span className="font-display text-xl font-semibold text-royal-800">
-            Happy Holidays
-          </span>
-          <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-gold-500">
-            Travel
+        <a href="#top" className="flex items-center gap-2.5" aria-label={`${office.name} home`}>
+          <img
+            src="/images/logo-mark.png"
+            alt=""
+            aria-hidden="true"
+            className="h-10 w-auto"
+            width={212}
+            height={320}
+          />
+          <span className="flex items-baseline gap-2">
+            <span className="font-display text-lg font-semibold text-royal-800 sm:text-xl">
+              Happy Holidays
+            </span>
+            {/* The balloon already carries the brand on a phone, where the
+                header has no room for the wordmark's second half. */}
+            <span className="hidden text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-gold-500 sm:inline">
+              Travel
+            </span>
           </span>
         </a>
 

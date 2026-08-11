@@ -2,11 +2,15 @@
 // HHT booking form uses (HHT-Booking/index.html), so a "Reserve this cabin"
 // link can carry the visitor's choice across.
 //
-// ⚠️ The booking form does NOT read query parameters yet — it has no
-// URLSearchParams handling, and its sail_date select is populated by JS
-// only after a ship is chosen. These params are therefore inert today:
-// harmless, ignored, and ready the moment that form learns to read them.
-// Until then the link simply opens the form at step one.
+// The booking form reads these on load (see its prefillFromQuery) and
+// preselects ship, sail date, occupancy and cabin type, validating every
+// value against the options actually in its DOM. cabin_label /
+// cabin_category ride along into the notes field, so the agent sees the
+// exact sheet row even when cabin_type had to be coarsened.
+//
+// ⚠️ The cabin_type values below must stay identical to the <option>
+// values in HHT-Booking's cabin_type select, or the prefill silently
+// leaves that field blank.
 
 import type { Cabin } from "./pricingSheet";
 import type { PricingSailing } from "../types/invitation";

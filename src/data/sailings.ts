@@ -88,7 +88,12 @@ export const sailings: PricingSailing[] = [
     nights: 8,
     itineraryName: "Southern Caribbean",
     departurePort: "Fort Lauderdale, Florida",
-    destinations: ["Curaçao", "Aruba", "Dominican Republic", "Perfect Day at CocoCay"],
+    destinations: [
+      "Curaçao",
+      "Aruba",
+      "Puerto Plata, Dominican Republic",
+      "Perfect Day at CocoCay",
+    ],
     region: "Caribbean",
     active: true,
     publishedId:

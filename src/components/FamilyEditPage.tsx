@@ -261,24 +261,29 @@ export default function FamilyEditPage({ slug }: { slug: string }) {
                     />
                   </div>
 
-                  <div>
-                    <label htmlFor="fe-registry" className={labelClass}>
-                      Gift registry link{" "}
-                      <span className="font-normal text-slate-400">(optional)</span>
-                    </label>
-                    <input
-                      id="fe-registry"
-                      type="url"
-                      value={registryUrl}
-                      onChange={(e) => setRegistryUrl(e.target.value)}
-                      placeholder="https://quinces-registry.netlify.app/r/..."
-                      className={inputClass}
-                    />
-                    <p className="mt-1.5 text-xs text-slate-500">
-                      Paste your registry link from the HHT Quince Gift Registry and a Gift
-                      Registry section appears on the invitation.
-                    </p>
-                  </div>
+                  {/* Hidden while the registry is unfinished — asking for a
+                      link that would never show up only confuses families.
+                      Any link already saved is preserved on save. */}
+                  {invitation.registry.enabled && (
+                    <div>
+                      <label htmlFor="fe-registry" className={labelClass}>
+                        Gift registry link{" "}
+                        <span className="font-normal text-slate-400">(optional)</span>
+                      </label>
+                      <input
+                        id="fe-registry"
+                        type="url"
+                        value={registryUrl}
+                        onChange={(e) => setRegistryUrl(e.target.value)}
+                        placeholder="https://quinces-registry.netlify.app/r/..."
+                        className={inputClass}
+                      />
+                      <p className="mt-1.5 text-xs text-slate-500">
+                        Paste your registry link from the HHT Quince Gift Registry and a Gift
+                        Registry section appears on the invitation.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {error && (

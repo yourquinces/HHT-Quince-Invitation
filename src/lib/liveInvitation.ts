@@ -139,8 +139,9 @@ export function applyInvitationRow(row: InvitationRow): void {
   }
   if (row.image_position) invitation.hero.imagePosition = row.image_position;
 
-  if (row.registry_url) {
-    invitation.registry.enabled = true;
+  // registry.enabled in invitation.ts is the master switch — while it is
+  // false, a saved registry link stays hidden on every invitation.
+  if (row.registry_url && invitation.registry.enabled) {
     invitation.registry.url = row.registry_url;
     invitation.registry.heading = "";
   } else {
