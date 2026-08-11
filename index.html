@@ -45,29 +45,10 @@
   <body>
     <div id="root"></div>
 
-    <!-- ================================================================
-         NETLIFY FORMS REGISTRATION (do not delete)
-         Netlify scans the deployed HTML for this hidden form to know
-         which fields to accept from the React interest form.
-         If you change `leadFormName` in src/data/invitation.ts, change
-         the name="" and value below to match — they must be identical.
-         ================================================================ -->
-    <form name="quince-cruise-interest" data-netlify="true" netlify-honeypot="bot-field" hidden>
-      <input type="hidden" name="form-name" value="quince-cruise-interest" />
-      <input type="text" name="bot-field" />
-      <input type="text" name="name" />
-      <input type="email" name="email" />
-      <input type="tel" name="phone" />
-      <input type="text" name="preferred-contact" />
-      <input type="text" name="guests" />
-      <input type="text" name="cabin-interest" />
-      <textarea name="comments"></textarea>
-      <input type="checkbox" name="consent" />
-      <input type="hidden" name="quinceanera-name" />
-      <input type="hidden" name="group-name" />
-      <input type="hidden" name="sailing-date" />
-      <input type="hidden" name="page-url" />
-    </form>
+    <!-- The guest interest form does NOT use Netlify Forms (form detection
+         is off across the HHT sites). It posts to the shared quince-request
+         function, so leads land in the same quince_leads pipeline as every
+         other source. See src/lib/quinceLeads.ts. -->
 
     <script type="module" src="/src/main.tsx"></script>
   </body>

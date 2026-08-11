@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { invitation } from "../data/invitation";
+import { submitQuinceLead } from "../lib/quinceLeads";
 import Icon from "./Icon";
 import PrimaryButton from "./PrimaryButton";
 import Section from "./Section";
@@ -39,10 +40,15 @@ const inputClass =
   "w-full rounded-xl border border-blush-200 bg-white px-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:border-royal-400";
 const labelClass = "mb-1.5 block text-sm font-semibold text-royal-800";
 
-function encode(data: Record<string, string>) {
-  return Object.keys(data)
-    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
-    .join("&");
+/** "Maria Elena Ruiz Diaz" → ["Maria", "Elena Ruiz Diaz"] */
+function splitName(full: string): [string, string] {
+  const parts = full.trim().split(/\s+/);
+  return [parts[0] ?? "", parts.slice(1).join(" ")];
+}
+
+/** "July 17–24, 2027" → "2027". Empty when the dates carry no year. */
+function yearOf(sailingDates: string): string {
+  return sailingDates.match(/\b(20\d{2})\b/)?.[1] ?? "";
 }
 
 export default function GuestInterestForm() {
@@ -85,29 +91,40 @@ export default function GuestInterestForm() {
     if (status === "submitting") return; // prevent duplicate submissions
     if (!validate()) return;
 
+    // Honeypot: bots fill the hidden field. Show them the thank-you screen
+    // rather than an error, so they never learn the submission was dropped.
+    if (fields.botField.trim()) {
+      setStatus("success");
+      return;
+    }
+
     setStatus("submitting");
+    const [guestFirst, guestLast] = splitName(fields.name);
+    const [quinceFirst, quinceLast] = splitName(quinceanera.fullName);
+
     try {
-      const res = await fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encode({
-          "form-name": leadForm.formName,
-          "bot-field": fields.botField,
-          name: fields.name.trim(),
-          email: fields.email.trim(),
-          phone: fields.phone.trim(),
-          "preferred-contact": fields.preferredContact,
-          guests: fields.guests,
-          "cabin-interest": fields.cabinInterest,
-          comments: fields.comments.trim(),
-          consent: "yes",
-          "quinceanera-name": quinceanera.fullName,
-          "group-name": groupName,
-          "sailing-date": cruise.sailingDates,
-          "page-url": pageUrl,
-        }),
+      await submitQuinceLead({
+        parent_first: guestFirst,
+        parent_last: guestLast,
+        parent_email: fields.email.trim(),
+        parent_phone: fields.phone.trim(),
+        quince_first: quinceFirst,
+        quince_last: quinceLast,
+        travel_year: yearOf(cruise.sailingDates),
+        interest: [cruise.ship],
+        client_notes: [
+          `Invited guest — ${groupName}`,
+          `Sailing: ${cruise.sailingDates}`,
+          fields.preferredContact ? `Prefers ${fields.preferredContact}` : "",
+          fields.guests ? `Guests traveling: ${fields.guests}` : "",
+          fields.cabinInterest ? `Cabin interest: ${fields.cabinInterest}` : "",
+          fields.comments.trim(),
+        ]
+          .filter(Boolean)
+          .join(" — "),
+        source: "invitation-page",
+        source_url: pageUrl,
       });
-      if (!res.ok) throw new Error(`Form submission failed (${res.status})`);
       setStatus("success");
     } catch {
       setStatus("error");
@@ -137,13 +154,10 @@ export default function GuestInterestForm() {
         ) : (
           <form
             name={leadForm.formName}
-            method="POST"
-            data-netlify="true"
             onSubmit={handleSubmit}
             noValidate
             className="mt-10 rounded-3xl bg-blush-50 p-6 ring-1 ring-blush-200 sm:p-8"
           >
-            <input type="hidden" name="form-name" value={leadForm.formName} />
             {/* Honeypot for spam bots — hidden from real guests */}
             <p className="hidden" aria-hidden="true">
               <label>

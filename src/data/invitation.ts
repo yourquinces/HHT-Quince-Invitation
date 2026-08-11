@@ -221,7 +221,8 @@ export const invitation: InvitationConfig = {
     heading: "Interested in Joining Us?",
     description:
       "Share your information below and a Happy Holidays Travel agent will contact you with cabin availability, current pricing and the next steps.",
-    // ⚠ Must match the hidden form's name="" in index.html exactly.
+    // Identifies the form in the DOM only. Submissions go to the shared
+    // quince_leads pipeline (src/lib/quinceLeads.ts), not Netlify Forms.
     formName: "quince-cruise-interest",
     // "{name}" is replaced automatically with the quinceañera's name.
     successMessage:
