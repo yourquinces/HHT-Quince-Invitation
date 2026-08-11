@@ -180,6 +180,19 @@ export const pricingSheet = { defaultSailingId, sailings };
 export const FEATURED_SHIP = "Icon of the Seas";
 export const SECONDARY_SHIP = "Allure of the Seas";
 
+// ── SHIP PHOTOS ──────────────────────────────────────────────────────
+// The cruise-details photo on a live /i/<slug> page follows the ship on
+// the reservation. Add a file to public/images and a line here to give a
+// ship its own photo; anything missing keeps the illustrated placeholder.
+export const SHIP_PHOTOS: Record<string, string> = {
+  "Allure of the Seas": "/images/allure.jpg",
+};
+
+/** The cruise-details photo for a ship, or null when we have no photo. */
+export function shipPhoto(ship: string): string | null {
+  return SHIP_PHOTOS[ship] ?? null;
+}
+
 const isActive = (s: PricingSailing) => s.active !== false;
 const regionOf = (s: PricingSailing) => s.region ?? "Caribbean";
 

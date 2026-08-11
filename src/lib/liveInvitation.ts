@@ -8,6 +8,7 @@
 // security only exposes rows with status = 'active'.
 
 import { invitation } from "../data/invitation";
+import { shipPhoto } from "../data/sailings";
 import { SUPABASE_KEY, SUPABASE_URL } from "./supabase";
 
 export interface InvitationRow {
@@ -168,6 +169,14 @@ export function applyInvitationRow(row: InvitationRow): void {
         label: `${GUEST_WORDS[t.guests]} Guests Per Cabin`,
         url: `/pricing?sailing=${sailing.id}&guests=${t.guests}`,
       }));
+  }
+
+  // Cruise-details photo follows whichever ship we ended up with. Ships
+  // without a photo keep the illustrated placeholder.
+  const photo = shipPhoto(invitation.cruise.ship);
+  if (photo) {
+    invitation.cruise.shipImage = photo;
+    invitation.cruise.shipImageAlt = `${invitation.cruise.line}'s ${invitation.cruise.ship}`;
   }
 
   if (row.agent_name) invitation.agent.name = row.agent_name;
