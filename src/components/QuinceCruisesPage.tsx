@@ -353,8 +353,8 @@ export default function QuinceCruisesPage() {
                   alt={`${SECONDARY_SHIP} at sea`}
                   className="mb-8 aspect-[21/9] w-full rounded-3xl object-cover ring-1 ring-blush-200"
                   loading="lazy"
-                  width={1600}
-                  height={1050}
+                  width={1968}
+                  height={1418}
                 />
                 <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-center">
                   <div>
