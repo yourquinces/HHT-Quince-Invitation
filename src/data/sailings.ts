@@ -203,8 +203,8 @@ export interface ShipPhotos {
 
 export const SHIP_PHOTOS: Record<string, ShipPhotos> = {
   "Icon of the Seas": {
-    hero: "/images/icon.jpg",
-    details: "/images/icon-details.jpg",
+    hero: "/images/icon-details.jpg",
+    details: "/images/icon.jpg",
   },
   "Allure of the Seas": {
     hero: "/images/allure-hero.jpg",
