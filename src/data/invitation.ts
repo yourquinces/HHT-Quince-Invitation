@@ -30,15 +30,21 @@ export const invitation: InvitationConfig = {
 
   // ------------------------------------------------------------------
   // MAIN INVITATION IMAGE (hero)
-  // Start with the ship photo. To switch to a photo of the quinceañera:
+  // On a live /i/<slug> page this is filled in for you, in order:
+  //   1. the quinceañera's own photo, once she uploads one from her edit
+  //      page — hers always wins;
+  //   2. otherwise a photo of the ship she's sailing on (see SHIP_PHOTOS
+  //      in sailings.ts);
+  //   3. otherwise the image below.
+  // To hard-code a photo of the quinceañera instead:
   //   1. Save her photo as  public/images/quinceanera.jpg  (portrait works best)
   //   2. Change image below to  "/images/quinceanera.jpg"
   //   3. Update imageAlt to describe her photo.
   // Full instructions: README.md → "Replacing the main photo".
   // ------------------------------------------------------------------
   hero: {
-    image: "/images/hero-placeholder.svg", // Replace with "/images/ship.jpg" or "/images/quinceanera.jpg"
-    imageAlt: "Icon of the Seas sailing the Caribbean",
+    image: "/images/allure.jpg", // Replace with "/images/quinceanera.jpg"
+    imageAlt: "A Royal Caribbean cruise ship at sea",
     // Adjusts which part of the photo stays visible when cropped.
     // "center" | "center top" | "50% 30%" etc. For portraits, "center top"
     // usually keeps faces in frame.
@@ -113,12 +119,6 @@ export const invitation: InvitationConfig = {
       icon: "crown",
       title: "Special Quinceañera Activities",
       description: "Moments created just for the guest of honor.",
-    },
-    {
-      enabled: true,
-      icon: "camera",
-      title: "Group Photo Opportunities",
-      description: "Capture the celebration together.",
     },
     {
       enabled: true,

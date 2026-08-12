@@ -186,15 +186,30 @@ export const FEATURED_SHIP = "Icon of the Seas";
 export const SECONDARY_SHIP = "Allure of the Seas";
 
 // ── SHIP PHOTOS ──────────────────────────────────────────────────────
-// The cruise-details photo on a live /i/<slug> page follows the ship on
-// the reservation. Add a file to public/images and a line here to give a
-// ship its own photo; anything missing keeps the illustrated placeholder.
-export const SHIP_PHOTOS: Record<string, string> = {
-  "Allure of the Seas": "/images/allure.jpg",
+// The photos on a live /i/<slug> page follow the ship on the reservation.
+// Two crops per ship, because the two slots are shaped very differently:
+//
+//   hero    → the tall 4:5 card at the top of the invitation. A family
+//             photo always wins here; this is what shows until she
+//             uploads one from the edit page.
+//   details → the 4:3 photo beside Cruise Details.
+//
+// Add files to public/images and a line here to give a ship its own
+// photos; anything missing keeps the illustrated placeholder.
+export interface ShipPhotos {
+  hero: string;
+  details: string;
+}
+
+export const SHIP_PHOTOS: Record<string, ShipPhotos> = {
+  "Allure of the Seas": {
+    hero: "/images/allure-hero.jpg",
+    details: "/images/allure.jpg",
+  },
 };
 
-/** The cruise-details photo for a ship, or null when we have no photo. */
-export function shipPhoto(ship: string): string | null {
+/** Both photos for a ship, or null when we have none. */
+export function shipPhotos(ship: string): ShipPhotos | null {
   return SHIP_PHOTOS[ship] ?? null;
 }
 

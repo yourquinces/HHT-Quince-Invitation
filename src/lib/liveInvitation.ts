@@ -8,7 +8,7 @@
 // security only exposes rows with status = 'active'.
 
 import { invitation } from "../data/invitation";
-import { shipPhoto } from "../data/sailings";
+import { shipPhotos } from "../data/sailings";
 import { SUPABASE_KEY, SUPABASE_URL } from "./supabase";
 
 export interface InvitationRow {
@@ -172,12 +172,18 @@ export function applyInvitationRow(row: InvitationRow): void {
       }));
   }
 
-  // Cruise-details photo follows whichever ship we ended up with. Ships
-  // without a photo keep the illustrated placeholder.
-  const photo = shipPhoto(invitation.cruise.ship);
-  if (photo) {
-    invitation.cruise.shipImage = photo;
+  // Photos follow whichever ship we ended up with. Ships without photos
+  // keep the illustrated placeholders.
+  const photos = shipPhotos(invitation.cruise.ship);
+  if (photos) {
+    invitation.cruise.shipImage = photos.details;
     invitation.cruise.shipImageAlt = `${invitation.cruise.line}'s ${invitation.cruise.ship}`;
+    // Her own photo always wins the hero — this only fills the card until
+    // she uploads one from the edit page.
+    if (!row.hero_image_url) {
+      invitation.hero.image = photos.hero;
+      invitation.hero.imageAlt = `Aboard ${invitation.cruise.line}'s ${invitation.cruise.ship}`;
+    }
   }
 
   if (row.agent_name) invitation.agent.name = row.agent_name;
