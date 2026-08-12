@@ -43,8 +43,8 @@ export const invitation: InvitationConfig = {
   // Full instructions: README.md → "Replacing the main photo".
   // ------------------------------------------------------------------
   hero: {
-    image: "/images/allure.jpg", // Replace with "/images/quinceanera.jpg"
-    imageAlt: "A Royal Caribbean cruise ship at sea",
+    image: "/images/icon.jpg", // Replace with "/images/quinceanera.jpg"
+    imageAlt: "Icon of the Seas at sea",
     // Adjusts which part of the photo stays visible when cropped.
     // "center" | "center top" | "50% 30%" etc. For portraits, "center top"
     // usually keeps faces in frame.
@@ -64,7 +64,7 @@ export const invitation: InvitationConfig = {
     destinations: ["St. Maarten", "St. Thomas", "Perfect Day at CocoCay"],
     // Smaller ship photo shown in the cruise-details section.
     // This stays even after the hero becomes the quinceañera's photo.
-    shipImage: "/images/ship-placeholder.svg", // Replace with "/images/ship.jpg"
+    shipImage: "/images/icon.jpg", // Live pages swap in their own ship's photo
     shipImageAlt: "Royal Caribbean's Icon of the Seas",
   },
 
