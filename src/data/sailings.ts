@@ -199,6 +199,8 @@ export const SECONDARY_SHIP = "Allure of the Seas";
 export interface ShipPhotos {
   hero: string;
   details: string;
+  /** Set when the details photo shows somewhere rather than the ship. */
+  detailsAlt?: string;
 }
 
 export const SHIP_PHOTOS: Record<string, ShipPhotos> = {
@@ -209,6 +211,13 @@ export const SHIP_PHOTOS: Record<string, ShipPhotos> = {
   "Allure of the Seas": {
     hero: "/images/allure-hero.jpg",
     details: "/images/allure.jpg",
+  },
+  "Odyssey of the Seas": {
+    hero: "/images/odyssey.jpg",
+    // Odyssey sails the Eastern Mediterranean, so the second photo sells
+    // the itinerary rather than the ship a second time.
+    details: "/images/santorini.jpg",
+    detailsAlt: "A Royal Caribbean ship anchored off Santorini, Greece",
   },
 };
 

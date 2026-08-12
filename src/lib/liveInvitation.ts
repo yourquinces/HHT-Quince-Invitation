@@ -177,7 +177,8 @@ export function applyInvitationRow(row: InvitationRow): void {
   const photos = shipPhotos(invitation.cruise.ship);
   if (photos) {
     invitation.cruise.shipImage = photos.details;
-    invitation.cruise.shipImageAlt = `${invitation.cruise.line}'s ${invitation.cruise.ship}`;
+    invitation.cruise.shipImageAlt =
+      photos.detailsAlt ?? `${invitation.cruise.line}'s ${invitation.cruise.ship}`;
     // Her own photo always wins the hero — this only fills the card until
     // she uploads one from the edit page.
     if (!row.hero_image_url) {
