@@ -203,10 +203,8 @@ export interface ShipPhotos {
 
 export const SHIP_PHOTOS: Record<string, ShipPhotos> = {
   "Icon of the Seas": {
-    // Near-square, so both crops read well from the one photo: the ship
-    // sits centered and its name stays in frame either way.
     hero: "/images/icon.jpg",
-    details: "/images/icon.jpg",
+    details: "/images/icon-details.jpg",
   },
   "Allure of the Seas": {
     hero: "/images/allure-hero.jpg",

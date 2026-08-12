@@ -64,7 +64,7 @@ export const invitation: InvitationConfig = {
     destinations: ["St. Maarten", "St. Thomas", "Perfect Day at CocoCay"],
     // Smaller ship photo shown in the cruise-details section.
     // This stays even after the hero becomes the quinceañera's photo.
-    shipImage: "/images/icon.jpg", // Live pages swap in their own ship's photo
+    shipImage: "/images/icon-details.jpg", // Live pages swap in their own ship's photo
     shipImageAlt: "Royal Caribbean's Icon of the Seas",
   },
 
