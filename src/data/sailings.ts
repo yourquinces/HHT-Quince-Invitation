@@ -153,8 +153,16 @@ export const sailings: PricingSailing[] = [
     ship: "Odyssey of the Seas",
     nights: 7,
     itineraryName: "Eastern Mediterranean",
-    departurePort: "Rome, Italy",
-    destinations: ["Santorini", "Ephesus", "Mykonos", "Naples"],
+    departurePort: "Rome (Civitavecchia), Italy",
+    // Ports exactly as Royal Caribbean lists them for this sailing, so the
+    // invitation, the quote and the cruise line's confirmation all agree.
+    // Aug 2 and Aug 6 are sea days; Aug 8 is the morning she returns.
+    destinations: [
+      "Santorini, Greece",
+      "Ephesus (Kusadasi), Turkey",
+      "Mykonos, Greece",
+      "Naples (Capri), Italy",
+    ],
     region: "Mediterranean",
     active: true,
     publishedId:
