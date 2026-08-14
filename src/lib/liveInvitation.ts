@@ -50,6 +50,12 @@ export function friendsSlugFromPath(pathname: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+/** Returns the slug for her registration form (/i/<slug>/register), or null. */
+export function registerSlugFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/i\/([^/]+)\/register\/?$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 /** Returns the slug for her hub (/i/<slug>/hub), or null. */
 export function hubSlugFromPath(pathname: string): string | null {
   const match = pathname.match(/^\/i\/([^/]+)\/hub\/?$/);

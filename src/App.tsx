@@ -7,10 +7,12 @@ import {
   liveSlugFromPath,
   friendsSlugFromPath,
   hubSlugFromPath,
+  registerSlugFromPath,
 } from "./lib/liveInvitation";
 import FamilyEditPage from "./components/FamilyEditPage";
 import FriendInvitePage from "./components/FriendInvitePage";
 import QuinceHubPage from "./components/QuinceHubPage";
+import QuinceRegistrationPage from "./components/QuinceRegistrationPage";
 import PricingPage from "./components/PricingPage";
 import QuinceCruisesPage from "./components/QuinceCruisesPage";
 import Header from "./components/Header";
@@ -127,6 +129,9 @@ export default function App() {
   const editSlug = editSlugFromPath(pathname);
   const friendsSlug = friendsSlugFromPath(pathname);
   const hubSlug = hubSlugFromPath(pathname);
+  const registerSlug = registerSlugFromPath(pathname);
+  // Standalone form for staff and anyone without an invitation yet.
+  const isRegisterPage = route === "/register";
   const liveSlug = liveSlugFromPath(pathname);
 
   // Keep the browser-tab title/description in sync with the config.
@@ -152,6 +157,8 @@ export default function App() {
   if (editSlug) return <FamilyEditPage slug={editSlug} />;
   if (friendsSlug) return <FriendInvitePage slug={friendsSlug} />;
   if (hubSlug) return <QuinceHubPage slug={hubSlug} />;
+  if (registerSlug) return <QuinceRegistrationPage slug={registerSlug} />;
+  if (isRegisterPage) return <QuinceRegistrationPage />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;
   return <InvitationPage />;
 }

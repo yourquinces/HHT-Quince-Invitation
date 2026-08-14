@@ -11,6 +11,7 @@
 import { useEffect, useState } from "react";
 import { invitation } from "../data/invitation";
 import { fetchInvitationRow } from "../lib/liveInvitation";
+import { hasRegistered } from "../lib/quinceRegistration";
 import type { InvitationRow } from "../lib/liveInvitation";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -25,12 +26,16 @@ interface Tool {
   href?: string;
   cta?: string;
   soon?: boolean;
+  /** Highlighted at the top until she has done it. */
+  todo?: boolean;
+  done?: boolean;
 }
 
 export default function QuinceHubPage({ slug }: { slug: string }) {
   const editKey = new URLSearchParams(window.location.search).get("key") ?? "";
   const [state, setState] = useState<PageState>("loading");
   const [row, setRow] = useState<InvitationRow | null>(null);
+  const [registered, setRegistered] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,6 +49,9 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
         setRow(r);
         document.title = `${r.preferred_name}'s Quinceañera Hub`;
         setState("ready");
+        // Decides whether the registration card sits at the top or drops
+        // down to the bottom as a done item.
+        hasRegistered(slug).then((yes) => !cancelled && setRegistered(yes));
       })
       .catch(() => !cancelled && setState("missing"));
     return () => {
@@ -87,7 +95,19 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
   }
 
   const s = encodeURIComponent(slug);
-  const tools: Tool[] = [
+  const registration: Tool = {
+    icon: "crown",
+    title: "Quinceañera Registration Form",
+    body: registered
+      ? "Thank you — we have your details. Need to change something? Fill it in again and tell us."
+      : "Start here. Tell us about you: how to reach you, who you want to sit with at dinner, your school and your socials.",
+    href: `/i/${s}/register`,
+    cta: registered ? "Fill it in again" : "Start my registration",
+    todo: !registered,
+    done: registered,
+  };
+
+  const rest: Tool[] = [
     {
       icon: "sparkles",
       title: "My invitation",
@@ -139,6 +159,10 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
     },
   ];
 
+  // Not done yet, so it leads. Once she has registered it drops to the bottom
+  // and the invitations become the first thing she sees.
+  const tools = registered ? [...rest, registration] : [registration, ...rest];
+
   return (
     <>
       <Header />
@@ -183,6 +207,16 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
                           Coming soon
                         </span>
                       )}
+                      {t.todo && (
+                        <span className="rounded-full bg-royal-600 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
+                          Start here
+                        </span>
+                      )}
+                      {t.done && (
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-700">
+                          Done
+                        </span>
+                      )}
                     </span>
                     <span
                       className={`mt-1 block leading-relaxed ${
@@ -200,6 +234,22 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
                 </>
               );
 
+              if (t.done) {
+                return (
+                  <a key={t.title} href={t.href}
+                    className="flex gap-4 rounded-3xl bg-white p-6 ring-1 ring-blush-200 transition hover:ring-royal-300">
+                    {inner}
+                  </a>
+                );
+              }
+              if (t.todo) {
+                return (
+                  <a key={t.title} href={t.href}
+                    className="flex gap-4 rounded-3xl bg-royal-50 p-6 ring-2 ring-royal-400 transition hover:ring-royal-500">
+                    {inner}
+                  </a>
+                );
+              }
               return t.soon ? (
                 <div
                   key={t.title}
