@@ -44,6 +44,18 @@ export function editSlugFromPath(pathname: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+/** Returns the slug for the friend invitation (/i/<slug>/friends), or null. */
+export function friendsSlugFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/i\/([^/]+)\/friends\/?$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+/** Returns the slug for her hub (/i/<slug>/hub), or null. */
+export function hubSlugFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/i\/([^/]+)\/hub\/?$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 export interface FamilyEditFields {
   family_message: string;
   signature: string;

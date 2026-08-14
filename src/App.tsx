@@ -5,8 +5,12 @@ import {
   editSlugFromPath,
   fetchInvitationRow,
   liveSlugFromPath,
+  friendsSlugFromPath,
+  hubSlugFromPath,
 } from "./lib/liveInvitation";
 import FamilyEditPage from "./components/FamilyEditPage";
+import FriendInvitePage from "./components/FriendInvitePage";
+import QuinceHubPage from "./components/QuinceHubPage";
 import PricingPage from "./components/PricingPage";
 import QuinceCruisesPage from "./components/QuinceCruisesPage";
 import Header from "./components/Header";
@@ -121,6 +125,8 @@ export default function App() {
   // Public landing page for email and ad traffic — belongs to no family.
   const isQuinceCruisesPage = route === "/quince-cruises";
   const editSlug = editSlugFromPath(pathname);
+  const friendsSlug = friendsSlugFromPath(pathname);
+  const hubSlug = hubSlugFromPath(pathname);
   const liveSlug = liveSlugFromPath(pathname);
 
   // Keep the browser-tab title/description in sync with the config.
@@ -144,6 +150,8 @@ export default function App() {
   if (isQuinceCruisesPage) return <QuinceCruisesPage />;
   if (isPricingPage) return <PricingPage />;
   if (editSlug) return <FamilyEditPage slug={editSlug} />;
+  if (friendsSlug) return <FriendInvitePage slug={friendsSlug} />;
+  if (hubSlug) return <QuinceHubPage slug={hubSlug} />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;
   return <InvitationPage />;
 }
