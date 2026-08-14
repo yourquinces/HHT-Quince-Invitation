@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { invitation } from "../data/invitation";
+import { shipPhotos } from "../data/sailings";
 import {
   fetchInvitationRow,
   updateInvitationByKey,
@@ -73,6 +74,22 @@ export default function FamilyEditPage({ slug }: { slug: string }) {
     setPhotoPreview(file ? URL.createObjectURL(file) : "");
   };
 
+  /** Put the invitation back to the ship photo. Nothing is deleted from
+   *  storage — the row simply stops pointing at the upload — so this is
+   *  always safe and she can upload again whenever she likes. */
+  const removePhoto = () => {
+    if (!window.confirm("Remove your photo? The invitation will show the cruise ship instead.")) {
+      return;
+    }
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview("");
+    setPhotoFile(null);
+    setPhotoUrl("");
+    setPosition("center top");
+    // Clear the input too, or picking the same file again fires no change event.
+    if (fileInput.current) fileInput.current.value = "";
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (saving) return;
@@ -92,7 +109,9 @@ export default function FamilyEditPage({ slug }: { slug: string }) {
         family_message: message,
         signature,
         hero_image_url: heroUrl,
-        image_position: position,
+        // Framing belongs to her photo. Leaving a stale "center top" behind
+        // would crop the ship photo she just fell back to.
+        image_position: heroUrl ? position : "",
         registry_url: registryUrl,
       });
       if (!ok) {
@@ -111,6 +130,9 @@ export default function FamilyEditPage({ slug }: { slug: string }) {
   };
 
   const shownPhoto = photoPreview || photoUrl;
+  // What the invitation falls back to with no family photo: her ship, or the
+  // site's built-in default when we have no photo of that ship.
+  const shipPhoto = (row?.ship && shipPhotos(row.ship)?.hero) || invitation.hero.image;
 
   return (
     <>
@@ -188,18 +210,35 @@ export default function FamilyEditPage({ slug }: { slug: string }) {
                         (a vertical phone photo works great)
                       </span>
                     </label>
-                    {shownPhoto && (
-                      <div className="mb-3 flex justify-center">
-                        <div className="w-40 overflow-hidden rounded-2xl shadow-md ring-1 ring-blush-200">
-                          <img
-                            src={shownPhoto}
-                            alt={`${row.preferred_name}'s invitation photo`}
-                            className="aspect-[4/5] w-full object-cover"
-                            style={{ objectPosition: position }}
-                          />
-                        </div>
+                    <div className="mb-3 flex flex-col items-center">
+                      <div className="w-40 overflow-hidden rounded-2xl shadow-md ring-1 ring-blush-200">
+                        <img
+                          src={shownPhoto || shipPhoto}
+                          alt={
+                            shownPhoto
+                              ? `${row.preferred_name}'s invitation photo`
+                              : `${row.ship ?? "The cruise ship"}, shown when there is no photo`
+                          }
+                          className="aspect-[4/5] w-full object-cover"
+                          style={{ objectPosition: shownPhoto ? position : "center" }}
+                        />
                       </div>
-                    )}
+                      {shownPhoto ? (
+                        <button
+                          type="button"
+                          onClick={removePhoto}
+                          className="mt-3 rounded-full px-4 py-2 text-sm font-semibold text-rosa-600 underline underline-offset-4 hover:text-rosa-700"
+                        >
+                          Remove photo and use the ship photo
+                        </button>
+                      ) : (
+                        <p className="mt-3 text-center text-xs text-slate-500">
+                          No photo yet — the invitation shows{" "}
+                          {row.ship ? `a photo of ${row.ship}` : "a cruise photo"}. Choose a
+                          file below to use your own.
+                        </p>
+                      )}
+                    </div>
                     <input
                       ref={fileInput}
                       type="file"

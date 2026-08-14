@@ -136,8 +136,10 @@ export function applyInvitationRow(row: InvitationRow): void {
   if (row.hero_image_url) {
     invitation.hero.image = row.hero_image_url;
     invitation.hero.imageAlt = `${name}'s quinceañera cruise invitation`;
+    // Framing is only meaningful for her own photo. Applying a leftover
+    // "center top" to the ship fallback would crop the ship badly.
+    if (row.image_position) invitation.hero.imagePosition = row.image_position;
   }
-  if (row.image_position) invitation.hero.imagePosition = row.image_position;
 
   // registry.enabled in invitation.ts is the master switch — while it is
   // false, a saved registry link stays hidden on every invitation.
