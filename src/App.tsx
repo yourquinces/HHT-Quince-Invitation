@@ -14,6 +14,7 @@ import FriendInvitePage from "./components/FriendInvitePage";
 import QuinceHubPage from "./components/QuinceHubPage";
 import QuinceRegistrationPage from "./components/QuinceRegistrationPage";
 import RegistrationsStaffPage from "./components/RegistrationsStaffPage";
+import HubsStaffPage from "./components/HubsStaffPage";
 import PricingPage from "./components/PricingPage";
 import QuinceCruisesPage from "./components/QuinceCruisesPage";
 import Header from "./components/Header";
@@ -134,6 +135,7 @@ export default function App() {
   // Standalone form for staff and anyone without an invitation yet.
   const isRegisterPage = route === "/register";
   const isStaffRegistrations = route === "/staff/registrations";
+  const isStaffHubs = route === "/staff/hubs";
   const liveSlug = liveSlugFromPath(pathname);
 
   // Keep the browser-tab title/description in sync with the config.
@@ -162,6 +164,7 @@ export default function App() {
   if (registerSlug) return <QuinceRegistrationPage slug={registerSlug} />;
   if (isRegisterPage) return <QuinceRegistrationPage />;
   if (isStaffRegistrations) return <RegistrationsStaffPage />;
+  if (isStaffHubs) return <HubsStaffPage />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;
   return <InvitationPage />;
 }
