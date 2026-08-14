@@ -101,10 +101,70 @@ export async function updateInvitationByKey(
   return (await res.json()) === true;
 }
 
+/* The bucket accepts image/jpeg, image/png and image/webp only. Phones report
+   all sorts of other things — image/jpg, image/heic, and application/octet-
+   stream when the browser cannot tell — and every one of those was rejected,
+   surfacing as "something went wrong while saving".
+
+   So rather than widen the bucket (which would let in HEIC files that most
+   browsers cannot display), re-encode to JPEG here. The browser has already
+   decoded the image to show a preview, so this is cheap, and it shrinks a
+   12-megapixel phone photo well under the 5 MB limit as a side effect. */
+const MAX_EDGE = 1600;
+const JPEG_QUALITY = 0.85;
+
+function decodeImage(file: File): Promise<CanvasImageSource> {
+  if (typeof createImageBitmap === "function") {
+    return createImageBitmap(file).catch(() => decodeViaImg(file));
+  }
+  return decodeViaImg(file);
+}
+
+function decodeViaImg(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("could not read that image"));
+    };
+    img.src = url;
+  });
+}
+
+/** Re-encodes any image the browser can open into a JPEG blob. */
+async function toJpeg(file: File): Promise<Blob> {
+  const src = await decodeImage(file);
+  const sw = (src as ImageBitmap).width || (src as HTMLImageElement).naturalWidth;
+  const sh = (src as ImageBitmap).height || (src as HTMLImageElement).naturalHeight;
+  if (!sw || !sh) throw new Error("could not read that image");
+
+  const scale = Math.min(1, MAX_EDGE / Math.max(sw, sh));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(sw * scale));
+  canvas.height = Math.max(1, Math.round(sh * scale));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("could not read that image");
+  ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
+  if ("close" in src && typeof (src as ImageBitmap).close === "function") {
+    (src as ImageBitmap).close();
+  }
+
+  const blob = await new Promise<Blob | null>((r) =>
+    canvas.toBlob(r, "image/jpeg", JPEG_QUALITY),
+  );
+  if (!blob) throw new Error("could not read that image");
+  return blob;
+}
+
 /** Uploads a family photo to the public bucket; returns its public URL. */
 export async function uploadInvitationPhoto(slug: string, file: File): Promise<string> {
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-  const name = `inv-${slug}-${Date.now()}.${ext}`;
+  const jpeg = await toJpeg(file);
+  const name = `inv-${slug}-${Date.now()}.jpg`;
   const res = await fetch(
     `${SUPABASE_URL}/storage/v1/object/invitation-photos/${encodeURIComponent(name)}`,
     {
@@ -112,9 +172,9 @@ export async function uploadInvitationPhoto(slug: string, file: File): Promise<s
       headers: {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": file.type || "image/jpeg",
+        "Content-Type": "image/jpeg",
       },
-      body: file,
+      body: jpeg,
     },
   );
   if (!res.ok) throw new Error(`Photo upload failed (${res.status})`);

@@ -98,12 +98,16 @@ export default function FamilyEditPage({ slug }: { slug: string }) {
     try {
       let heroUrl = photoUrl;
       if (photoFile) {
-        if (photoFile.size > 5 * 1024 * 1024) {
-          setError("That photo is larger than 5 MB. Please choose a smaller one.");
+        try {
+          heroUrl = await uploadInvitationPhoto(slug, photoFile);
+        } catch {
+          // Separated from the save below so she is told which half failed.
+          setError(
+            "We could not use that photo. Please try a different one, or send it to us and we will add it for you.",
+          );
           setSaving(false);
           return;
         }
-        heroUrl = await uploadInvitationPhoto(slug, photoFile);
       }
       const ok = await updateInvitationByKey(slug, editKey, {
         family_message: message,
@@ -242,7 +246,7 @@ export default function FamilyEditPage({ slug }: { slug: string }) {
                     <input
                       ref={fileInput}
                       type="file"
-                      accept="image/jpeg,image/png,image/webp"
+                      accept="image/*"
                       onChange={(e) => onPickPhoto(e.target.files?.[0] ?? null)}
                       className="w-full rounded-xl border border-blush-200 bg-white px-4 py-3 text-sm text-slate-600 file:mr-3 file:rounded-full file:border-0 file:bg-royal-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
                     />
