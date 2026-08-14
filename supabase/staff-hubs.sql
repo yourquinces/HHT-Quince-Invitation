@@ -16,7 +16,7 @@ returns table (
   preferred_name   text,
   ship             text,
   sailing_dates    text,
-  sail_date        text,
+  sail_date        text,   -- cast below: the column is a date
   edit_key         text,
   registered       boolean
 )
@@ -37,7 +37,7 @@ begin
            i.preferred_name,
            i.ship,
            i.sailing_dates,
-           i.sail_date,
+           i.sail_date::text,
            k.edit_key,
            exists (
              select 1 from public.quince_registrations r
