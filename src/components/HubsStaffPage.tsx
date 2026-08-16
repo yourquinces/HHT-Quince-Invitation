@@ -24,6 +24,7 @@ interface Row {
   sailing_dates: string | null;
   sail_date: string | null;
   edit_key: string | null;
+  group_code: string | null;
   registered: boolean;
 }
 
@@ -207,14 +208,16 @@ export default function HubsStaffPage() {
                         >
                           Invite friends
                         </a>
-                        <a
-                          className={linkCls}
-                          href={`/i/${r.slug}/cruise`}
-                          target="_blank"
-                          rel="noopener"
-                        >
-                          Group cruise invite
-                        </a>
+                        {r.group_code && (
+                          <a
+                            className={linkCls}
+                            href={`/c/${r.group_code}`}
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            Group cruise invite
+                          </a>
+                        )}
                         <a
                           className={linkCls}
                           href={`/i/${r.slug}/register`}

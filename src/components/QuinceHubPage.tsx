@@ -133,13 +133,17 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
       href: `/i/${s}/friends`,
       cta: "Invite friends",
     },
-    {
-      icon: "users",
-      title: "Invitation for your family's friends",
-      body: "For the grown-ups sailing with you. It invites people to the cruise without mentioning your quinces, so your aunts and uncles can send it to their own friends and fill more cabins.",
-      href: `/i/${s}/cruise`,
-      cta: "Open the group invitation",
-    },
+    ...(row.group_code
+      ? [
+          {
+            icon: "users",
+            title: "Invitation for your family's friends",
+            body: "For the grown-ups sailing with you. It invites people to the cruise without mentioning your quinces, so your aunts and uncles can send it to their own friends and fill more cabins.",
+            href: `/c/${row.group_code}`,
+            cta: "Open the group invitation",
+          } as Tool,
+        ]
+      : []),
     {
       icon: "camera",
       title: "Cruise photos",

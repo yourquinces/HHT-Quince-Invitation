@@ -6,6 +6,7 @@ import {
   fetchInvitationRow,
   liveSlugFromPath,
   friendsSlugFromPath,
+  groupCodeFromPath,
   groupCruiseSlugFromPath,
   hubSlugFromPath,
   registerSlugFromPath,
@@ -134,6 +135,8 @@ export default function App() {
   const friendsSlug = friendsSlugFromPath(pathname);
   // The neutral invitation a booked relative forwards to their own friends.
   const groupCruiseSlug = groupCruiseSlugFromPath(pathname);
+  // The neutral address for that same page — nothing in it names her.
+  const groupCode = groupCodeFromPath(pathname);
   const hubSlug = hubSlugFromPath(pathname);
   const registerSlug = registerSlugFromPath(pathname);
   // Standalone form for staff and anyone without an invitation yet.
@@ -164,6 +167,7 @@ export default function App() {
   if (isPricingPage) return <PricingPage />;
   if (editSlug) return <FamilyEditPage slug={editSlug} />;
   if (friendsSlug) return <FriendInvitePage slug={friendsSlug} />;
+  if (groupCode) return <GroupCruisePage code={groupCode} />;
   if (groupCruiseSlug) return <GroupCruisePage slug={groupCruiseSlug} />;
   if (hubSlug) return <QuinceHubPage slug={hubSlug} />;
   if (registerSlug) return <QuinceRegistrationPage slug={registerSlug} />;

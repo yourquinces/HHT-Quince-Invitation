@@ -26,6 +26,8 @@ export interface InvitationRow {
   sailing_dates: string | null;
   /** ISO sail date from QRS — matches pricingSheet.sailings ids. */
   sail_date?: string | null;
+  /** Neutral address for the group cruise page. See groupCodeFromPath. */
+  group_code?: string | null;
   agent_name: string | null;
   agent_phone: string | null;
   agent_whatsapp: string | null;
@@ -53,12 +55,25 @@ export function friendsSlugFromPath(pathname: string): string | null {
 /**
  * Returns the slug for the group cruise invitation (/i/<slug>/cruise), or null.
  *
- * This is the page a booked relative forwards to their own friends. It sells
- * the same sailing and never mentions the quinceañera — see GroupCruisePage.
+ * The original address for that page. It still works so links already handed
+ * out keep working, but it is not the one to share: the path spells out her
+ * name. Use the /c/<code> form below.
  */
 export function groupCruiseSlugFromPath(pathname: string): string | null {
   const match = pathname.match(/^\/i\/([^/]+)\/cruise\/?$/);
   return match ? decodeURIComponent(match[1]) : null;
+}
+
+/**
+ * Returns the code for a group cruise page at /c/<code>, or null.
+ *
+ * This is the address to share. A booked relative forwards it to their own
+ * friends, and nothing in it — not the path, not a name — says whose cruise
+ * it is. (The hostname is the remaining giveaway; see README.)
+ */
+export function groupCodeFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/c\/([A-Za-z0-9_-]+)\/?$/);
+  return match ? match[1] : null;
 }
 
 /** Returns the slug for her registration form (/i/<slug>/register), or null. */
@@ -202,6 +217,19 @@ export async function fetchInvitationRow(slug: string): Promise<InvitationRow | 
       apikey: SUPABASE_KEY,
       Authorization: `Bearer ${SUPABASE_KEY}`,
     },
+  });
+  if (!res.ok) throw new Error(`Invitation lookup failed (${res.status})`);
+  const rows: InvitationRow[] = await res.json();
+  return rows[0] ?? null;
+}
+
+/** Looks a row up by its neutral group code rather than her slug. */
+export async function fetchInvitationByGroupCode(code: string): Promise<InvitationRow | null> {
+  const url =
+    `${SUPABASE_URL}/rest/v1/invitations` +
+    `?group_code=eq.${encodeURIComponent(code)}&status=eq.active&limit=1`;
+  const res = await fetch(url, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
   });
   if (!res.ok) throw new Error(`Invitation lookup failed (${res.status})`);
   const rows: InvitationRow[] = await res.json();

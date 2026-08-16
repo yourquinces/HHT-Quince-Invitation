@@ -1,4 +1,4 @@
-// The group cruise invitation — /i/<slug>/cruise
+// The group cruise invitation — /c/<code>
 //
 // A booked relative forwards this to their own circle. It sells the same
 // sailing as the quinceañera invitation, from the same data, and never
@@ -18,7 +18,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { invitation } from "../data/invitation";
-import { applyGroupCruiseRow, fetchInvitationRow } from "../lib/liveInvitation";
+import {
+  applyGroupCruiseRow,
+  fetchInvitationByGroupCode,
+  fetchInvitationRow,
+} from "../lib/liveInvitation";
 import type { InvitationRow } from "../lib/liveInvitation";
 import { submitQuinceLead } from "../lib/quinceLeads";
 import CruiseDetails from "./CruiseDetails";
@@ -84,7 +88,12 @@ function cleanFromName(raw: string | null): string {
     .slice(0, 40);
 }
 
-export default function GroupCruisePage({ slug }: { slug: string }) {
+/**
+ * Addressed two ways. `code` is the neutral /c/<code> URL and is the one to
+ * share; `slug` is the older /i/<slug>/cruise form, kept working for links
+ * already handed out even though its path spells out her name.
+ */
+export default function GroupCruisePage({ slug, code }: { slug?: string; code?: string }) {
   const [state, setState] = useState<PageState>("loading");
   const [row, setRow] = useState<InvitationRow | null>(null);
   const [status, setStatus] = useState<Status>("idle");
@@ -105,7 +114,7 @@ export default function GroupCruisePage({ slug }: { slug: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    fetchInvitationRow(slug)
+    (code ? fetchInvitationByGroupCode(code) : fetchInvitationRow(slug ?? ""))
       .then((r) => {
         if (cancelled) return;
         if (!r) {
@@ -121,12 +130,16 @@ export default function GroupCruisePage({ slug }: { slug: string }) {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, code]);
 
-  const shareUrl = useMemo(
-    () => `${window.location.origin}/i/${encodeURIComponent(slug)}/cruise`,
-    [slug],
-  );
+  // Always the neutral address, whichever way this visitor arrived — so a
+  // relative who was sent the old link still forwards a clean one.
+  const shareUrl = useMemo(() => {
+    const c = row?.group_code || code;
+    return c
+      ? `${window.location.origin}/c/${encodeURIComponent(c)}`
+      : `${window.location.origin}/i/${encodeURIComponent(slug ?? "")}/cruise`;
+  }, [row?.group_code, code, slug]);
 
   const { cruise, office } = invitation;
 
