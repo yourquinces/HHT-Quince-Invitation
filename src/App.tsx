@@ -6,11 +6,13 @@ import {
   fetchInvitationRow,
   liveSlugFromPath,
   friendsSlugFromPath,
+  groupCruiseSlugFromPath,
   hubSlugFromPath,
   registerSlugFromPath,
 } from "./lib/liveInvitation";
 import FamilyEditPage from "./components/FamilyEditPage";
 import FriendInvitePage from "./components/FriendInvitePage";
+import GroupCruisePage from "./components/GroupCruisePage";
 import QuinceHubPage from "./components/QuinceHubPage";
 import QuinceRegistrationPage from "./components/QuinceRegistrationPage";
 import RegistrationsStaffPage from "./components/RegistrationsStaffPage";
@@ -130,6 +132,8 @@ export default function App() {
   const isQuinceCruisesPage = route === "/quince-cruises";
   const editSlug = editSlugFromPath(pathname);
   const friendsSlug = friendsSlugFromPath(pathname);
+  // The neutral invitation a booked relative forwards to their own friends.
+  const groupCruiseSlug = groupCruiseSlugFromPath(pathname);
   const hubSlug = hubSlugFromPath(pathname);
   const registerSlug = registerSlugFromPath(pathname);
   // Standalone form for staff and anyone without an invitation yet.
@@ -160,6 +164,7 @@ export default function App() {
   if (isPricingPage) return <PricingPage />;
   if (editSlug) return <FamilyEditPage slug={editSlug} />;
   if (friendsSlug) return <FriendInvitePage slug={friendsSlug} />;
+  if (groupCruiseSlug) return <GroupCruisePage slug={groupCruiseSlug} />;
   if (hubSlug) return <QuinceHubPage slug={hubSlug} />;
   if (registerSlug) return <QuinceRegistrationPage slug={registerSlug} />;
   if (isRegisterPage) return <QuinceRegistrationPage />;

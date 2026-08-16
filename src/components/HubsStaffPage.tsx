@@ -209,6 +209,14 @@ export default function HubsStaffPage() {
                         </a>
                         <a
                           className={linkCls}
+                          href={`/i/${r.slug}/cruise`}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          Group cruise invite
+                        </a>
+                        <a
+                          className={linkCls}
                           href={`/i/${r.slug}/register`}
                           target="_blank"
                           rel="noopener"

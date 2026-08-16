@@ -50,6 +50,17 @@ export function friendsSlugFromPath(pathname: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+/**
+ * Returns the slug for the group cruise invitation (/i/<slug>/cruise), or null.
+ *
+ * This is the page a booked relative forwards to their own friends. It sells
+ * the same sailing and never mentions the quinceañera — see GroupCruisePage.
+ */
+export function groupCruiseSlugFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/i\/([^/]+)\/cruise\/?$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 /** Returns the slug for her registration form (/i/<slug>/register), or null. */
 export function registerSlugFromPath(pathname: string): string | null {
   const match = pathname.match(/^\/i\/([^/]+)\/register\/?$/);
@@ -228,6 +239,31 @@ export function applyInvitationRow(row: InvitationRow): void {
     invitation.registry.enabled = false;
   }
 
+  applySailingAndAgent(row);
+
+  // Photos follow whichever ship we ended up with. Her own photo always wins
+  // the hero — the ship only fills the card until she uploads one.
+  const heroPhotos = shipPhotos(invitation.cruise.ship);
+  if (heroPhotos && !row.hero_image_url) {
+    invitation.hero.image = heroPhotos.hero;
+    invitation.hero.imageAlt = `Aboard ${invitation.cruise.line}'s ${invitation.cruise.ship}`;
+  }
+
+  invitation.social.title = `Celebrate ${name}'s Quinceañera Cruise | ${invitation.cruise.ship}`;
+  invitation.social.description =
+    `Join ${name}, her family and friends aboard ${invitation.cruise.ship} ` +
+    `${invitation.cruise.sailingDates}. View cruise details, pricing and reservation information.`;
+}
+
+/**
+ * The half of a row that is just "which sailing is this, and whose client are
+ * they" — ship, dates, itinerary, pricing links, cabin photo, agent.
+ *
+ * Shared by the quinceañera invitation and the group cruise page, because
+ * those two must never drift apart on the facts. Anything that names her
+ * stays out of here, which is exactly what makes the neutral page possible.
+ */
+function applySailingAndAgent(row: InvitationRow): void {
   if (row.starting_price) invitation.pricing.startingPricePerPerson = row.starting_price;
   if (row.ship) invitation.cruise.ship = row.ship;
   if (row.sailing_dates) invitation.cruise.sailingDates = row.sailing_dates;
@@ -259,12 +295,6 @@ export function applyInvitationRow(row: InvitationRow): void {
     invitation.cruise.shipImage = photos.details;
     invitation.cruise.shipImageAlt =
       photos.detailsAlt ?? `${invitation.cruise.line}'s ${invitation.cruise.ship}`;
-    // Her own photo always wins the hero — this only fills the card until
-    // she uploads one from the edit page.
-    if (!row.hero_image_url) {
-      invitation.hero.image = photos.hero;
-      invitation.hero.imageAlt = `Aboard ${invitation.cruise.line}'s ${invitation.cruise.ship}`;
-    }
   }
 
   if (row.agent_name) invitation.agent.name = row.agent_name;
@@ -274,9 +304,36 @@ export function applyInvitationRow(row: InvitationRow): void {
   }
   if (row.agent_whatsapp) invitation.agent.whatsappUrl = row.agent_whatsapp;
   if (row.agent_email) invitation.agent.email = row.agent_email;
+}
 
-  invitation.social.title = `Celebrate ${name}'s Quinceañera Cruise | ${invitation.cruise.ship}`;
+/**
+ * Applies a row for the group cruise page — the same sailing, with every
+ * trace of the quinceañera removed.
+ *
+ * The differences from applyInvitationRow are the whole point of the page, so
+ * they are deliberate, not incidental:
+ *  · the hero is always the ship. Her uploaded photo is a fifteen-year-old in
+ *    a gown and would give the game away in one glance.
+ *  · the gift registry is off. It is hers.
+ *  · nothing sets quinceanera.* or groupName, so any component that reads
+ *    them is simply not rendered on this page.
+ */
+export function applyGroupCruiseRow(row: InvitationRow): void {
+  applySailingAndAgent(row);
+
+  const photos = shipPhotos(invitation.cruise.ship);
+  if (photos) {
+    invitation.hero.image = photos.hero;
+    invitation.hero.imageAlt = `Aboard ${invitation.cruise.line}'s ${invitation.cruise.ship}`;
+    invitation.hero.imagePosition = "center";
+  }
+
+  invitation.registry.enabled = false;
+
+  invitation.social.title =
+    `${invitation.cruise.nights}-Night ${invitation.cruise.itineraryName} Cruise | ` +
+    `${invitation.cruise.ship}`;
   invitation.social.description =
-    `Join ${name}, her family and friends aboard ${invitation.cruise.ship} ` +
-    `${invitation.cruise.sailingDates}. View cruise details, pricing and reservation information.`;
+    `Join our group aboard ${invitation.cruise.ship} ${invitation.cruise.sailingDates}. ` +
+    `Group rates, cabin options and payment plans through Happy Holidays Travel.`;
 }

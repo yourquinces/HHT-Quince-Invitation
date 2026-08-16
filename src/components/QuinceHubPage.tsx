@@ -134,6 +134,13 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
       cta: "Invite friends",
     },
     {
+      icon: "users",
+      title: "Invitation for your family's friends",
+      body: "For the grown-ups sailing with you. It invites people to the cruise without mentioning your quinces, so your aunts and uncles can send it to their own friends and fill more cabins.",
+      href: `/i/${s}/cruise`,
+      cta: "Open the group invitation",
+    },
+    {
       icon: "camera",
       title: "Cruise photos",
       body: "Upload photos and videos from the cruise, and share your album with your family.",
