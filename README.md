@@ -241,20 +241,47 @@ Spam protection: the form includes a Netlify honeypot field (`bot-field`).
 
 ## 8. Social sharing (WhatsApp / Facebook previews)
 
-WhatsApp, Facebook, and iMessage build their link previews from the `<meta>`
-tags in **`index.html`** (they can't run the app's JavaScript). When you create
-a new invitation:
+**This is automatic now — there is nothing to edit per invitation.**
 
-1. Open `index.html` and update the `<title>`, `description`, `og:title`,
-   `og:description`, `og:image`, `og:url`, and the Twitter tags to match the
-   new family.
-2. `og:image` must be a **full https URL to a JPG or PNG** on your deployed
-   site, e.g. `https://sofia-quince.netlify.app/images/social-share.jpg`.
-   Save a nice share photo (1200×630 works best) as
-   `public/images/social-share.jpg`.
-3. After deploying, paste the link into WhatsApp to check the preview. If an
-   old preview is cached, test with Facebook's tool:
-   https://developers.facebook.com/tools/debug/
+WhatsApp, Facebook and iMessage build their previews from the `<meta>` tags in
+the HTML and never run the app's JavaScript. That used to mean every invitation
+previewed as the same girl, with no picture, because one static set of tags was
+serving every link.
+
+`netlify/edge-functions/social-preview.ts` now looks up the invitation the URL
+is asking for and rewrites the block between `<!--SOCIAL:START-->` and
+`<!--SOCIAL:END-->` in `index.html` before the crawler sees the page:
+
+| Link | Preview shows |
+| --- | --- |
+| `/i/<slug>` | "Celebrate *Name*'s Quinceañera Cruise \| *Ship*", and **her uploaded photo** — the ship stands in until she uploads one |
+| `/c/<code>` | "Join Our Group Cruise · *Ship*", ship photo only. Never her name, never her photo — a preview is the first thing a stranger sees. `?from=Carlos` adds "Carlos would love you to join." |
+| anything else | the generic Happy Holidays Travel tags in `index.html` |
+
+Keep the two `SOCIAL` markers in `index.html`. What sits between them is only
+the fallback for the root page and for links the function cannot identify.
+
+### Share images
+
+Previews want **1200×630 and under ~300 KB**. The photos used on the page are
+portrait or square, which WhatsApp renders as a cramped thumbnail, so each ship
+has a purpose-made crop: `public/images/<ship>-share.jpg`. To regenerate one
+after changing a ship photo (macOS, no extra tools):
+
+```sh
+cd public/images
+sips --resampleWidth 1200 icon.jpg --out /tmp/w.jpg
+sips -c 630 1200 /tmp/w.jpg --out /tmp/c.jpg
+sips -s format jpeg -s formatOptions 72 /tmp/c.jpg --out icon-share.jpg
+```
+
+Then add or update the entry in `SHIP_IMAGE` in the edge function.
+
+### Checking a preview
+
+Paste the link into WhatsApp. If you see a stale preview, previews are cached
+per URL for a long time — force a refetch with Facebook's debugger:
+https://developers.facebook.com/tools/debug/
 
 The browser-tab title also follows `social.title` in `src/data/invitation.ts`.
 

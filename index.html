@@ -7,33 +7,40 @@
 
     <!-- ================================================================
          SOCIAL SHARING METADATA
-         WhatsApp, Facebook, and iMessage read these tags directly from
-         this file (they do not run JavaScript), so when you create a new
-         invitation, update the title / description / image below to
-         match src/data/invitation.ts. See README.md → "Social sharing".
-         The og:image URL must be an ABSOLUTE https URL to a JPG or PNG.
+         WhatsApp, Facebook and iMessage read these tags straight out of
+         this file — they never run the app's JavaScript. That is why every
+         invitation link used to preview as the same girl.
+
+         For /i/<slug> and /c/<code>, the edge function at
+         netlify/edge-functions/social-preview.ts REPLACES everything
+         between the two SOCIAL markers below with tags for that actual
+         invitation, before the crawler sees the page. Keep the markers.
+
+         What is written here is only the fallback: the root page, the
+         marketing page, and anything the edge function cannot identify.
          ================================================================ -->
-    <title>Celebrate Sofia’s Quinceañera Cruise | Icon of the Seas</title>
+    <!--SOCIAL:START-->
+    <title>Quinceañera Cruises | Happy Holidays Travel</title>
     <meta
       name="description"
-      content="Join Sofia, her family and friends aboard Icon of the Seas July 17–24, 2027. View cruise details, pricing and reservation information."
+      content="Celebrate a quinceañera at sea with Happy Holidays Travel. Cruise details, cabin prices and reservations for our 2027 group sailings."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Celebrate Sofia’s Quinceañera Cruise | Icon of the Seas" />
+    <meta property="og:title" content="Quinceañera Cruises | Happy Holidays Travel" />
     <meta
       property="og:description"
-      content="Join Sofia, her family and friends aboard Icon of the Seas July 17–24, 2027. View cruise details, pricing and reservation information."
+      content="Celebrate a quinceañera at sea with Happy Holidays Travel. Cruise details, cabin prices and reservations for our 2027 group sailings."
     />
-    <!-- Replace with your deployed site URL + a real JPG/PNG share image. -->
-    <meta property="og:image" content="https://YOUR-SITE.netlify.app/images/social-share.jpg" />
-    <meta property="og:url" content="https://YOUR-SITE.netlify.app/" />
+    <meta property="og:image" content="https://hht-quince-invitation.netlify.app/images/icon-share.jpg" />
+    <meta property="og:url" content="https://hht-quince-invitation.netlify.app/" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Celebrate Sofia’s Quinceañera Cruise | Icon of the Seas" />
+    <meta name="twitter:title" content="Quinceañera Cruises | Happy Holidays Travel" />
     <meta
       name="twitter:description"
-      content="Join Sofia, her family and friends aboard Icon of the Seas July 17–24, 2027. View cruise details, pricing and reservation information."
+      content="Celebrate a quinceañera at sea with Happy Holidays Travel. Cruise details, cabin prices and reservations for our 2027 group sailings."
     />
-    <meta name="twitter:image" content="https://YOUR-SITE.netlify.app/images/social-share.jpg" />
+    <meta name="twitter:image" content="https://hht-quince-invitation.netlify.app/images/icon-share.jpg" />
+    <!--SOCIAL:END-->
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -5,6 +5,10 @@
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
+  # Per-invitation link previews for WhatsApp and friends. See
+  # netlify/edge-functions/social-preview.ts — it rewrites the social meta
+  # block on /i/* and /c/* before the crawler sees the page.
+  edge_functions = "netlify/edge-functions"
 
 # Functions must resolve before the catch-all SPA redirect below.
 [[redirects]]
