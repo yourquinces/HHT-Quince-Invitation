@@ -91,7 +91,7 @@ export const sailings: PricingSailing[] = [
     destinations: [
       "Curaçao",
       "Aruba",
-      "Puerto Plata, Dominican Republic",
+      "Cabo Rojo, Dominican Republic",
       "Perfect Day at CocoCay",
     ],
     region: "Caribbean",
