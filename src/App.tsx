@@ -7,6 +7,7 @@ import {
   liveSlugFromPath,
   friendsSlugFromPath,
   groupCodeFromPath,
+  guestsSlugFromPath,
   groupCruiseSlugFromPath,
   hubSlugFromPath,
   registerSlugFromPath,
@@ -14,6 +15,7 @@ import {
 import FamilyEditPage from "./components/FamilyEditPage";
 import FriendInvitePage from "./components/FriendInvitePage";
 import GroupCruisePage from "./components/GroupCruisePage";
+import GuestListPage from "./components/GuestListPage";
 import QuinceHubPage from "./components/QuinceHubPage";
 import QuinceRegistrationPage from "./components/QuinceRegistrationPage";
 import RegistrationsStaffPage from "./components/RegistrationsStaffPage";
@@ -138,6 +140,8 @@ export default function App() {
   // The neutral address for that same page — nothing in it names her.
   const groupCode = groupCodeFromPath(pathname);
   const hubSlug = hubSlugFromPath(pathname);
+  // Her guest list — needs the same secret key as the family editor.
+  const guestsSlug = guestsSlugFromPath(pathname);
   const registerSlug = registerSlugFromPath(pathname);
   // Standalone form for staff and anyone without an invitation yet.
   const isRegisterPage = route === "/register";
@@ -169,6 +173,7 @@ export default function App() {
   if (friendsSlug) return <FriendInvitePage slug={friendsSlug} />;
   if (groupCode) return <GroupCruisePage code={groupCode} />;
   if (groupCruiseSlug) return <GroupCruisePage slug={groupCruiseSlug} />;
+  if (guestsSlug) return <GuestListPage slug={guestsSlug} />;
   if (hubSlug) return <QuinceHubPage slug={hubSlug} />;
   if (registerSlug) return <QuinceRegistrationPage slug={registerSlug} />;
   if (isRegisterPage) return <QuinceRegistrationPage />;

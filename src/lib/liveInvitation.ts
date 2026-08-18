@@ -82,6 +82,12 @@ export function registerSlugFromPath(pathname: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+/** Returns the slug for her guest list (/i/<slug>/guests), or null. */
+export function guestsSlugFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/i\/([^/]+)\/guests\/?$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 /** Returns the slug for her hub (/i/<slug>/hub), or null. */
 export function hubSlugFromPath(pathname: string): string | null {
   const match = pathname.match(/^\/i\/([^/]+)\/hub\/?$/);
@@ -364,4 +370,41 @@ export function applyGroupCruiseRow(row: InvitationRow): void {
   invitation.social.description =
     `Join our group aboard ${invitation.cruise.ship} ${invitation.cruise.sailingDates}. ` +
     `Group rates, cabin options and payment plans through Happy Holidays Travel.`;
+}
+
+/* ── Guest list ──────────────────────────────────────────────────────────────
+   Everyone booked under her in the reservation system, read through one
+   SECURITY DEFINER function. The secret edit key is what authorises it — the
+   same key that unlocks her family editor — because this returns other
+   families' names. Nothing else about those tables is reachable from here.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+export interface GuestCabin {
+  cabin_number: string | null;
+  category: string | null;
+  occupancy: string | null;
+  is_quinceanera: boolean;
+  guests: { first_name: string | null; last_name: string | null; is_quinceanera: boolean }[];
+}
+
+export interface GuestList {
+  quinceanera: string | null;
+  ship: string | null;
+  sail_date: string | null;
+  cabins: GuestCabin[];
+}
+
+/** Null when the key does not match — the page treats that as "not authorised". */
+export async function fetchQuinceGuests(slug: string, key: string): Promise<GuestList | null> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/list_quince_guests`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ p_slug: slug, p_key: key }),
+  });
+  if (!res.ok) throw new Error(`Guest list lookup failed (${res.status})`);
+  return (await res.json()) as GuestList | null;
 }

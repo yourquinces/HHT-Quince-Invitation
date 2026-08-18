@@ -126,6 +126,17 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
           } as Tool,
         ]
       : []),
+    ...(editKey
+      ? [
+          {
+            icon: "users",
+            title: "Guest list",
+            body: "Everyone booked under your name so far, cabin by cabin. It comes straight from our reservation system, so it updates as your family and friends book.",
+            href: `/i/${s}/guests?key=${encodeURIComponent(editKey)}`,
+            cta: "See who is coming",
+          } as Tool,
+        ]
+      : []),
     {
       icon: "ship",
       title: "Invite my friends",
