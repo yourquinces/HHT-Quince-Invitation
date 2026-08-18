@@ -154,23 +154,38 @@ export default function App() {
   const isStaffShipVisits = route === "/staff/ship-visits";
   const liveSlug = liveSlugFromPath(pathname);
 
-  // Keep the browser-tab title/description in sync with the config.
-  // (Share previews read index.html — see README → Social sharing.)
+  // Every page below sets its own tab title, and React runs a parent's effect
+  // AFTER its children's — so a blanket title here overwrote all of them, and
+  // every page ended up titled with the sample config: "Celebrate Sofia's
+  // Quinceañera Cruise". So this only titles the pages it actually owns: the
+  // sample invitation at the root, the pricing table, and the marketing page.
+  const pageOwnsTitle =
+    !!editSlug || !!friendsSlug || !!groupCruiseSlug || !!groupCode || !!guestsSlug ||
+    !!hubSlug || !!registerSlug || !!liveSlug ||
+    isRegisterPage || isStaffRegistrations || isStaffHubs || isShipVisit || isStaffShipVisits;
+
   useEffect(() => {
+    if (pageOwnsTitle) return;
+    // These three belong to no particular girl, so they must not borrow the
+    // sample invitation's title — that is how "Celebrate Sofia's Quinceañera
+    // Cruise" ended up in the tab on pages that have nothing to do with her.
+    const GENERIC = "Quinceañera Cruises | Happy Holidays Travel";
     if (isQuinceCruisesPage) {
       document.title = MARKETING_TITLE;
     } else if (isPricingPage) {
-      document.title = `Cabin Pricing | ${invitation.social.title}`;
+      document.title = "Cabin Pricing | Happy Holidays Travel";
     } else {
-      document.title = invitation.social.title;
+      document.title = GENERIC;
     }
     const meta = document.querySelector('meta[name="description"]');
     if (meta)
       meta.setAttribute(
         "content",
-        isQuinceCruisesPage ? MARKETING_DESCRIPTION : invitation.social.description,
+        isQuinceCruisesPage
+          ? MARKETING_DESCRIPTION
+          : "Celebrate a quinceañera at sea with Happy Holidays Travel. Cruise details, cabin prices and reservations for our 2027 group sailings.",
       );
-  }, [isPricingPage, isQuinceCruisesPage]);
+  }, [isPricingPage, isQuinceCruisesPage, pageOwnsTitle]);
 
   if (isQuinceCruisesPage) return <QuinceCruisesPage />;
   if (isPricingPage) return <PricingPage />;
