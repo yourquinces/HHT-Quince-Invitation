@@ -19,6 +19,8 @@ export interface InvitationRow {
   family_message: string | null;
   signature: string | null;
   hero_image_url: string | null;
+  /** Square avatar for the hub and registration form; null = show the cartoon. */
+  profile_image_url?: string | null;
   image_position: string | null;
   registry_url: string | null;
   starting_price: string | null;
@@ -407,4 +409,76 @@ export async function fetchQuinceGuests(slug: string, key: string): Promise<Gues
   });
   if (!res.ok) throw new Error(`Guest list lookup failed (${res.status})`);
   return (await res.json()) as GuestList | null;
+}
+
+/* ── Profile picture ─────────────────────────────────────────────────────────
+   A square avatar, kept apart from the invitation's hero photo: different
+   shape, different job, and either may be empty. Cropped and shrunk here
+   because a 12-megapixel phone photo has no business being a 40-pixel circle.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+const AVATAR_PX = 512;
+
+/** Centre-crops to a square and encodes a modest JPEG. */
+async function toSquareJpeg(file: File): Promise<Blob> {
+  const src = await decodeImage(file);
+  const sw = (src as ImageBitmap).width || (src as HTMLImageElement).naturalWidth;
+  const sh = (src as ImageBitmap).height || (src as HTMLImageElement).naturalHeight;
+  if (!sw || !sh) throw new Error("could not read that image");
+
+  const side = Math.min(sw, sh);
+  const sx = Math.round((sw - side) / 2);
+  // Faces sit above centre far more often than below, so a portrait is cropped
+  // from a third of the way down rather than the middle — otherwise chins go
+  // missing.
+  const sy = sh > sw ? Math.round((sh - side) / 3) : Math.round((sh - side) / 2);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = AVATAR_PX;
+  canvas.height = AVATAR_PX;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("could not read that image");
+  ctx.drawImage(src, sx, sy, side, side, 0, 0, AVATAR_PX, AVATAR_PX);
+  if ("close" in src && typeof (src as ImageBitmap).close === "function") {
+    (src as ImageBitmap).close();
+  }
+
+  const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.85));
+  if (!blob) throw new Error("could not read that image");
+  return blob;
+}
+
+/** Uploads the avatar to the same public bucket; returns its URL. */
+export async function uploadProfilePhoto(slug: string, file: File): Promise<string> {
+  const jpeg = await toSquareJpeg(file);
+  const name = `avatar-${slug}-${Date.now()}.jpg`;
+  const res = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/invitation-photos/${encodeURIComponent(name)}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "image/jpeg",
+      },
+      body: jpeg,
+    },
+  );
+  if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+  return `${SUPABASE_URL}/storage/v1/object/public/invitation-photos/${encodeURIComponent(name)}`;
+}
+
+/** Saves (or with an empty string, clears) the avatar. False = wrong key. */
+export async function setProfilePhoto(slug: string, key: string, url: string): Promise<boolean> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/set_invitation_profile_photo`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ p_slug: slug, p_key: key, p_url: url }),
+  });
+  if (!res.ok) throw new Error(`Save failed (${res.status})`);
+  return (await res.json()) === true;
 }

@@ -10,7 +10,8 @@
 
 import { useEffect, useState } from "react";
 import { invitation } from "../data/invitation";
-import { fetchInvitationRow } from "../lib/liveInvitation";
+import { fetchInvitationRow, setProfilePhoto, uploadProfilePhoto } from "../lib/liveInvitation";
+import QuinceAvatar from "./QuinceAvatar";
 import { hasRegistered } from "../lib/quinceRegistration";
 import type { InvitationRow } from "../lib/liveInvitation";
 import Header from "./Header";
@@ -36,6 +37,11 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
   const [state, setState] = useState<PageState>("loading");
   const [row, setRow] = useState<InvitationRow | null>(null);
   const [registered, setRegistered] = useState(false);
+  // Her profile picture is edited in place here rather than on a page of its
+  // own — it is one tap, and sending her elsewhere for it would be sillier
+  // than the feature.
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -92,6 +98,36 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
         <Footer />
       </>
     );
+  }
+
+  async function onPickPhoto(file: File | null) {
+    if (!file || !editKey) return;
+    setPhotoError("");
+    setPhotoBusy(true);
+    try {
+      const url = await uploadProfilePhoto(slug, file);
+      const ok = await setProfilePhoto(slug, editKey, url);
+      if (!ok) throw new Error("link expired");
+      setRow((prev) => (prev ? { ...prev, profile_image_url: url } : prev));
+    } catch {
+      setPhotoError("That photo did not upload. Try another one, or a smaller file.");
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
+  async function onRemovePhoto() {
+    if (!editKey) return;
+    setPhotoBusy(true);
+    setPhotoError("");
+    try {
+      await setProfilePhoto(slug, editKey, "");
+      setRow((prev) => (prev ? { ...prev, profile_image_url: null } : prev));
+    } catch {
+      setPhotoError("Could not remove that photo.");
+    } finally {
+      setPhotoBusy(false);
+    }
   }
 
   const s = encodeURIComponent(slug);
@@ -191,7 +227,37 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
       <main className="px-5 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-3xl">
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-gold-600">
+            <div className="flex flex-col items-center">
+              <QuinceAvatar src={row.profile_image_url} name={row.preferred_name} size={104} />
+              {editKey ? (
+                <div className="mt-3 flex items-center gap-3 text-sm">
+                  <label className="cursor-pointer font-semibold text-royal-600 hover:text-royal-700">
+                    {photoBusy
+                      ? "Uploading…"
+                      : row.profile_image_url
+                        ? "Change photo"
+                        : "Add your photo"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={photoBusy}
+                      onChange={(e) => onPickPhoto(e.target.files?.[0] ?? null)}
+                    />
+                  </label>
+                  {row.profile_image_url && !photoBusy && (
+                    <button type="button" onClick={onRemovePhoto}
+                            className="text-slate-400 hover:text-rosa-600">
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ) : null}
+              {photoError && (
+                <p role="alert" className="mt-2 text-sm font-medium text-rosa-600">{photoError}</p>
+              )}
+            </div>
+            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.35em] text-gold-600">
               Quinceañera Hub
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold text-royal-800 sm:text-4xl">

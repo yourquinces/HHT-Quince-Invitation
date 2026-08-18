@@ -10,6 +10,7 @@ import type { FormEvent } from "react";
 import { invitation } from "../data/invitation";
 import { sailings } from "../data/sailings";
 import { fetchInvitationRow } from "../lib/liveInvitation";
+import QuinceAvatar from "./QuinceAvatar";
 import { submitQuinceRegistration } from "../lib/quinceRegistration";
 import type { QuinceRegistration } from "../lib/quinceRegistration";
 import Header from "./Header";
@@ -102,6 +103,7 @@ function YesNo({
 }
 
 export default function QuinceRegistrationPage({ slug }: { slug?: string }) {
+  const [girlPhoto, setGirlPhoto] = useState<string | null>(null);
   const [f, setF] = useState<Fields>(INITIAL);
   const [status, setStatus] = useState<Status>("idle");
   const [girlName, setGirlName] = useState("");
@@ -116,6 +118,7 @@ export default function QuinceRegistrationPage({ slug }: { slug?: string }) {
       .then((r) => {
         if (cancelled || !r) return;
         setGirlName(r.preferred_name);
+        setGirlPhoto(r.profile_image_url ?? null);
         const parts = (r.quinceanera_name || "").trim().split(/\s+/);
         setF((p) => ({
           ...p,
@@ -212,6 +215,15 @@ export default function QuinceRegistrationPage({ slug }: { slug?: string }) {
       <main className="px-5 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-2xl">
           <div className="text-center">
+            {/* Her own picture when the form is opened from her hub — the same
+                one she set there, so the form reads as hers rather than as a
+                stranger's questionnaire. Opened without a slug there is no
+                girl to show, so nothing is drawn. */}
+            {slug && (
+              <div className="mb-5 flex justify-center">
+                <QuinceAvatar src={girlPhoto} name={girlName} size={88} />
+              </div>
+            )}
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-gold-600">
               Happy Holidays Travel
             </p>
