@@ -18,6 +18,7 @@ import {
 } from "../lib/liveInvitation";
 import type { HubProgress } from "../lib/liveInvitation";
 import HubChecklist from "./HubChecklist";
+import { makeSay, useHubLang } from "../lib/hubLang";
 import QuinceAvatar from "./QuinceAvatar";
 import { hasRegistered } from "../lib/quinceRegistration";
 import type { InvitationRow } from "../lib/liveInvitation";
@@ -45,6 +46,8 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
   const [row, setRow] = useState<InvitationRow | null>(null);
   const [registered, setRegistered] = useState(false);
   const [progress, setProgress] = useState<HubProgress | null>(null);
+  const [lang, setLang] = useHubLang();
+  const say = makeSay(lang);
   // Her profile picture is edited in place here rather than on a page of its
   // own — it is one tap, and sending her elsewhere for it would be sillier
   // than the feature.
@@ -95,7 +98,7 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
         <Header />
         <main className="px-5 py-20 text-center">
           <p className="font-display text-2xl font-semibold text-royal-800">
-            We could not find this hub.
+            {say("We could not find this hub.", "No encontramos este portal.")}
           </p>
           <p className="mt-3 text-slate-600">
             Please check the link, or call Happy Holidays Travel at{" "}
@@ -120,7 +123,12 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
       if (!ok) throw new Error("link expired");
       setRow((prev) => (prev ? { ...prev, profile_image_url: url } : prev));
     } catch {
-      setPhotoError("That photo did not upload. Try another one, or a smaller file.");
+      setPhotoError(
+        say(
+          "That photo did not upload. Try another one, or a smaller file.",
+          "Esa foto no se subió. Prueba con otra o con un archivo más pequeño.",
+        ),
+      );
     } finally {
       setPhotoBusy(false);
     }
@@ -134,7 +142,7 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
       await setProfilePhoto(slug, editKey, "");
       setRow((prev) => (prev ? { ...prev, profile_image_url: null } : prev));
     } catch {
-      setPhotoError("Could not remove that photo.");
+      setPhotoError(say("Could not remove that photo.", "No se pudo quitar esa foto."));
     } finally {
       setPhotoBusy(false);
     }
@@ -143,12 +151,18 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
   const s = encodeURIComponent(slug);
   const registration: Tool = {
     icon: "crown",
-    title: "Quinceañera Registration Form",
+    title: say("Quinceañera Registration Form", "Formulario de registro de quinceañera"),
     body: registered
-      ? "Thank you — we have your details. Need to change something? Fill it in again and tell us."
-      : "Start here. Tell us about you: how to reach you, who you want to sit with at dinner, your school and your socials.",
+      ? say(
+          "Thank you — we have your details. Need to change something? Fill it in again and tell us.",
+          "Gracias — ya tenemos tus datos. ¿Necesitas cambiar algo? Complétalo otra vez y avísanos.",
+        )
+      : say(
+          "Start here. Tell us about you: how to reach you, who you want to sit with at dinner, your school and your socials.",
+          "Empieza aquí. Cuéntanos de ti: cómo contactarte, con quién quieres sentarte a cenar, tu escuela y tus redes.",
+        ),
     href: `/i/${s}/register`,
-    cta: registered ? "Fill it in again" : "Start my registration",
+    cta: registered ? say("Fill it in again", "Completarlo otra vez") : say("Start my registration", "Empezar mi registro"),
     todo: !registered,
     done: registered,
   };
@@ -156,19 +170,19 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
   const rest: Tool[] = [
     {
       icon: "sparkles",
-      title: "My invitation",
-      body: "The invitation your family and guests see, with your photo, your message and everything about the cruise.",
+      title: say("My invitation", "Mi invitación"),
+      body: say("The invitation your family and guests see, with your photo, your message and everything about the cruise.", "La invitación que ven tu familia e invitados, con tu foto, tu mensaje y todo sobre el crucero."),
       href: `/i/${s}`,
-      cta: "View my invitation",
+      cta: say("View my invitation", "Ver mi invitación"),
     },
     ...(editKey
       ? [
           {
             icon: "heart",
-            title: "Edit my invitation",
-            body: "Change your photo, your welcome message and how the photo is framed. Your changes appear instantly.",
+            title: say("Edit my invitation", "Editar mi invitación"),
+            body: say("Change your photo, your welcome message and how the photo is framed. Your changes appear instantly.", "Cambia tu foto, tu mensaje de bienvenida y cómo se recorta la foto. Tus cambios aparecen al instante."),
             href: `/i/${s}/edit?key=${encodeURIComponent(editKey)}`,
-            cta: "Edit",
+            cta: say("Edit", "Editar"),
           } as Tool,
         ]
       : []),
@@ -176,53 +190,53 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
       ? [
           {
             icon: "users",
-            title: "Guest list",
-            body: "Everyone booked under your name so far, cabin by cabin. It comes straight from our reservation system, so it updates as your family and friends book.",
+            title: say("Guest list", "Lista de invitados"),
+            body: say("Everyone booked under your name so far, cabin by cabin. It comes straight from our reservation system, so it updates as your family and friends book.", "Todos los que han reservado bajo tu nombre, cabina por cabina. Viene directo de nuestro sistema de reservas, así que se actualiza a medida que reservan."),
             href: `/i/${s}/guests?key=${encodeURIComponent(editKey)}`,
-            cta: "See who is coming",
+            cta: say("See who is coming", "Ver quién viene"),
           } as Tool,
         ]
       : []),
     {
       icon: "ship",
-      title: "Invite my friends",
-      body: "Ask your friends to have their quinceañera with you. Send it by text, email or WhatsApp with the message already written.",
+      title: say("Invite my friends", "Invitar a mis amigas"),
+      body: say("Ask your friends to have their quinceañera with you. Send it by text, email or WhatsApp with the message already written.", "Invita a tus amigas a celebrar sus quinces contigo. Envíalo por mensaje, correo o WhatsApp con el texto ya escrito."),
       href: `/i/${s}/friends`,
-      cta: "Invite friends",
+      cta: say("Invite friends", "Invitar amigas"),
     },
     ...(row.group_code
       ? [
           {
             icon: "users",
-            title: "Invitation for your family's friends",
-            body: "For the grown-ups sailing with you. It invites people to the cruise without mentioning your quinces, so your aunts and uncles can send it to their own friends and fill more cabins.",
+            title: say("Invitation for your family's friends", "Invitación para los amigos de tu familia"),
+            body: say("For the grown-ups sailing with you. It invites people to the cruise without mentioning your quinces, so your aunts and uncles can send it to their own friends and fill more cabins.", "Para los adultos que viajan contigo. Invita al crucero sin mencionar tus quinces, para que tus tíos puedan enviarla a sus propios amigos y llenar más cabinas."),
             href: `/c/${row.group_code}`,
-            cta: "Open the group invitation",
+            cta: say("Open the group invitation", "Abrir la invitación del grupo"),
           } as Tool,
         ]
       : []),
     {
       icon: "camera",
-      title: "Cruise photos",
-      body: "Upload photos and videos from the cruise, and share your album with your family.",
+      title: say("Cruise photos", "Fotos del crucero"),
+      body: say("Upload photos and videos from the cruise, and share your album with your family.", "Sube fotos y videos del crucero y comparte tu álbum con tu familia."),
       soon: true,
     },
     {
       icon: "gift",
-      title: "Gift registry",
-      body: "Your registry, so guests know exactly what would make your quinces special.",
+      title: say("Gift registry", "Mesa de regalos"),
+      body: say("Your registry, so guests know exactly what would make your quinces special.", "Tu mesa de regalos, para que tus invitados sepan exactamente qué haría especiales tus quinces."),
       soon: true,
     },
     {
       icon: "ship",
-      title: "Excursions",
-      body: "Choose what you want to do in each port before you sail.",
+      title: say("Excursions", "Excursiones"),
+      body: say("Choose what you want to do in each port before you sail.", "Elige qué quieres hacer en cada puerto antes de zarpar."),
       soon: true,
     },
     {
       icon: "info",
-      title: "Quinces video",
-      body: "The video that explains how a quinceañera cruise works, to share with your family.",
+      title: say("Quinces video", "Video de quinces"),
+      body: say("The video that explains how a quinceañera cruise works, to share with your family.", "El video que explica cómo funciona un crucero de quinceañera, para compartir con tu familia."),
       soon: true,
     },
   ];
@@ -236,6 +250,25 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
       <Header />
       <main className="px-5 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-3xl">
+          {/* Her page, her language. Remembered per device. */}
+          <div className="mb-6 flex justify-center">
+            <div className="inline-flex overflow-hidden rounded-full border border-blush-200 bg-white text-sm font-semibold">
+              {(["en", "es"] as const).map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setLang(code)}
+                  aria-pressed={lang === code}
+                  className={`px-4 py-1.5 transition ${
+                    lang === code ? "bg-royal-600 text-white" : "text-slate-500 hover:text-royal-700"
+                  }`}
+                >
+                  {code === "en" ? "English" : "Español"}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="text-center">
             <div className="flex flex-col items-center">
               <QuinceAvatar src={row.profile_image_url} name={row.preferred_name} size={104} />
@@ -243,10 +276,10 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
                 <div className="mt-3 flex items-center gap-3 text-sm">
                   <label className="cursor-pointer font-semibold text-royal-600 hover:text-royal-700">
                     {photoBusy
-                      ? "Uploading…"
+                      ? say("Uploading…", "Subiendo…")
                       : row.profile_image_url
-                        ? "Change photo"
-                        : "Add your photo"}
+                        ? say("Change photo", "Cambiar foto")
+                        : say("Add your photo", "Agrega tu foto")}
                     <input
                       type="file"
                       accept="image/*"
@@ -258,7 +291,7 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
                   {row.profile_image_url && !photoBusy && (
                     <button type="button" onClick={onRemovePhoto}
                             className="text-slate-400 hover:text-rosa-600">
-                      Remove
+                      {say("Remove", "Quitar")}
                     </button>
                   )}
                 </div>
@@ -268,15 +301,20 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
               )}
             </div>
             <p className="mt-5 text-xs font-semibold uppercase tracking-[0.35em] text-gold-600">
-              Quinceañera Hub
+              {say("Quinceañera Hub", "Portal de la Quinceañera")}
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold text-royal-800 sm:text-4xl">
-              {row.preferred_name}’s quinces, all in one place
+              {say(`${row.preferred_name}’s quinces, all in one place`, `Los quinces de ${row.preferred_name}, todo en un solo lugar`)}
             </h1>
             <p className="mt-3 text-slate-600">
-              {row.ship ? `Sailing aboard the ${row.ship}` : "Your quinceañera cruise"}
-              {row.sailing_dates ? ` · ${row.sailing_dates}` : ""}. Bookmark this page — everything
-              we build for you shows up here.
+              {row.ship
+                ? say(`Sailing aboard the ${row.ship}`, `Navegando a bordo del ${row.ship}`)
+                : say("Your quinceañera cruise", "Tu crucero de quinceañera")}
+              {row.sailing_dates ? ` · ${row.sailing_dates}` : ""}.{" "}
+              {say(
+                "Bookmark this page — everything we build for you shows up here.",
+                "Guarda esta página — todo lo que preparemos para ti aparece aquí.",
+              )}
             </p>
           </div>
 
@@ -287,6 +325,7 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
               progress={progress}
               groupCode={row.group_code}
               whatsappUrl={invitation.whatsappGroupUrl}
+              lang={lang}
               onChange={setProgress}
             />
           )}
