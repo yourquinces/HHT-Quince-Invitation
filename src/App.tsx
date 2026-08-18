@@ -16,6 +16,8 @@ import FamilyEditPage from "./components/FamilyEditPage";
 import FriendInvitePage from "./components/FriendInvitePage";
 import GroupCruisePage from "./components/GroupCruisePage";
 import GuestListPage from "./components/GuestListPage";
+import ShipVisitFormPage from "./components/ShipVisitFormPage";
+import ShipVisitsStaffPage from "./components/ShipVisitsStaffPage";
 import QuinceHubPage from "./components/QuinceHubPage";
 import QuinceRegistrationPage from "./components/QuinceRegistrationPage";
 import RegistrationsStaffPage from "./components/RegistrationsStaffPage";
@@ -147,6 +149,9 @@ export default function App() {
   const isRegisterPage = route === "/register";
   const isStaffRegistrations = route === "/staff/registrations";
   const isStaffHubs = route === "/staff/hubs";
+  // Ship visit registration, and the staff view that opens the dates.
+  const isShipVisit = route === "/ship-visit";
+  const isStaffShipVisits = route === "/staff/ship-visits";
   const liveSlug = liveSlugFromPath(pathname);
 
   // Keep the browser-tab title/description in sync with the config.
@@ -179,6 +184,8 @@ export default function App() {
   if (isRegisterPage) return <QuinceRegistrationPage />;
   if (isStaffRegistrations) return <RegistrationsStaffPage />;
   if (isStaffHubs) return <HubsStaffPage />;
+  if (isShipVisit) return <ShipVisitFormPage />;
+  if (isStaffShipVisits) return <ShipVisitsStaffPage />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;
   return <InvitationPage />;
 }
