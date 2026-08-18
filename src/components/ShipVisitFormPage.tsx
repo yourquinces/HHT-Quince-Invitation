@@ -27,6 +27,7 @@ import { sailings } from "../data/sailings";
 import Header from "./Header";
 import Footer from "./Footer";
 import Section from "./Section";
+import Icon from "./Icon";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -216,35 +217,80 @@ export default function ShipVisitFormPage() {
               <input type="text" tabIndex={-1} aria-hidden="true" className="hidden"
                      value={f.botField} onChange={(e) => set("botField")(e.target.value)} />
 
-              {/* The question that shapes the rest of the form */}
+              {/* The question that shapes the rest of the form.
+                  Asked as "is she already registered?" rather than "are you
+                  registering her?" — the first version made "yes" read as
+                  "yes, register her again", which is the opposite of what it
+                  did. The answer people give here is a fact they already know,
+                  not a decision about this form. */}
               <fieldset>
                 <legend className="font-display text-xl font-semibold text-royal-800">
-                  Are you registering the quinceañera?
+                  Is the quinceañera already registered for this visit?
                 </legend>
-                <p className="mt-1 text-sm text-slate-500">¿Está registrando a la quinceañera?</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  ¿La quinceañera ya está registrada para esta visita?
+                </p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {[
-                    { on: true, en: "Yes — she is coming too", es: "Sí — ella también viene",
-                      note: "Her details and ID are needed below." },
-                    { on: false, en: "No — she is already registered", es: "No — ya está registrada",
-                      note: "Just adding more family or guests." },
-                  ].map((opt) => (
-                    <button
-                      key={String(opt.on)}
-                      type="button"
-                      onClick={() => setWithQuince(opt.on)}
-                      aria-pressed={withQuince === opt.on}
-                      className={`rounded-2xl border-2 p-4 text-left transition ${
-                        withQuince === opt.on
-                          ? "border-royal-500 bg-royal-50/50"
-                          : "border-blush-200 bg-white hover:border-blush-300"
-                      }`}
-                    >
-                      <span className="block font-semibold text-royal-800">{opt.en}</span>
-                      <span className="mt-0.5 block text-sm text-slate-500">{opt.es}</span>
-                      <span className="mt-2 block text-xs text-slate-500">{opt.note}</span>
-                    </button>
-                  ))}
+                    {
+                      already: false,
+                      en: "No — not yet",
+                      es: "No — todavía no",
+                      note: "We will register her and her guests together.",
+                      noteEs: "La registramos a ella y a sus invitados juntos.",
+                      icon: "crown",
+                    },
+                    {
+                      already: true,
+                      en: "Yes — she is registered",
+                      es: "Sí — ya está registrada",
+                      note: "We will only add the guests you name below.",
+                      noteEs: "Solo agregamos los invitados que escribas abajo.",
+                      icon: "users",
+                    },
+                  ].map((opt) => {
+                    const selected = withQuince === !opt.already;
+                    return (
+                      <button
+                        key={String(opt.already)}
+                        type="button"
+                        onClick={() => setWithQuince(!opt.already)}
+                        aria-pressed={selected}
+                        className={`group relative overflow-hidden rounded-2xl border-2 p-5 pr-12 text-left transition ${
+                          selected
+                            ? "border-royal-500 bg-gradient-to-br from-royal-50 to-blush-50 shadow-sm"
+                            : "border-blush-200 bg-white hover:border-royal-300 hover:bg-blush-50/40"
+                        }`}
+                      >
+                        <span
+                          className={`inline-flex h-10 w-10 items-center justify-center rounded-full transition ${
+                            selected ? "bg-royal-600 text-white" : "bg-blush-100 text-royal-500"
+                          }`}
+                        >
+                          <Icon name={opt.icon} className="h-5 w-5" />
+                        </span>
+
+                        <span className="mt-3 block font-display text-lg font-semibold text-royal-800">
+                          {opt.en}
+                        </span>
+                        <span className="mt-0.5 block text-sm text-slate-500">{opt.es}</span>
+                        <span className="mt-2 block text-sm text-slate-600">{opt.note}</span>
+                        <span className="mt-0.5 block text-xs text-slate-400">{opt.noteEs}</span>
+
+                        {/* The tick that says which one you are on. */}
+                        <span
+                          aria-hidden="true"
+                          className={`absolute right-4 top-4 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 transition ${
+                            selected
+                              ? "border-royal-600 bg-royal-600 text-white"
+                              : "border-blush-300 bg-white text-transparent group-hover:border-royal-300"
+                          }`}
+                        >
+                          <Icon name="check" className="h-3.5 w-3.5" />
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </fieldset>
 
@@ -298,8 +344,8 @@ export default function ShipVisitFormPage() {
                 </legend>
                 {!withQuince && (
                   <p className="rounded-xl bg-blush-50 px-4 py-3 text-sm text-slate-600 ring-1 ring-blush-200">
-                    She is already registered, so we only need her name here — it tells us whose
-                    group these guests belong to. She will not be counted twice.
+                    You said she is already registered, so we only need her name here — it tells us
+                    whose group these guests belong to. She will not be counted twice.
                     <span className="mt-1 block text-slate-500">
                       Solo necesitamos su nombre para saber a qué grupo pertenecen estos invitados.
                     </span>
