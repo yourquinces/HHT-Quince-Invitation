@@ -482,3 +482,47 @@ export async function setProfilePhoto(slug: string, key: string, url: string): P
   if (!res.ok) throw new Error(`Save failed (${res.status})`);
   return (await res.json()) === true;
 }
+
+/* ── Hub checklist ───────────────────────────────────────────────────────────
+   Two kinds of item. Registration and the ship visit are EARNED — we can see
+   whether she has done them, so they tick themselves and she cannot fake them.
+   The rest are hers to tick, because nothing on our side can tell whether she
+   joined a WhatsApp group or followed an account.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+export interface HubProgress {
+  registered: boolean;
+  ship_visit: boolean;
+  checklist: Record<string, boolean>;
+}
+
+export async function fetchHubProgress(slug: string): Promise<HubProgress | null> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/quince_hub_progress`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ p_slug: slug }),
+  });
+  if (!res.ok) return null;
+  return (await res.json()) as HubProgress | null;
+}
+
+/** False when the key does not match. */
+export async function setChecklistItem(
+  slug: string, key: string, item: string, done: boolean,
+): Promise<boolean> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/set_checklist_item`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ p_slug: slug, p_key: key, p_item: item, p_done: done }),
+  });
+  if (!res.ok) throw new Error(`Save failed (${res.status})`);
+  return (await res.json()) === true;
+}

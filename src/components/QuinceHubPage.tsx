@@ -10,7 +10,14 @@
 
 import { useEffect, useState } from "react";
 import { invitation } from "../data/invitation";
-import { fetchInvitationRow, setProfilePhoto, uploadProfilePhoto } from "../lib/liveInvitation";
+import {
+  fetchHubProgress,
+  fetchInvitationRow,
+  setProfilePhoto,
+  uploadProfilePhoto,
+} from "../lib/liveInvitation";
+import type { HubProgress } from "../lib/liveInvitation";
+import HubChecklist from "./HubChecklist";
 import QuinceAvatar from "./QuinceAvatar";
 import { hasRegistered } from "../lib/quinceRegistration";
 import type { InvitationRow } from "../lib/liveInvitation";
@@ -37,6 +44,7 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
   const [state, setState] = useState<PageState>("loading");
   const [row, setRow] = useState<InvitationRow | null>(null);
   const [registered, setRegistered] = useState(false);
+  const [progress, setProgress] = useState<HubProgress | null>(null);
   // Her profile picture is edited in place here rather than on a page of its
   // own — it is one tap, and sending her elsewhere for it would be sillier
   // than the feature.
@@ -58,6 +66,8 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
         // Decides whether the registration card sits at the top or drops
         // down to the bottom as a done item.
         hasRegistered(slug).then((yes) => !cancelled && setRegistered(yes));
+        // The checklist needs the same answer plus her own ticks, in one call.
+        fetchHubProgress(slug).then((p) => !cancelled && p && setProgress(p));
       })
       .catch(() => !cancelled && setState("missing"));
     return () => {
@@ -269,6 +279,17 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
               we build for you shows up here.
             </p>
           </div>
+
+          {progress && (
+            <HubChecklist
+              slug={slug}
+              editKey={editKey}
+              progress={progress}
+              groupCode={row.group_code}
+              whatsappUrl={invitation.whatsappGroupUrl}
+              onChange={setProgress}
+            />
+          )}
 
           <div className="mt-9 space-y-4">
             {tools.map((t) => {

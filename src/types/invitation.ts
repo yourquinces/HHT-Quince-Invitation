@@ -114,6 +114,8 @@ export interface InvitationConfig {
   };
 
   /** Existing HHT reservation form — buttons across the page use this. */
+  /** WhatsApp group invite for sailing families. "" hides the link. */
+  whatsappGroupUrl: string;
   reservationFormUrl: string;
   /** Existing HHT deposit-payment link. */
   depositPaymentUrl: string;

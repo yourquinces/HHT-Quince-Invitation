@@ -157,6 +157,11 @@ export const invitation: InvitationConfig = {
   // ------------------------------------------------------------------
   pricingSheet,
 
+  // WhatsApp group for the families sailing with us. Shown as a checklist item
+  // on every hub; leave it "" and the item tells her to ask her agent instead
+  // of offering a link that goes nowhere.
+  whatsappGroupUrl: "",
+
   // The existing Happy Holidays Travel reservation form.
   reservationFormUrl: "https://hht-booking.netlify.app/",
 

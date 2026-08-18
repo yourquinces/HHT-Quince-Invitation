@@ -23,6 +23,8 @@ export interface ShipVisitSubmission {
   visit_id: string;
   /** False when the quinceañera is already registered and this adds guests. */
   registering_quince?: boolean;
+  /** Set when opened from her hub; lets her checklist tick this item. */
+  invitation_slug?: string;
   quince_first: string;
   quince_last: string;
   quince_dob?: string;

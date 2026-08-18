@@ -83,6 +83,9 @@ export default function ShipVisitFormPage() {
   const [error, setError] = useState("");
   // ?mode=guests opens straight into "she is already registered", so an agent
   // can send a family a link for adding relatives without explaining anything.
+  // Set when the form is opened from her hub, so her checklist can tick the
+  // ship visit itself rather than trusting a self-report.
+  const invitationSlug = new URLSearchParams(window.location.search).get("slug") ?? "";
   const [withQuince, setWithQuince] = useState(
     new URLSearchParams(window.location.search).get("mode") !== "guests",
   );
@@ -137,7 +140,11 @@ export default function ShipVisitFormPage() {
     setError("");
     try {
       const { botField, ...rest } = f;
-      const res = await submitShipVisit({ ...rest, registering_quince: withQuince });
+      const res = await submitShipVisit({
+        ...rest,
+        registering_quince: withQuince,
+        invitation_slug: invitationSlug || undefined,
+      });
       if (!res.ok) {
         setError(res.error || "Could not save that. Please try again.");
         setStatus("error");
