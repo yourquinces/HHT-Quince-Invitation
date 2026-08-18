@@ -46,6 +46,9 @@ export interface PricingSailing {
   tabs: PricingSheetTab[];
   /** Link to the sheet itself, shown if the live fetch fails. */
   backupUrl: string;
+  /** WhatsApp group for the families on THIS sailing — each date has its own.
+   *  Surfaced on every hub whose sail date matches. */
+  whatsappUrl?: string;
   /** Groups the sailing on the marketing page. Defaults to Caribbean. */
   region?: SailingRegion;
   /** Set false to pull a sailing off /quince-cruises without deleting it.
@@ -113,9 +116,10 @@ export interface InvitationConfig {
     defaultSailingId: string;
   };
 
-  /** Existing HHT reservation form — buttons across the page use this. */
-  /** WhatsApp group invite for sailing families. "" hides the link. */
+  /** Fallback WhatsApp group, used only when a girl's sail date has no group
+   *  of its own in sailings.ts. "" means the hub tells her to ask her agent. */
   whatsappGroupUrl: string;
+  /** Existing HHT reservation form — buttons across the page use this. */
   reservationFormUrl: string;
   /** Existing HHT deposit-payment link. */
   depositPaymentUrl: string;

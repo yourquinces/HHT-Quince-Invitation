@@ -19,6 +19,7 @@ import {
 import type { HubProgress } from "../lib/liveInvitation";
 import HubChecklist from "./HubChecklist";
 import { makeSay, useHubLang } from "../lib/hubLang";
+import { sailings } from "../data/sailings";
 import QuinceAvatar from "./QuinceAvatar";
 import { hasRegistered } from "../lib/quinceRegistration";
 import type { InvitationRow } from "../lib/liveInvitation";
@@ -324,7 +325,14 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
               editKey={editKey}
               progress={progress}
               groupCode={row.group_code}
-              whatsappUrl={invitation.whatsappGroupUrl}
+              whatsappUrl={
+                /* Each sail date has its own WhatsApp group — she belongs in
+                   the one for her own sailing, not a general HHT group. Falls
+                   back to the config value for dates with no group yet (the
+                   2026 sailings), and to "ask your agent" when that is empty. */
+                sailings.find((x) => x.id === row.sail_date)?.whatsappUrl ||
+                invitation.whatsappGroupUrl
+              }
               lang={lang}
               onChange={setProgress}
             />

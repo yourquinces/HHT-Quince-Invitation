@@ -41,6 +41,7 @@ export const defaultSailingId = "2027-07-17";
 export const sailings: PricingSailing[] = [
   {
     id: "2027-06-19",
+    whatsappUrl: "https://chat.whatsapp.com/FAkZS14hixZFYeaJ4eE5I3",
     label: "June 19–26, 2027",
     ship: "Icon of the Seas",
     nights: 7,
@@ -62,6 +63,7 @@ export const sailings: PricingSailing[] = [
   },
   {
     id: "2027-06-26",
+    whatsappUrl: "https://chat.whatsapp.com/K6ioimY3LZfFFQctLCFKY2",
     label: "June 26 – July 3, 2027",
     ship: "Icon of the Seas",
     nights: 7,
@@ -83,6 +85,7 @@ export const sailings: PricingSailing[] = [
   },
   {
     id: "2027-07-10",
+    whatsappUrl: "https://chat.whatsapp.com/BbrkaqCtnPf1UkHYCElcFb",
     label: "July 10–18, 2027",
     ship: "Allure of the Seas",
     nights: 8,
@@ -109,6 +112,7 @@ export const sailings: PricingSailing[] = [
   },
   {
     id: "2027-07-17",
+    whatsappUrl: "https://chat.whatsapp.com/BUxnsTA0daOGgpKv8YCsbU",
     label: "July 17–24, 2027",
     ship: "Icon of the Seas",
     nights: 7,
@@ -129,6 +133,7 @@ export const sailings: PricingSailing[] = [
   },
   {
     id: "2027-07-24",
+    whatsappUrl: "https://chat.whatsapp.com/LMbEwBFbKKZ2CeEuHgdNLr",
     label: "July 24–31, 2027",
     ship: "Icon of the Seas",
     nights: 7,
@@ -149,6 +154,7 @@ export const sailings: PricingSailing[] = [
   },
   {
     id: "2027-08-01",
+    whatsappUrl: "https://chat.whatsapp.com/IiJ8Hi04fgbEd5aVaILSMH",
     label: "August 1–8, 2027",
     ship: "Odyssey of the Seas",
     nights: 7,
