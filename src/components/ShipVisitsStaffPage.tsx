@@ -30,10 +30,14 @@ function pretty(iso: string | null): string {
 const person = (first: string | null, last: string | null) =>
   [first, last].filter(Boolean).join(" ").trim();
 
-/** Every attendee on a registration, flattened — this is what the port needs. */
+/** Every attendee on a registration, flattened — this is what the port needs.
+ *  She is only an attendee when she was registered on that form; otherwise her
+ *  name is just the label for whose group the guests belong to. */
 function attendees(r: ShipVisitRegistration) {
   const rows = [
-    { who: "Quinceañera", name: person(r.quince_first, r.quince_last), dob: r.quince_dob, idType: r.quince_id_type, id: r.quince_id_number },
+    ...(r.registering_quince === false
+      ? []
+      : [{ who: "Quinceañera", name: person(r.quince_first, r.quince_last), dob: r.quince_dob, idType: r.quince_id_type, id: r.quince_id_number }]),
     { who: "Guest 1", name: person(r.guest1_first, r.guest1_last), dob: r.guest1_dob, idType: r.guest1_id_type, id: r.guest1_id_number },
     { who: "Guest 2", name: person(r.guest2_first, r.guest2_last), dob: r.guest2_dob, idType: r.guest2_id_type, id: r.guest2_id_number },
   ];

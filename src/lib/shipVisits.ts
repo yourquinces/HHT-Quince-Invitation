@@ -21,6 +21,8 @@ export interface ShipVisit {
 
 export interface ShipVisitSubmission {
   visit_id: string;
+  /** False when the quinceañera is already registered and this adds guests. */
+  registering_quince?: boolean;
   quince_first: string;
   quince_last: string;
   quince_dob?: string;
@@ -131,6 +133,8 @@ export interface ShipVisitRegistration {
   agent: string | null;
   notes: string | null;
   party_size: number;
+  /** False when she was registered separately and this row only adds guests. */
+  registering_quince: boolean;
 }
 
 export interface StaffShipVisitData {

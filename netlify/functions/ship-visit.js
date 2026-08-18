@@ -27,9 +27,14 @@ function sheetRows(d, visit) {
     "Cell Phone": d.cell_phone || "",
     Agent: d.agent || "",
     Notes: d.notes || "",
+    "Quinceañera Group": [d.quince_first, d.quince_last].filter(Boolean).join(" "),
   };
+  // She only appears as an attendee when she was registered on this form —
+  // otherwise her name is the group label, and she is already on an earlier row.
   const people = [
-    ["Quinceañera", d.quince_first, d.quince_last, d.quince_dob, d.quince_email, d.quince_id_type, d.quince_id_number],
+    ...(d.registering_quince === false
+      ? []
+      : [["Quinceañera", d.quince_first, d.quince_last, d.quince_dob, d.quince_email, d.quince_id_type, d.quince_id_number]]),
     ["Guest #1", d.guest1_first, d.guest1_last, d.guest1_dob, d.guest1_email, d.guest1_id_type, d.guest1_id_number],
     ["Guest #2", d.guest2_first, d.guest2_last, d.guest2_dob, d.guest2_email, d.guest2_id_type, d.guest2_id_number],
   ];
