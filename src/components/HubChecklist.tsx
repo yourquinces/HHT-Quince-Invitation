@@ -33,6 +33,8 @@ interface Item {
   icon: string;
   href?: string;
   cta?: string;
+  /** For items that lead to more than one place, like an app on two stores. */
+  links?: { href: string; label: string }[];
   /** Set for items we can verify; those are never tickable by hand. */
   earned?: boolean;
 }
@@ -92,6 +94,22 @@ export default function HubChecklist({
       icon: "phone",
       href: whatsappUrl || undefined,
       cta: say("Join the group", "Unirme al grupo"),
+    },
+    {
+      key: "rcapp",
+      title: say(
+        "Download the Royal Caribbean app",
+        "Descarga la app de Royal Caribbean",
+      ),
+      body: say(
+        "Start designing your cruise — check in, see the ship, book shows and dinner before you sail.",
+        "Empieza a planear tu crucero — haz el check-in, conoce el barco y reserva shows y cenas antes de zarpar.",
+      ),
+      icon: "phone",
+      links: [
+        { href: "https://apps.apple.com/us/app/royal-caribbean-international/id1260728016", label: "iPhone" },
+        { href: "https://play.google.com/store/apps/details?id=com.rccl.royalcaribbean&hl=en_US", label: "Android" },
+      ],
     },
     {
       key: "instagram",
@@ -299,6 +317,17 @@ export default function HubChecklist({
                           {item.cta} →
                         </a>
                       )}
+                      {item.links?.map((l) => (
+                        <a
+                          key={l.href}
+                          href={l.href}
+                          target="_blank"
+                          rel="noopener"
+                          className="font-semibold text-royal-600 hover:text-royal-700"
+                        >
+                          {l.label} →
+                        </a>
+                      ))}
                       {item.earned !== undefined ? (
                         <span className="text-xs text-slate-400">
                           {done
