@@ -8,8 +8,11 @@
 //     re-entering her details was both busywork and a double count against the
 //     tour's capacity. Answer "already registered" and her section collapses to
 //     her name, which is only there to say whose group these guests belong to.
-//   · The visit date is picked from the dates the office has opened, with the
-//     spots left shown, so nobody registers for a tour that is not happening.
+//   · The visit date is picked from the dates the office has opened, so nobody
+//     registers for a tour that is not happening. How many places remain is
+//     deliberately NOT shown — that is the office's business. A full date says
+//     only that it is full, because a family that cannot be told will fill in
+//     the whole form and then be turned away.
 //   · Every person needs their own email address. One address was being used
 //     for a whole family, which makes it impossible to tell people apart.
 //   · Notes is optional. It was starred as required on the old form, which is
@@ -320,17 +323,18 @@ export default function ShipVisitFormPage() {
                       {visits.map((v) => (
                         <option key={v.id} value={v.id} disabled={v.remaining <= 0}>
                           {visitLabel(v)}
-                          {v.remaining <= 0
-                            ? " — FULL / LLENO"
-                            : ` — ${v.remaining} spot${v.remaining === 1 ? "" : "s"} left`}
+                          {/* Full dates have to say so or a family fills the whole
+                              form only to be turned away. How full is nobody's
+                              business but the office's. */}
+                          {v.remaining <= 0 ? " — FULL / LLENO" : ""}
                         </option>
                       ))}
                     </select>
                     {chosen && (
                       <p className={`mt-2 text-sm ${wontFit ? "font-semibold text-rosa-600" : "text-slate-500"}`}>
                         {wontFit
-                          ? `Only ${chosen.remaining} spot${chosen.remaining === 1 ? "" : "s"} left on this date and you are registering ${partySize}. Please pick another date or call us.`
-                          : `${chosen.remaining} of ${chosen.capacity} spots left. You are registering ${partySize} ${partySize === 1 ? "person" : "people"}.`}
+                          ? `There is not enough room left on this date for ${partySize} people. Please pick another date, or call us and we will see what we can do.`
+                          : `You are registering ${partySize} ${partySize === 1 ? "person" : "people"}.`}
                       </p>
                     )}
                   </div>
