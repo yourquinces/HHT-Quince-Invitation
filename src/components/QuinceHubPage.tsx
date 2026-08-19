@@ -169,75 +169,98 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
   };
 
   const rest: Tool[] = [
-    {
-      icon: "sparkles",
-      title: say("My invitation", "Mi invitación"),
-      body: say("The invitation your family and guests see, with your photo, your message and everything about the cruise.", "La invitación que ven tu familia e invitados, con tu foto, tu mensaje y todo sobre el crucero."),
-      href: `/i/${s}`,
-      cta: say("View my invitation", "Ver mi invitación"),
-    },
+    // Editing comes before viewing: she opens her hub to change something far
+    // more often than to admire it.
     ...(editKey
       ? [
           {
             icon: "heart",
             title: say("Edit my invitation", "Editar mi invitación"),
-            body: say("Change your photo, your welcome message and how the photo is framed. Your changes appear instantly.", "Cambia tu foto, tu mensaje de bienvenida y cómo se recorta la foto. Tus cambios aparecen al instante."),
+            body: say(
+              "Change your photo, your welcome message and how the photo is framed. Your changes appear instantly.",
+              "Cambia tu foto, tu mensaje de bienvenida y cómo se recorta la foto. Tus cambios aparecen al instante.",
+            ),
             href: `/i/${s}/edit?key=${encodeURIComponent(editKey)}`,
             cta: say("Edit", "Editar"),
           } as Tool,
         ]
       : []),
+    {
+      icon: "sparkles",
+      title: say("My invitation", "Mi invitación"),
+      body: say(
+        "The invitation your family and guests see, with your photo, your message and everything about the cruise.",
+        "La invitación que ven tu familia e invitados, con tu foto, tu mensaje y todo sobre el crucero.",
+      ),
+      href: `/i/${s}`,
+      cta: say("View my invitation", "Ver mi invitación"),
+    },
+    {
+      icon: "ship",
+      title: say(
+        "Invite your friend to be a quinceañera with you",
+        "Invita a tu amiga a ser quinceañera contigo",
+      ),
+      body: say(
+        "Ask your friends to have their quinceañera with you. Send it by text, email or WhatsApp with the message already written.",
+        "Invita a tus amigas a celebrar sus quinces contigo. Envíalo por mensaje, correo o WhatsApp con el texto ya escrito.",
+      ),
+      href: `/i/${s}/friends`,
+      cta: say("Invite friends", "Invitar amigas"),
+    },
+    // Who has booked under her — sits with the inviting, since that is the
+    // question inviting raises.
     ...(editKey
       ? [
           {
             icon: "users",
             title: say("Guest list", "Lista de invitados"),
-            body: say("Everyone booked under your name so far, cabin by cabin. It comes straight from our reservation system, so it updates as your family and friends book.", "Todos los que han reservado bajo tu nombre, cabina por cabina. Viene directo de nuestro sistema de reservas, así que se actualiza a medida que reservan."),
+            body: say(
+              "Everyone booked under your name so far, cabin by cabin. It comes straight from our reservation system, so it updates as your family and friends book.",
+              "Todos los que han reservado bajo tu nombre, cabina por cabina. Viene directo de nuestro sistema de reservas, así que se actualiza a medida que reservan.",
+            ),
             href: `/i/${s}/guests?key=${encodeURIComponent(editKey)}`,
             cta: say("See who is coming", "Ver quién viene"),
           } as Tool,
         ]
       : []),
-    {
-      icon: "ship",
-      title: say("Invite my friends", "Invitar a mis amigas"),
-      body: say("Ask your friends to have their quinceañera with you. Send it by text, email or WhatsApp with the message already written.", "Invita a tus amigas a celebrar sus quinces contigo. Envíalo por mensaje, correo o WhatsApp con el texto ya escrito."),
-      href: `/i/${s}/friends`,
-      cta: say("Invite friends", "Invitar amigas"),
-    },
-    ...(row.group_code
-      ? [
-          {
-            icon: "users",
-            title: say("Invitation for your family's friends", "Invitación para los amigos de tu familia"),
-            body: say("For the grown-ups sailing with you. It invites people to the cruise without mentioning your quinces, so your aunts and uncles can send it to their own friends and fill more cabins.", "Para los adultos que viajan contigo. Invita al crucero sin mencionar tus quinces, para que tus tíos puedan enviarla a sus propios amigos y llenar más cabinas."),
-            href: `/c/${row.group_code}`,
-            cta: say("Open the group invitation", "Abrir la invitación del grupo"),
-          } as Tool,
-        ]
-      : []),
+    // The group cruise invitation is NOT here on purpose: it is for the adults
+    // sailing with her, and they receive it on their own invoice. Her hub is
+    // hers.
     {
       icon: "camera",
       title: say("Cruise photos", "Fotos del crucero"),
-      body: say("Upload photos and videos from the cruise, and share your album with your family.", "Sube fotos y videos del crucero y comparte tu álbum con tu familia."),
+      body: say(
+        "Upload photos and videos from the cruise, and share your album with your family.",
+        "Sube fotos y videos del crucero y comparte tu álbum con tu familia.",
+      ),
       soon: true,
     },
     {
       icon: "gift",
       title: say("Gift registry", "Mesa de regalos"),
-      body: say("Your registry, so guests know exactly what would make your quinces special.", "Tu mesa de regalos, para que tus invitados sepan exactamente qué haría especiales tus quinces."),
+      body: say(
+        "Your registry, so guests know exactly what would make your quinces special.",
+        "Tu mesa de regalos, para que tus invitados sepan exactamente qué haría especiales tus quinces.",
+      ),
       soon: true,
     },
     {
       icon: "ship",
       title: say("Excursions", "Excursiones"),
-      body: say("Choose what you want to do in each port before you sail.", "Elige qué quieres hacer en cada puerto antes de zarpar."),
+      body: say(
+        "Choose what you want to do in each port before you sail.",
+        "Elige qué quieres hacer en cada puerto antes de zarpar.",
+      ),
       soon: true,
     },
     {
       icon: "info",
       title: say("Quinces video", "Video de quinces"),
-      body: say("The video that explains how a quinceañera cruise works, to share with your family.", "El video que explica cómo funciona un crucero de quinceañera, para compartir con tu familia."),
+      body: say(
+        "The video that explains how a quinceañera cruise works, to share with your family.",
+        "El video que explica cómo funciona un crucero de quinceañera, para compartir con tu familia.",
+      ),
       soon: true,
     },
   ];
