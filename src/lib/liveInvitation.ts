@@ -383,10 +383,17 @@ export function applyGroupCruiseRow(row: InvitationRow): void {
 
 export interface GuestCabin {
   cabin_number: string | null;
+  booking_number: string | null;
   category: string | null;
   occupancy: string | null;
   is_quinceanera: boolean;
-  guests: { first_name: string | null; last_name: string | null; is_quinceanera: boolean }[];
+  guests: {
+    first_name: string | null;
+    last_name: string | null;
+    is_quinceanera: boolean;
+    /** Age ON the sail date, not today. Null when no date of birth is on file. */
+    age_at_sailing: number | null;
+  }[];
 }
 
 export interface GuestList {

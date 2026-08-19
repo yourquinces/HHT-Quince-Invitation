@@ -153,8 +153,9 @@ export default function GuestListPage({ slug }: { slug: string }) {
             </h1>
             <p className="mt-3 text-slate-600">
               {data?.ship ? `Aboard the ${data.ship}` : "Your cruise"}
-              {data?.sail_date ? ` · sailing ${prettyDate(data.sail_date)}` : ""}. Straight from the reservation
-              system, so it updates as cabins are booked.
+              {data?.sail_date ? ` · sailing ${prettyDate(data.sail_date)}` : ""}. Straight from the
+              reservation system, so it updates as cabins are booked. Ages are what everyone will
+              be on the sail date.
             </p>
           </div>
 
@@ -215,6 +216,7 @@ export default function GuestListPage({ slug }: { slug: string }) {
                       )}
                     </h2>
                     <span className="text-xs text-slate-500">
+                      {c.booking_number ? `Booking ${c.booking_number} · ` : ""}
                       {c.guests.length} {c.guests.length === 1 ? "guest" : "guests"}
                       {c.occupancy ? ` · ${c.occupancy.toLowerCase()}` : ""}
                     </span>
@@ -235,6 +237,11 @@ export default function GuestListPage({ slug }: { slug: string }) {
                           <span className={name ? "" : "italic text-slate-400"}>
                             {name ?? "Name to come"}
                           </span>
+                          {g.age_at_sailing != null && (
+                            <span className="ml-auto flex-none text-xs text-slate-400">
+                              {g.age_at_sailing} at sailing
+                            </span>
+                          )}
                         </li>
                       );
                     })}
