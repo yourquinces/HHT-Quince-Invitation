@@ -184,10 +184,6 @@ export default function ShipVisitFormPage() {
           <p className="mx-auto mt-6 max-w-xl text-sm text-slate-500">
             Traiga la misma identificación con foto que ingresó aquí — el puerto se la pedirá.
           </p>
-          <button onClick={() => window.location.reload()}
-                  className="mt-8 rounded-full border border-royal-300 px-6 py-3 font-semibold text-royal-700">
-            Register more guests / Registrar más invitados
-          </button>
         </main>
         <Footer />
       </>
