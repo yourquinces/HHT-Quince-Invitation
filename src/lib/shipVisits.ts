@@ -137,7 +137,18 @@ export interface ShipVisitRegistration {
   party_size: number;
   /** False when she was registered separately and this row only adds guests. */
   registering_quince: boolean;
+  /** Null means USA. Never asked on the form — staff set the exceptions. */
+  quince_citizenship: string | null;
+  guest1_citizenship: string | null;
+  guest2_citizenship: string | null;
+  /** The QRS passenger this attendee turned out to be. Null = not booked yet. */
+  quince_passenger_id: string | null;
+  guest1_passenger_id: string | null;
+  guest2_passenger_id: string | null;
 }
+
+/** Which of the three people on a registration a value belongs to. */
+export type Who = "quince" | "guest1" | "guest2";
 
 export interface StaffShipVisitData {
   visits: StaffShipVisit[];
@@ -182,4 +193,25 @@ export async function saveShipVisit(
   });
   if (!res.ok) return { ok: false, error: `Save failed (${res.status})` };
   return (await res.json()) as { ok: boolean; error?: string };
+}
+
+/** Set one attendee's citizenship. Blank clears it back to the USA default. */
+export async function setShipVisitCitizenship(
+  key: string,
+  registrationId: string,
+  who: Who,
+  citizenship: string,
+): Promise<{ ok: boolean; error?: string; citizenship?: string | null }> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/set_ship_visit_citizenship`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      p_key: key,
+      p_id: registrationId,
+      p_who: who,
+      p_citizenship: citizenship,
+    }),
+  });
+  if (!res.ok) return { ok: false, error: `Save failed (${res.status})` };
+  return (await res.json()) as { ok: boolean; error?: string; citizenship?: string | null };
 }

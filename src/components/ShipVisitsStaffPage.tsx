@@ -8,8 +8,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   fetchShipVisitsStaff,
   saveShipVisit,
+  setShipVisitCitizenship,
 } from "../lib/shipVisits";
-import type { ShipVisitRegistration, StaffShipVisit, StaffShipVisitData } from "../lib/shipVisits";
+import type { ShipVisitRegistration, StaffShipVisit, StaffShipVisitData, Who } from "../lib/shipVisits";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -30,16 +31,75 @@ function pretty(iso: string | null): string {
 const person = (first: string | null, last: string | null) =>
   [first, last].filter(Boolean).join(" ").trim();
 
+/* ── The port manifest ──────────────────────────────────────────────────────
+   Royal Caribbean asks for one row per person in a fixed shape. Three of its
+   columns are the same on every row we will ever send, so they are constants
+   here rather than questions on the form — a family cannot tell us anything
+   useful about them, and each extra required field costs submissions.
+   ────────────────────────────────────────────────────────────────────────── */
+const REASON_FOR_BOARDING = "IC Ship Tour";
+const COMPANY = "Happy Holidays Travel";
+const DEFAULT_CITIZENSHIP = "USA";
+
+/** Our ID labels in Royal Caribbean's vocabulary. Anything that is not a
+ *  passport or a driver's licence is a government ID as far as the manifest is
+ *  concerned — that covers state ID, school ID and birth certificate. */
+function rclIdType(label: string | null): string {
+  const v = (label ?? "").trim().toLowerCase();
+  if (!v) return "";
+  if (v.startsWith("passport")) return "PASSPORT";
+  if (v.includes("driver")) return "DRIVER_LICENSE";
+  return "GOVERNMENT_ID";
+}
+
+/** Digits only, and without the US country code — the sample manifest is bare
+ *  10-digit numbers, and families type them every way imaginable. */
+function barePhone(v: string | null): string {
+  const d = (v ?? "").replace(/\D/g, "");
+  return d.length === 11 && d.startsWith("1") ? d.slice(1) : d;
+}
+
 /** Every attendee on a registration, flattened — this is what the port needs.
  *  She is only an attendee when she was registered on that form; otherwise her
- *  name is just the label for whose group the guests belong to. */
+ *  name is just the label for whose group the guests belong to.
+ *
+ *  Mobile is the registration's one cell phone repeated down the party: the
+ *  form asks for a single number for the family, and the manifest wants a
+ *  reachable number against each name rather than a unique one. Email, by
+ *  contrast, IS per person — the form has required that since the second pass,
+ *  and an earlier version of this export sent the quinceañera's address for
+ *  every guest, which made the whole column useless. */
 function attendees(r: ShipVisitRegistration) {
-  const rows = [
+  const mobile = barePhone(r.cell_phone);
+  const rows: {
+    key: Who; who: string; first: string | null; last: string | null; name: string;
+    dob: string | null; idType: string | null; id: string | null;
+    email: string | null; mobile: string; citizenship: string | null;
+    passengerId: string | null;
+  }[] = [
     ...(r.registering_quince === false
       ? []
-      : [{ who: "Quinceañera", name: person(r.quince_first, r.quince_last), dob: r.quince_dob, idType: r.quince_id_type, id: r.quince_id_number }]),
-    { who: "Guest 1", name: person(r.guest1_first, r.guest1_last), dob: r.guest1_dob, idType: r.guest1_id_type, id: r.guest1_id_number },
-    { who: "Guest 2", name: person(r.guest2_first, r.guest2_last), dob: r.guest2_dob, idType: r.guest2_id_type, id: r.guest2_id_number },
+      : [{
+          key: "quince" as Who, who: "Quinceañera",
+          first: r.quince_first, last: r.quince_last, name: person(r.quince_first, r.quince_last),
+          dob: r.quince_dob, idType: r.quince_id_type, id: r.quince_id_number,
+          email: r.quince_email, mobile, citizenship: r.quince_citizenship,
+          passengerId: r.quince_passenger_id,
+        }]),
+    {
+      key: "guest1", who: "Guest 1",
+      first: r.guest1_first, last: r.guest1_last, name: person(r.guest1_first, r.guest1_last),
+      dob: r.guest1_dob, idType: r.guest1_id_type, id: r.guest1_id_number,
+      email: r.guest1_email, mobile, citizenship: r.guest1_citizenship,
+      passengerId: r.guest1_passenger_id,
+    },
+    {
+      key: "guest2", who: "Guest 2",
+      first: r.guest2_first, last: r.guest2_last, name: person(r.guest2_first, r.guest2_last),
+      dob: r.guest2_dob, idType: r.guest2_id_type, id: r.guest2_id_number,
+      email: r.guest2_email, mobile, citizenship: r.guest2_citizenship,
+      passengerId: r.guest2_passenger_id,
+    },
   ];
   return rows.filter((x) => x.name);
 }
@@ -114,24 +174,47 @@ export default function ShipVisitsStaffPage() {
     load();
   }
 
+  /** The file Royal Caribbean asks for, in their column order, ready to send.
+   *  Nothing here should need editing in Excel first — that was the point. */
   function exportCSV(visit: StaffShipVisit) {
     const regs = byVisit.get(visit.id) ?? [];
-    const header = ["Attendee", "Name", "Date of Birth", "ID Type", "ID #", "Cell Phone", "Email", "Sail Date", "Agent", "Notes", "Registered"];
+    const header = [
+      "Last Name", "First Name", "Date of Birth", "Citizenship", "ID Type",
+      "ID Number", "Mobile", "Email", "Reason for Boarding", "Company", "Quinceañera",
+    ];
     const lines = [header.join(",")];
     for (const r of regs) {
+      // Whose group this is — her name is on the registration whether or not she
+      // is attending on it, which is exactly what makes it able to label every row.
+      const quince = person(r.quince_first, r.quince_last);
       for (const a of attendees(r)) {
         lines.push([
-          a.who, a.name, a.dob ?? "", a.idType ?? "", a.id ?? "",
-          r.cell_phone ?? "", r.quince_email ?? "", r.sail_date ?? "", r.agent ?? "",
-          r.notes ?? "", r.created_at.slice(0, 10),
+          a.last ?? "", a.first ?? "", a.dob ?? "",
+          a.citizenship || DEFAULT_CITIZENSHIP,
+          rclIdType(a.idType), a.id ?? "", a.mobile, a.email ?? "",
+          REASON_FOR_BOARDING, COMPANY, quince,
         ].map(csvCell).join(","));
       }
     }
-    const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `ship-visit-${visit.visit_date}.csv`;
+    a.download = `ship-visit-${visit.visit_date}-manifest.csv`;
     document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  /** Citizenship is the one manifest column staff ever have to touch, so it is
+   *  edited in place in the table rather than behind a form. Saved on blur, and
+   *  written back into local state so the next export uses it without a reload. */
+  async function saveCitizenship(regId: string, who: Who, value: string) {
+    const res = await setShipVisitCitizenship(key, regId, who, value);
+    if (!res.ok) { alert(res.error || "Could not save that citizenship."); return; }
+    const stored = res.citizenship ?? null;
+    setData((prev) => prev && {
+      ...prev,
+      registrations: prev.registrations.map((r) =>
+        r.id === regId ? { ...r, [`${who}_citizenship`]: stored } : r),
+    });
   }
 
   if (state === "loading") {
@@ -269,7 +352,7 @@ export default function ShipVisitsStaffPage() {
                       </button>
                       <button onClick={() => exportCSV(v)} disabled={!regs.length}
                               className="rounded-full border border-blush-200 px-4 py-1.5 text-xs font-semibold text-royal-700 hover:border-royal-400 disabled:opacity-40">
-                        ⬇ CSV
+                        ⬇ RCL manifest
                       </button>
                     </div>
 
@@ -278,13 +361,15 @@ export default function ShipVisitsStaffPage() {
                         {regs.length === 0 ? (
                           <p className="text-sm text-slate-500">Nobody registered for this date yet.</p>
                         ) : (
-                          <table className="w-full min-w-[640px] text-left text-sm">
+                          <table className="w-full min-w-[900px] text-left text-sm">
                             <thead>
                               <tr className="border-b border-blush-200 text-xs uppercase tracking-wider text-slate-500">
                                 <th className="py-2 pr-3">Name</th>
                                 <th className="py-2 pr-3">Who</th>
                                 <th className="py-2 pr-3">Date of birth</th>
+                                <th className="py-2 pr-3">Citizenship</th>
                                 <th className="py-2 pr-3">ID</th>
+                                <th className="py-2 pr-3">Email</th>
                                 <th className="py-2 pr-3">Phone</th>
                                 <th className="py-2">Agent</th>
                               </tr>
@@ -296,9 +381,27 @@ export default function ShipVisitsStaffPage() {
                                     <td className="py-2 pr-3 font-medium text-slate-800">{a.name}</td>
                                     <td className="py-2 pr-3 text-slate-500">{a.who}</td>
                                     <td className="py-2 pr-3 text-slate-600">{a.dob ?? "—"}</td>
+                                    {/* The only manifest column staff edit. Blank shows the
+                                        USA the export will use, greyed, so an untouched row
+                                        reads as "USA by default" rather than as missing. */}
+                                    <td className="py-2 pr-3">
+                                      <input
+                                        defaultValue={a.citizenship ?? ""}
+                                        placeholder={DEFAULT_CITIZENSHIP}
+                                        maxLength={3}
+                                        aria-label={`Citizenship for ${a.name}`}
+                                        onBlur={(e) => {
+                                          const v = e.target.value.trim().toUpperCase();
+                                          e.target.value = v;
+                                          if (v !== (a.citizenship ?? "")) saveCitizenship(r.id, a.key, v);
+                                        }}
+                                        className="w-16 rounded border border-blush-200 bg-white px-2 py-1 text-sm uppercase text-slate-700 placeholder:normal-case placeholder:text-slate-400 focus:border-royal-400"
+                                      />
+                                    </td>
                                     <td className="py-2 pr-3 text-slate-600">
                                       {a.idType ? `${a.idType} ${a.id ?? ""}` : "—"}
                                     </td>
+                                    <td className="py-2 pr-3 text-slate-600">{a.email ?? "—"}</td>
                                     <td className="py-2 pr-3 text-slate-600">{i === 0 ? r.cell_phone ?? "—" : ""}</td>
                                     <td className="py-2 text-slate-600">{i === 0 ? r.agent ?? "—" : ""}</td>
                                   </tr>
