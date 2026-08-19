@@ -35,6 +35,10 @@ export interface ShipVisitPassProps {
   people: PassPerson[];
   phoneDisplay: string;
   phoneDial: string;
+  /** Called when the family prints. The success screen uses it to stop the
+   *  payment redirect — somebody who has just asked for a printout should not
+   *  have the page pulled out from under them mid-print. */
+  onPrint?: () => void;
 }
 
 function prettyDate(iso: string): string {
@@ -148,7 +152,7 @@ export default function ShipVisitPass(p: ShipVisitPassProps) {
       <div className="no-print mt-5 flex justify-center gap-3">
         <button
           type="button"
-          onClick={() => window.print()}
+          onClick={() => { p.onPrint?.(); window.print(); }}
           className="rounded-full bg-royal-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-royal-700"
         >
           🖨 Print / Save PDF

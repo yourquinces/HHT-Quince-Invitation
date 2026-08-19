@@ -37,6 +37,10 @@ import type { PassPerson } from "./ShipVisitPass";
 type Status = "idle" | "submitting" | "success" | "error";
 
 const ID_TYPES = ["Passport", "Driver's License", "State ID", "School ID", "Birth Certificate", "Other"];
+// Same gateway and the same 15 seconds as the booking form and the Cozumel
+// form, so a family who has used one of ours recognises this one.
+const DEPOSIT_URL = "https://hhtcruises.net/deposit.php";
+const REDIRECT_SECONDS = 15;
 const AGENTS = ["Luisa", "Camila", "Isabel", "Keren", "Sergio", "Beatriz", "Maurice", "Other"];
 
 const input =
@@ -89,6 +93,9 @@ export default function ShipVisitFormPage() {
   const [error, setError] = useState("");
   // Set on a successful save so the pass can carry a confirmation code.
   const [savedId, setSavedId] = useState("");
+  // Deposit redirect, same 15s pattern as the booking and Cozumel forms.
+  // Null once the countdown has been called off — see cancelRedirect.
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   // ?mode=guests opens straight into "she is already registered", so an agent
   // can send a family a link for adding relatives without explaining anything.
   // Set when the form is opened from her hub, so her checklist can tick the
@@ -112,6 +119,17 @@ export default function ShipVisitFormPage() {
     document.title = "Ship Visit Registration | Happy Holidays Travel";
     fetchShipVisits().then(setVisits).catch(() => setVisits([]));
   }, []);
+
+  // Tick down to the payment page. The manual button is always there, so this
+  // is only for families who would otherwise close the tab and forget.
+  useEffect(() => {
+    if (secondsLeft === null) return;
+    if (secondsLeft <= 0) { window.location.href = DEPOSIT_URL; return; }
+    const t = setTimeout(() => setSecondsLeft((n) => (n === null ? null : n - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [secondsLeft]);
+
+  const cancelRedirect = () => setSecondsLeft(null);
 
   const hasG1 = !!f.guest1_first.trim();
   const hasG2 = !!f.guest2_first.trim();
@@ -161,6 +179,7 @@ export default function ShipVisitFormPage() {
       }
       setSavedId(res.id ?? "");
       setStatus("success");
+      setSecondsLeft(REDIRECT_SECONDS);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setError("Something went wrong. Please try again, or call the office.");
@@ -183,20 +202,106 @@ export default function ShipVisitFormPage() {
       <>
         <Header />
         <main className="px-5 py-14">
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-gold-600">Ship Visit</p>
-            <h1 className="mx-auto mt-4 max-w-2xl font-display text-3xl font-bold text-royal-800 sm:text-4xl">
-              You’re registered — see you on board!
+          <div className="mx-auto max-w-2xl text-center">
+            <h1 className="font-display text-3xl font-bold text-royal-800 sm:text-4xl">
+              🚢 Ship Visit Registration Confirmed!
             </h1>
-            <p className="mx-auto mt-4 max-w-xl text-slate-600">
-              Print this pass or save it to your phone, and bring it with you.
-              <span className="mt-1 block text-sm text-slate-500">
-                Imprima este pase o guárdelo en su teléfono, y tráigalo con usted.
-              </span>
-            </p>
+            <div className="mt-5 space-y-3 text-left text-slate-700">
+              <p>Hello! 😊</p>
+              <p>We’re excited to confirm your registration for our upcoming Ship Visit!</p>
+              <p>
+                <strong>📸 Important:</strong> Everyone attending must bring the same photo ID that
+                was entered during registration. The port will require it for entry.
+              </p>
+              <p>
+                During the week before the ship visit, we will send you all the information and
+                details you need to get to the port, including the meeting point and arrival
+                instructions.
+              </p>
+              <p>
+                If you have any questions, please call us at{" "}
+                <a href={`tel:+${invitation.office.phoneDial}`} className="font-semibold text-royal-600">
+                  {invitation.office.phoneDisplay}
+                </a>
+                .
+              </p>
+              <p>We look forward to seeing you there! 💙🚢</p>
+            </div>
+
+            <div className="mt-8 border-t border-blush-200 pt-6 text-left text-slate-700">
+              <h2 className="font-display text-2xl font-bold text-royal-800">
+                🚢 ¡Registro Confirmado para la Visita al Barco!
+              </h2>
+              <div className="mt-4 space-y-3">
+                <p>¡Hola! 😊</p>
+                <p>¡Nos complace confirmar su registro para nuestra próxima Visita al Barco!</p>
+                <p>
+                  <strong>📸 Importante:</strong> Todas las personas que asistirán deben traer la
+                  misma identificación con foto que ingresaron al momento de registrarse. El puerto
+                  solicitará esta identificación para poder ingresar.
+                </p>
+                <p>
+                  Durante la semana previa a la visita al barco, les enviaremos toda la información
+                  y los detalles necesarios para llegar al puerto, incluyendo el punto de encuentro
+                  e instrucciones de llegada.
+                </p>
+                <p>
+                  Si tienen alguna pregunta, pueden llamarnos al{" "}
+                  <a href={`tel:+${invitation.office.phoneDial}`} className="font-semibold text-royal-600">
+                    {invitation.office.phoneDisplay}
+                  </a>
+                  .
+                </p>
+                <p>¡Estamos emocionados de recibirlos! 💙🚢</p>
+              </div>
+            </div>
+
+            {/* Payment, same shape as the booking and Cozumel forms: say the
+                spot is not secured, give a button, and fall back to a timer for
+                families who would otherwise close the tab. */}
+            {chosen && chosen.price_per_person > 0 && (
+              <div className="mt-8 rounded-2xl bg-gold-100/60 px-5 py-5 ring-1 ring-gold-200">
+                <h3 className="font-display text-lg font-bold text-royal-800">
+                  ⚠️ Your spot is not yet reserved
+                  <span className="mt-0.5 block text-base font-semibold text-slate-600">
+                    ⚠️ Su lugar aún no está reservado
+                  </span>
+                </h3>
+                <p className="mt-2 text-slate-700">
+                  The ship visit is ${chosen.price_per_person.toFixed(2)} per person —{" "}
+                  <strong className="text-royal-800">
+                    ${(partySize * chosen.price_per_person).toFixed(2)}
+                  </strong>{" "}
+                  for your {partySize === 1 ? "registration" : `${partySize} people`}. Please
+                  complete your payment now to secure it.
+                  <span className="mt-1 block text-sm text-slate-600">
+                    La visita al barco cuesta ${chosen.price_per_person.toFixed(2)} por persona.
+                    Complete su pago ahora para asegurar su lugar.
+                  </span>
+                </p>
+                <a
+                  href={DEPOSIT_URL}
+                  className="mt-4 inline-block rounded-full bg-gradient-to-r from-rosa-500 to-royal-500 px-8 py-3 font-semibold text-white shadow-lg shadow-royal-800/20"
+                >
+                  💳 Pay Now → / Pagar Ahora →
+                </a>
+                {secondsLeft !== null && (
+                  <p className="mt-3 text-sm text-slate-600">
+                    You’ll be redirected to the payment page in{" "}
+                    <strong>{secondsLeft}</strong> seconds…
+                    <span className="mt-0.5 block text-slate-500">
+                      Será redirigido a la página de pago en <strong>{secondsLeft}</strong> segundos…
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="mt-8">
+          {/* The pass sits below payment on purpose. Printing it calls off the
+              countdown — a family part-way through a printout should not have
+              the page pulled out from under them. */}
+          <div className="mt-10">
             <ShipVisitPass
               code={(savedId || "").slice(0, 8).toUpperCase() || "—"}
               visitDate={chosen ? chosen.visit_date : ""}
@@ -206,6 +311,7 @@ export default function ShipVisitFormPage() {
               people={passPeople}
               phoneDisplay={invitation.office.phoneDisplay}
               phoneDial={invitation.office.phoneDial}
+              onPrint={cancelRedirect}
             />
           </div>
         </main>
@@ -366,10 +472,10 @@ export default function ShipVisitFormPage() {
                         <strong className="text-royal-800">
                           ${(partySize * chosen.price_per_person).toFixed(2)}
                         </strong>{" "}
-                        added to the quinceañera’s cabin. Nothing is paid here.
+                        total. You’ll be able to pay right after you register.
                         <span className="mt-0.5 block text-xs text-slate-500">
-                          ${chosen.price_per_person.toFixed(2)} por persona, agregado al camarote de la
-                          quinceañera. No se paga nada aquí.
+                          ${chosen.price_per_person.toFixed(2)} por persona. Podrá pagar justo después
+                          de registrarse.
                         </span>
                       </p>
                     )}
