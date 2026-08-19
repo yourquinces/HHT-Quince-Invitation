@@ -13,11 +13,13 @@
 // list still shows, read-only, which is the right answer for a page a family
 // might share around.
 //
-// It collapses, and the collapsed header still carries the whole story — the
-// count, the bar, and green when everything is done — so folding it away never
-// hides whether she has anything left to do.
+// It arrives collapsed, showing the ONE thing she has to do next. A hub with
+// seven expanded rows sitting on top of eight tiles is a wall; one row is an
+// instruction. The header still carries the whole story either way — the count,
+// the bar, and green when everything is done — so folded up it never hides
+// whether anything is outstanding.
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { setChecklistItem } from "../lib/liveInvitation";
 import type { HubProgress } from "../lib/liveInvitation";
 import { makeSay } from "../lib/hubLang";
@@ -153,41 +155,32 @@ export default function HubChecklist({
   const doneCount = items.filter(isDone).length;
   const allDone = doneCount === items.length;
 
-  // Open when there is something left to do, folded away when there is not —
-  // then remember whatever she decides herself.
+  // Collapsed by default, but never empty: folded up it still shows the next
+  // thing she has to do, so the card answers "what now?" without being opened.
+  // A hub with seven expanded rows on top of eight tiles is a wall; one row is
+  // an instruction.
   const openKey = `hht_hub_checklist_open_${slug}`;
   const [open, setOpen] = useState<boolean>(() => {
     try {
-      const saved = localStorage.getItem(openKey);
-      if (saved === "1") return true;
-      if (saved === "0") return false;
+      return localStorage.getItem(openKey) === "1";
     } catch {
-      /* ignore */
+      return false;
     }
-    return true;
   });
-  const [touched, setTouched] = useState(false);
-  useEffect(() => {
-    if (touched) return;
-    let saved: string | null = null;
-    try {
-      saved = localStorage.getItem(openKey);
-    } catch {
-      /* ignore */
-    }
-    if (saved === null) setOpen(!allDone);
-  }, [allDone, openKey, touched]);
 
   function toggleOpen() {
     const next = !open;
     setOpen(next);
-    setTouched(true);
     try {
       localStorage.setItem(openKey, next ? "1" : "0");
     } catch {
-      /* ignore */
+      /* not worth failing over */
     }
   }
+
+  // The one shown while collapsed: the first thing still outstanding.
+  const nextItem = items.find((i) => !isDone(i)) ?? null;
+  const shown = open ? items : nextItem ? [nextItem] : [];
 
   async function toggle(item: Item) {
     if (item.earned !== undefined || !editKey) return;
@@ -214,33 +207,20 @@ export default function HubChecklist({
 
   return (
     <section className="mt-9 rounded-2xl bg-white ring-1 ring-blush-200">
-      {/* The header is the whole summary, so collapsing hides nothing that
-          matters: what it is, how far along she is, and green when finished. */}
-      <button
-        type="button"
-        onClick={toggleOpen}
-        aria-expanded={open}
-        className="w-full rounded-2xl p-5 text-left sm:p-6"
-      >
+      {/* Collapsed or open, the header carries the whole story: what it is,
+          how far along she is, and green when it is finished. */}
+      <div className="p-5 pb-0 sm:p-6 sm:pb-0">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-display text-2xl font-bold text-royal-800">
             {say("Your checklist", "Tu lista")}
           </h2>
-          <span className="flex items-center gap-2">
-            <span className={`text-sm font-semibold ${allDone ? "text-emerald-600" : "text-slate-500"}`}>
-              {allDone
-                ? say("All done — nice work!", "¡Todo listo — bien hecho!")
-                : say(
-                    `${doneCount} of ${items.length} done`,
-                    `${doneCount} de ${items.length} completado${doneCount === 1 ? "" : "s"}`,
-                  )}
-            </span>
-            <span
-              aria-hidden="true"
-              className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
-            >
-              ▾
-            </span>
+          <span className={`text-sm font-semibold ${allDone ? "text-emerald-600" : "text-slate-500"}`}>
+            {allDone
+              ? say("All done — nice work!", "¡Todo listo — bien hecho!")
+              : say(
+                  `${doneCount} of ${items.length} done`,
+                  `${doneCount} de ${items.length} completado${doneCount === 1 ? "" : "s"}`,
+                )}
           </span>
         </div>
 
@@ -251,22 +231,18 @@ export default function HubChecklist({
           />
         </div>
 
-        {!open && !allDone && (
-          <p className="mt-2 text-sm text-slate-500">
-            {say(
-              `${items.length - doneCount} still to do — tap to see them.`,
-              `Te faltan ${items.length - doneCount} — toca para verlos.`,
-            )}
+        {!open && nextItem && (
+          <p className="mt-3 text-sm text-slate-500">
+            {say("Next up:", "Lo siguiente:")}
           </p>
         )}
-      </button>
+      </div>
 
-      {open && (
-        <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+      <div className="px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
           {error && <p role="alert" className="mb-3 text-sm font-medium text-rosa-600">{error}</p>}
 
-          <ul className="space-y-2.5">
-            {items.map((item) => {
+        <ul className="space-y-2.5">
+          {shown.map((item) => {
               const done = isDone(item);
               const canTick = item.earned === undefined && !!editKey;
               return (
@@ -348,9 +324,28 @@ export default function HubChecklist({
                 </li>
               );
             })}
-          </ul>
-        </div>
-      )}
+        </ul>
+
+        {/* One row is enough to know what to do next; the rest is on request. */}
+        {items.length > 1 && (
+          <button
+            type="button"
+            onClick={toggleOpen}
+            aria-expanded={open}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-blush-200 py-2.5 text-sm font-semibold text-royal-600 transition hover:border-royal-300 hover:bg-blush-50/60"
+          >
+            {open
+              ? say("Show less", "Ver menos")
+              : allDone
+                ? say(`Show all ${items.length}`, `Ver los ${items.length}`)
+                : say(
+                    `Show all ${items.length} — ${items.length - doneCount} still to do`,
+                    `Ver los ${items.length} — te faltan ${items.length - doneCount}`,
+                  )}
+            <span aria-hidden="true" className={`transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
+          </button>
+        )}
+      </div>
     </section>
   );
 }
