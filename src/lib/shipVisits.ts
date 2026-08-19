@@ -70,6 +70,9 @@ export interface SubmitResult {
   ok: boolean;
   error?: string;
   remaining?: number;
+  /** The new registration's id. Its first 8 characters are the code on the
+   *  ship visit pass, the same way a Cozumel request shortens its own id. */
+  id?: string;
 }
 
 export async function submitShipVisit(data: ShipVisitSubmission): Promise<SubmitResult> {

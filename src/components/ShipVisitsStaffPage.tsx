@@ -13,6 +13,8 @@ import {
 import type { ShipVisitRegistration, StaffShipVisit, StaffShipVisitData, Who } from "../lib/shipVisits";
 import Header from "./Header";
 import Footer from "./Footer";
+import ShipVisitPass from "./ShipVisitPass";
+import { invitation } from "../data/invitation";
 
 type State = "loading" | "denied" | "ready";
 
@@ -117,6 +119,9 @@ export default function ShipVisitsStaffPage() {
   const [editing, setEditing] = useState<StaffShipVisit | null>(null);
   const [draft, setDraft] = useState({ visit_date: "", visit_time: "", ship: "", capacity: "50", notes: "", active: true });
   const [saving, setSaving] = useState(false);
+  // Which registration's pass is open, if any. Families lose theirs, and
+  // agents register people over the phone who never saw the success screen.
+  const [pass, setPass] = useState<ShipVisitRegistration | null>(null);
 
   async function load() {
     if (!key) { setState("denied"); return; }
@@ -361,7 +366,7 @@ export default function ShipVisitsStaffPage() {
                         {regs.length === 0 ? (
                           <p className="text-sm text-slate-500">Nobody registered for this date yet.</p>
                         ) : (
-                          <table className="w-full min-w-[900px] text-left text-sm">
+                          <table className="w-full min-w-[1000px] text-left text-sm">
                             <thead>
                               <tr className="border-b border-blush-200 text-xs uppercase tracking-wider text-slate-500">
                                 <th className="py-2 pr-3">Name</th>
@@ -371,7 +376,8 @@ export default function ShipVisitsStaffPage() {
                                 <th className="py-2 pr-3">ID</th>
                                 <th className="py-2 pr-3">Email</th>
                                 <th className="py-2 pr-3">Phone</th>
-                                <th className="py-2">Agent</th>
+                                <th className="py-2 pr-3">Agent</th>
+                                <th className="py-2">Pass</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -403,7 +409,17 @@ export default function ShipVisitsStaffPage() {
                                     </td>
                                     <td className="py-2 pr-3 text-slate-600">{a.email ?? "—"}</td>
                                     <td className="py-2 pr-3 text-slate-600">{i === 0 ? r.cell_phone ?? "—" : ""}</td>
-                                    <td className="py-2 text-slate-600">{i === 0 ? r.agent ?? "—" : ""}</td>
+                                    <td className="py-2 pr-3 text-slate-600">{i === 0 ? r.agent ?? "—" : ""}</td>
+                                    {/* One pass per registration, not per person — the pass
+                                        lists the whole party, so it belongs on the first row. */}
+                                    <td className="py-2">
+                                      {i === 0 && (
+                                        <button onClick={() => setPass(r)}
+                                                className="rounded-full border border-blush-200 px-3 py-1 text-xs font-semibold text-royal-700 hover:border-royal-400">
+                                          🖨 Pass
+                                        </button>
+                                      )}
+                                    </td>
                                   </tr>
                                 )),
                               )}
@@ -419,6 +435,36 @@ export default function ShipVisitsStaffPage() {
           )}
         </div>
       </main>
+
+      {/* Reprint. Rendered over the page rather than on its own route so an
+          agent never loses their place in the monitor. */}
+      {pass && (() => {
+        const v = visits.find((x) => x.id === pass.visit_id) ?? null;
+        return (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 px-4 py-10"
+               onClick={() => setPass(null)}>
+            <div onClick={(e) => e.stopPropagation()}>
+              <ShipVisitPass
+                code={pass.id.slice(0, 8).toUpperCase()}
+                visitDate={v ? v.visit_date : ""}
+                visitTime={v ? v.visit_time : null}
+                ship={v ? v.ship : null}
+                quince={person(pass.quince_first, pass.quince_last)}
+                people={attendees(pass).map((a) => ({ who: a.who, name: a.name, idType: a.idType }))}
+                phoneDisplay={invitation.office.phoneDisplay}
+                phoneDial={invitation.office.phoneDial}
+              />
+              <div className="no-print mt-3 flex justify-center">
+                <button onClick={() => setPass(null)}
+                        className="rounded-full bg-white/90 px-5 py-2 text-sm font-semibold text-slate-700">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       <Footer />
     </>
   );

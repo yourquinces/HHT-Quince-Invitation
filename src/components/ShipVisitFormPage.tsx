@@ -31,6 +31,8 @@ import Header from "./Header";
 import Footer from "./Footer";
 import Section from "./Section";
 import Icon from "./Icon";
+import ShipVisitPass from "./ShipVisitPass";
+import type { PassPerson } from "./ShipVisitPass";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -85,6 +87,8 @@ export default function ShipVisitFormPage() {
   const [visits, setVisits] = useState<ShipVisit[] | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  // Set on a successful save so the pass can carry a confirmation code.
+  const [savedId, setSavedId] = useState("");
   // ?mode=guests opens straight into "she is already registered", so an agent
   // can send a family a link for adding relatives without explaining anything.
   // Set when the form is opened from her hub, so her checklist can tick the
@@ -155,6 +159,7 @@ export default function ShipVisitFormPage() {
         fetchShipVisits().then(setVisits).catch(() => {});   // refresh spot counts
         return;
       }
+      setSavedId(res.id ?? "");
       setStatus("success");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -164,26 +169,45 @@ export default function ShipVisitFormPage() {
   }
 
   if (status === "success") {
+    // Everyone this form just put on the tour. She is on it only when she was
+    // registered here — otherwise her name is the group label and she already
+    // has a pass of her own from the form that registered her.
+    const passPeople: PassPerson[] = [
+      ...(withQuince
+        ? [{ who: "Quinceañera", name: `${f.quince_first} ${f.quince_last}`.trim(), idType: f.quince_id_type }]
+        : []),
+      ...(hasG1 ? [{ who: "Guest 1", name: `${f.guest1_first} ${f.guest1_last}`.trim(), idType: f.guest1_id_type }] : []),
+      ...(hasG2 ? [{ who: "Guest 2", name: `${f.guest2_first} ${f.guest2_last}`.trim(), idType: f.guest2_id_type }] : []),
+    ];
     return (
       <>
         <Header />
-        <main className="px-5 py-20 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-gold-600">Ship Visit</p>
-          <h1 className="mx-auto mt-4 max-w-2xl font-display text-3xl font-bold text-royal-800 sm:text-4xl">
-            You’re registered — see you on board!
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-slate-600">
-            We have {partySize} more {partySize === 1 ? "person" : "people"} down for{" "}
-            {chosen ? visitLabel(chosen) : "your ship visit"}. Everyone must bring the same photo
-            ID entered here — the port will ask for it. Questions? Call us at{" "}
-            <a href={`tel:+${invitation.office.phoneDial}`} className="font-medium text-royal-600">
-              {invitation.office.phoneDisplay}
-            </a>
-            .
-          </p>
-          <p className="mx-auto mt-6 max-w-xl text-sm text-slate-500">
-            Traiga la misma identificación con foto que ingresó aquí — el puerto se la pedirá.
-          </p>
+        <main className="px-5 py-14">
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-gold-600">Ship Visit</p>
+            <h1 className="mx-auto mt-4 max-w-2xl font-display text-3xl font-bold text-royal-800 sm:text-4xl">
+              You’re registered — see you on board!
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-slate-600">
+              Print this pass or save it to your phone, and bring it with you.
+              <span className="mt-1 block text-sm text-slate-500">
+                Imprima este pase o guárdelo en su teléfono, y tráigalo con usted.
+              </span>
+            </p>
+          </div>
+
+          <div className="mt-8">
+            <ShipVisitPass
+              code={(savedId || "").slice(0, 8).toUpperCase() || "—"}
+              visitDate={chosen ? chosen.visit_date : ""}
+              visitTime={chosen ? chosen.visit_time : null}
+              ship={chosen ? chosen.ship : null}
+              quince={`${f.quince_first} ${f.quince_last}`.trim()}
+              people={passPeople}
+              phoneDisplay={invitation.office.phoneDisplay}
+              phoneDial={invitation.office.phoneDial}
+            />
+          </div>
         </main>
         <Footer />
       </>
