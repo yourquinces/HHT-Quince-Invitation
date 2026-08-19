@@ -7,7 +7,9 @@
 // to visit a ship, and not a booking.
 //
 // Three rules it follows, all learned elsewhere in this codebase:
-//   · No prices. Same as the Cozumel roster, which goes to the operator.
+//   · The charge is on it, and says where it lands. The tour is $20 a head
+//     billed to the quinceañera's cabin, so the family's own balance is where
+//     they settle it — the pass must not read as something to pay at the pier.
 //   · ID TYPE only, never the number. The port matches names against the
 //     manifest we send them; the family only needs to know which card to bring.
 //     These parties include minors and this is a page people photograph.
@@ -29,6 +31,8 @@ export interface ShipVisitPassProps {
   /** Whose group this is. Shown as the group label, not as an attendee. */
   quince: string;
   people: PassPerson[];
+  /** What the tour costs a head on this date. */
+  pricePerPerson: number;
   phoneDisplay: string;
   phoneDial: string;
 }
@@ -123,11 +127,22 @@ export default function ShipVisitPass(p: ShipVisitPassProps) {
             </p>
           </div>
 
-          {/* The sentence that keeps this from being mistaken for a booking. */}
-          <p className="mt-4 text-center text-xs text-slate-500">
-            This pass is for a ship visit only. It is not a cruise booking and no payment is due.
+          {/* What it costs and — the part that stops anyone turning up at the
+              pier with cash — where it is actually paid. */}
+          <div className="mt-5 flex items-baseline justify-between border-t border-blush-200 pt-3">
+            <span className="text-sm text-slate-600">
+              {p.people.length} × ${p.pricePerPerson.toFixed(2)} per person
+            </span>
+            <span className="font-display text-xl font-bold text-royal-800">
+              ${(p.people.length * p.pricePerPerson).toFixed(2)}
+            </span>
+          </div>
+          <p className="mt-2 text-center text-xs text-slate-500">
+            This charge is added to {p.quince ? `${p.quince}’s` : "the quinceañera’s"} cabin — nothing
+            is collected at the pier. This pass is for a ship visit only; it is not a cruise booking.
             <span className="mt-0.5 block">
-              Este pase es solo para visitar el barco. No es una reserva de crucero y no requiere pago.
+              Este cargo se agrega al camarote de la quinceañera — no se cobra nada en el puerto. Este
+              pase es solo para visitar el barco; no es una reserva de crucero.
             </span>
           </p>
 

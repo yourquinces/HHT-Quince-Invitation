@@ -204,6 +204,7 @@ export default function ShipVisitFormPage() {
               ship={chosen ? chosen.ship : null}
               quince={`${f.quince_first} ${f.quince_last}`.trim()}
               people={passPeople}
+              pricePerPerson={chosen ? chosen.price_per_person : 0}
               phoneDisplay={invitation.office.phoneDisplay}
               phoneDial={invitation.office.phoneDial}
             />
@@ -355,6 +356,22 @@ export default function ShipVisitFormPage() {
                         {wontFit
                           ? `There is not enough room left on this date for ${partySize} people. Please pick another date, or call us and we will see what we can do.`
                           : `You are registering ${partySize} ${partySize === 1 ? "person" : "people"}.`}
+                      </p>
+                    )}
+                    {/* The cost, while they are still deciding — not sprung on
+                        them at the end. It is billed to her cabin, never
+                        collected here, so the form takes no payment. */}
+                    {chosen && !wontFit && chosen.price_per_person > 0 && (
+                      <p className="mt-2 text-sm text-slate-600">
+                        ${chosen.price_per_person.toFixed(2)} per person —{" "}
+                        <strong className="text-royal-800">
+                          ${(partySize * chosen.price_per_person).toFixed(2)}
+                        </strong>{" "}
+                        added to the quinceañera’s cabin. Nothing is paid here.
+                        <span className="mt-0.5 block text-xs text-slate-500">
+                          ${chosen.price_per_person.toFixed(2)} por persona, agregado al camarote de la
+                          quinceañera. No se paga nada aquí.
+                        </span>
                       </p>
                     )}
                   </div>

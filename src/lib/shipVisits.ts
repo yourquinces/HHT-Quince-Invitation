@@ -17,6 +17,8 @@ export interface ShipVisit {
   capacity: number;
   booked: number;
   remaining: number;
+  /** What the tour costs a head on this date. */
+  price_per_person: number;
 }
 
 export interface ShipVisitSubmission {
@@ -144,10 +146,10 @@ export interface ShipVisitRegistration {
   quince_citizenship: string | null;
   guest1_citizenship: string | null;
   guest2_citizenship: string | null;
-  /** The QRS passenger this attendee turned out to be. Null = not booked yet. */
-  quince_passenger_id: string | null;
-  guest1_passenger_id: string | null;
-  guest2_passenger_id: string | null;
+  /** The quinceañera cabin this whole party bills to. Null until an agent
+   *  confirms it in QRS — a party belongs to a cabin, not to a passenger, so
+   *  a relative with no booking of her own is still charged here. */
+  reservation_id: string | null;
 }
 
 /** Which of the three people on a registration a value belongs to. */
@@ -178,6 +180,7 @@ export async function saveShipVisit(
     capacity: number;
     active: boolean;
     notes?: string;
+    price_per_person: number;
   },
 ): Promise<{ ok: boolean; error?: string }> {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/save_ship_visit`, {
@@ -192,6 +195,7 @@ export async function saveShipVisit(
       p_capacity: v.capacity,
       p_active: v.active,
       p_notes: v.notes ?? null,
+      p_price_per_person: v.price_per_person,
     }),
   });
   if (!res.ok) return { ok: false, error: `Save failed (${res.status})` };

@@ -77,7 +77,6 @@ function attendees(r: ShipVisitRegistration) {
     key: Who; who: string; first: string | null; last: string | null; name: string;
     dob: string | null; idType: string | null; id: string | null;
     email: string | null; mobile: string; citizenship: string | null;
-    passengerId: string | null;
   }[] = [
     ...(r.registering_quince === false
       ? []
@@ -86,21 +85,18 @@ function attendees(r: ShipVisitRegistration) {
           first: r.quince_first, last: r.quince_last, name: person(r.quince_first, r.quince_last),
           dob: r.quince_dob, idType: r.quince_id_type, id: r.quince_id_number,
           email: r.quince_email, mobile, citizenship: r.quince_citizenship,
-          passengerId: r.quince_passenger_id,
         }]),
     {
       key: "guest1", who: "Guest 1",
       first: r.guest1_first, last: r.guest1_last, name: person(r.guest1_first, r.guest1_last),
       dob: r.guest1_dob, idType: r.guest1_id_type, id: r.guest1_id_number,
       email: r.guest1_email, mobile, citizenship: r.guest1_citizenship,
-      passengerId: r.guest1_passenger_id,
     },
     {
       key: "guest2", who: "Guest 2",
       first: r.guest2_first, last: r.guest2_last, name: person(r.guest2_first, r.guest2_last),
       dob: r.guest2_dob, idType: r.guest2_id_type, id: r.guest2_id_number,
       email: r.guest2_email, mobile, citizenship: r.guest2_citizenship,
-      passengerId: r.guest2_passenger_id,
     },
   ];
   return rows.filter((x) => x.name);
@@ -117,7 +113,7 @@ export default function ShipVisitsStaffPage() {
   const [data, setData] = useState<StaffShipVisitData | null>(null);
   const [openVisit, setOpenVisit] = useState<string | null>(null);
   const [editing, setEditing] = useState<StaffShipVisit | null>(null);
-  const [draft, setDraft] = useState({ visit_date: "", visit_time: "", ship: "", capacity: "50", notes: "", active: true });
+  const [draft, setDraft] = useState({ visit_date: "", visit_time: "", ship: "", capacity: "50", notes: "", active: true, price: "20" });
   const [saving, setSaving] = useState(false);
   // Which registration's pass is open, if any. Families lose theirs, and
   // agents register people over the phone who never saw the success screen.
@@ -150,14 +146,15 @@ export default function ShipVisitsStaffPage() {
   }, [data]);
 
   function startNew() {
-    setEditing({ id: "", visit_date: "", visit_time: "", ship: "", capacity: 50, booked: 0, active: true, notes: "" });
-    setDraft({ visit_date: "", visit_time: "", ship: "", capacity: "50", notes: "", active: true });
+    setEditing({ id: "", visit_date: "", visit_time: "", ship: "", capacity: 50, booked: 0, active: true, notes: "", price_per_person: 20 });
+    setDraft({ visit_date: "", visit_time: "", ship: "", capacity: "50", notes: "", active: true, price: "20" });
   }
   function startEdit(v: StaffShipVisit) {
     setEditing(v);
     setDraft({
       visit_date: v.visit_date, visit_time: v.visit_time ?? "", ship: v.ship ?? "",
       capacity: String(v.capacity), notes: v.notes ?? "", active: v.active,
+      price: String(v.price_per_person ?? 20),
     });
   }
 
@@ -172,6 +169,7 @@ export default function ShipVisitsStaffPage() {
       capacity: Number(draft.capacity) || 0,
       active: draft.active,
       notes: draft.notes,
+      price_per_person: Number(draft.price) || 0,
     });
     setSaving(false);
     if (!res.ok) { alert(res.error || "Could not save that date."); return; }
@@ -282,6 +280,12 @@ export default function ShipVisitsStaffPage() {
                   <input type="number" min={0} className={input} value={draft.capacity}
                          onChange={(e) => setDraft({ ...draft, capacity: e.target.value })} />
                 </label>
+                {/* Per date, not global: an already-billed visit keeps its own
+                    price when the rate changes. */}
+                <label className="text-sm">Price per person
+                  <input type="number" min={0} step="1" className={input} value={draft.price}
+                         onChange={(e) => setDraft({ ...draft, price: e.target.value })} />
+                </label>
                 <label className="text-sm sm:col-span-2">Notes
                   <input className={input} value={draft.notes}
                          onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />
@@ -328,6 +332,7 @@ export default function ShipVisitsStaffPage() {
                         <p className="mt-0.5 text-sm text-slate-500">
                           {!v.active && <span className="mr-2 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">Closed</span>}
                           {regs.length} {regs.length === 1 ? "registration" : "registrations"}
+                          {` · $${Number(v.price_per_person ?? 0).toFixed(0)} per person`}
                           {v.notes ? ` · ${v.notes}` : ""}
                         </p>
                       </div>
@@ -451,6 +456,7 @@ export default function ShipVisitsStaffPage() {
                 ship={v ? v.ship : null}
                 quince={person(pass.quince_first, pass.quince_last)}
                 people={attendees(pass).map((a) => ({ who: a.who, name: a.name, idType: a.idType }))}
+                pricePerPerson={Number(v?.price_per_person ?? 0)}
                 phoneDisplay={invitation.office.phoneDisplay}
                 phoneDial={invitation.office.phoneDial}
               />
