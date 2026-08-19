@@ -347,7 +347,6 @@ export default function QuinceHubPage({ slug }: { slug: string }) {
               slug={slug}
               editKey={editKey}
               progress={progress}
-              groupCode={row.group_code}
               whatsappUrl={
                 /* Each sail date has its own WhatsApp group — she belongs in
                    the one for her own sailing, not a general HHT group. Falls

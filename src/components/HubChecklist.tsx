@@ -38,12 +38,11 @@ interface Item {
 }
 
 export default function HubChecklist({
-  slug, editKey, progress, groupCode, whatsappUrl, lang, onChange,
+  slug, editKey, progress, whatsappUrl, lang, onChange,
 }: {
   slug: string;
   editKey: string;
   progress: HubProgress;
-  groupCode?: string | null;
   whatsappUrl?: string;
   lang: Lang;
   onChange: (next: HubProgress) => void;
@@ -131,23 +130,22 @@ export default function HubChecklist({
       cta: say("Invite a friend", "Invitar a una amiga"),
     },
     {
+      // Her own invitation, not the neutral group one: the family always sends
+      // the quinceañera invitation. The neutral version exists for the adults
+      // already sailing to forward to their own circle, and it reaches them on
+      // their invoice — it was never hers to hand out.
       key: "family",
       title: say(
-        "Invite your family and friends to the cruise",
-        "Invita a tu familia y amigos al crucero",
+        "Send your invitation to family and friends",
+        "Envía tu invitación a tu familia y amigos",
       ),
-      body: groupCode
-        ? say(
-            "The invitation for everyone else — the cruise, the prices and how to book.",
-            "La invitación para los demás — el crucero, los precios y cómo reservar.",
-          )
-        : say(
-            "Ask your agent for the invitation to send your family.",
-            "Pídele a tu agente la invitación para enviar a tu familia.",
-          ),
+      body: say(
+        "Your invitation page — your photo, your message, the cruise, the prices and how to book.",
+        "Tu página de invitación — tu foto, tu mensaje, el crucero, los precios y cómo reservar.",
+      ),
       icon: "users",
-      href: groupCode ? `/c/${groupCode}` : undefined,
-      cta: say("Open the invitation", "Abrir la invitación"),
+      href: `/i/${s}`,
+      cta: say("Open my invitation", "Abrir mi invitación"),
     },
   ];
 
