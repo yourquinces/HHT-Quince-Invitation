@@ -456,7 +456,6 @@ export default function ShipVisitsStaffPage() {
                 ship={v ? v.ship : null}
                 quince={person(pass.quince_first, pass.quince_last)}
                 people={attendees(pass).map((a) => ({ who: a.who, name: a.name, idType: a.idType }))}
-                pricePerPerson={Number(v?.price_per_person ?? 0)}
                 phoneDisplay={invitation.office.phoneDisplay}
                 phoneDial={invitation.office.phoneDial}
               />

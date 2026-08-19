@@ -204,7 +204,6 @@ export default function ShipVisitFormPage() {
               ship={chosen ? chosen.ship : null}
               quince={`${f.quince_first} ${f.quince_last}`.trim()}
               people={passPeople}
-              pricePerPerson={chosen ? chosen.price_per_person : 0}
               phoneDisplay={invitation.office.phoneDisplay}
               phoneDial={invitation.office.phoneDial}
             />
