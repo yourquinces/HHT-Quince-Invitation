@@ -1,12 +1,52 @@
--- Ship visits, fifth pass: stop asking agents to match anything.
+-- Ship visits repair, second attempt.
 --
--- The registration already says whose quinceañera it is — that is the first
--- question the form asks. Making an agent then point it at a cabin was asking
--- them to re-enter something the system already knew. The party now attaches
--- itself to her cabin by name, and the only thing a human ever sees is the
--- exception: a name that resolves to no cabin, or to more than one.
+-- The first attempt failed on `min(r.id)` — Postgres has no min() aggregate
+-- for uuid — which threw inside resolve_ship_visit_cabin and rolled the whole
+-- batch back, so nothing at all was applied, including the price fix. The
+-- resolver now collects candidates into an array instead, which gives both the
+-- count and the single id without a cast.
 --
--- Safe to re-run.
+-- Everything here is idempotent. Run as ONE batch; if it stops, send the error.
+
+create or replace function public.list_ship_visit_registrations(p_key text)
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  STAFF_KEY constant text := 'c439d8dfe7b7d0f910424075';
+  v_out json;
+begin
+  if p_key is null or p_key <> STAFF_KEY then
+    raise exception 'not authorised' using errcode = '42501';
+  end if;
+
+  select json_build_object(
+    'visits', coalesce((
+      select json_agg(json_build_object(
+               'id', s.id, 'visit_date', s.visit_date, 'visit_time', s.visit_time,
+               'ship', s.ship, 'capacity', s.capacity, 'active', s.active, 'notes', s.notes,
+               'price_per_person', s.price_per_person,
+               'booked', coalesce((select sum(r.party_size) from public.ship_visit_registrations r
+                                    where r.visit_id = s.id), 0)
+             ) order by s.visit_date desc)
+      from public.ship_visits s
+    ), '[]'::json),
+    'registrations', coalesce((
+      select json_agg(to_jsonb(r) order by r.created_at desc)
+      from public.ship_visit_registrations r
+    ), '[]'::json)
+  ) into v_out;
+
+  return v_out;
+end;
+$$;
+
+revoke all on function public.list_ship_visit_registrations(text) from public;
+grant execute on function public.list_ship_visit_registrations(text) to anon, authenticated;
+
+-- ─────────────────────────────────────────────────────────────────────
 
 -- ---------------------------------------------------------------------------
 -- Name normalising
@@ -150,3 +190,30 @@ grant execute on function public.resolve_ship_visit_cabin(text, text) to authent
 
 -- Run it once now, so everything already registered is attached and billed.
 select public.resolve_ship_visit_cabins();
+
+-- ---------------------------------------------------------------------------
+-- Report
+-- ---------------------------------------------------------------------------
+select
+  to_regprocedure('public.svis_norm(text)')                     is not null as fn_norm,
+  to_regprocedure('public.resolve_ship_visit_cabin(text,text)') is not null as fn_resolve_one,
+  to_regprocedure('public.resolve_ship_visit_cabins()')         is not null as fn_catchup,
+  to_regprocedure('public.recompute_ship_visit_charge(uuid)')   is not null as fn_recompute,
+  (select count(*) from pg_trigger where tgname = 'ship_visit_autolink_trg')    as trg_autolink,
+  (select count(*) from pg_trigger where tgname = 'ship_visit_charge_sync_trg') as trg_charge,
+  (select price_per_person from public.ship_visits order by visit_date desc limit 1) as visit_price;
+
+-- Every live cabin whose quinceañera name contains both parts, and which of
+-- them is flagged as hers. More than one flagged means the resolver refuses to
+-- guess, and that would be why nothing attached.
+select r.cabin_number, r.booking_number, r.quinceanera_name, r.status, r.is_quinceanera
+  from public.reservations r
+ where public.svis_norm(r.quinceanera_name) like '%jamie%'
+   and public.svis_norm(r.quinceanera_name) like '%darias%'
+ order by r.is_quinceanera desc, r.cabin_number;
+
+-- What the resolver returns for her, and where the money stands.
+select
+  public.resolve_ship_visit_cabin('Jamie', 'Darias') as resolved_cabin_id,
+  (select count(*) from public.ship_visit_registrations where reservation_id is null) as still_unattached,
+  (select coalesce(sum(ship_visit_charge), 0) from public.reservations)               as total_ship_visit_charged;
