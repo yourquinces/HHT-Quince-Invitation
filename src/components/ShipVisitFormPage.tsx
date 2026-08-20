@@ -76,6 +76,20 @@ function Field({
   );
 }
 
+/** Adult on the day of the visit, not today — a guest who turns 18 between
+ *  registering and touring is an adult at the gangway. Mirrors svis_is_adult
+ *  in the database, including treating an unknown date of birth as an adult so
+ *  a blank can never buy a free pass on the uniqueness rule. */
+function isAdultAt(dob: string, visitDate: string | undefined): boolean {
+  if (!dob || !visitDate) return true;
+  const [by, bm, bd] = dob.split("-").map(Number);
+  const [vy, vm, vd] = visitDate.split("-").map(Number);
+  if (!by || !vy) return true;
+  let age = vy - by;
+  if (vm < bm || (vm === bm && vd < bd)) age -= 1;
+  return age >= 18;
+}
+
 function visitLabel(v: ShipVisit): string {
   const [y, m, d] = v.visit_date.split("-").map(Number);
   const date = new Date(y, m - 1, d).toLocaleDateString(undefined, {
@@ -138,24 +152,35 @@ export default function ShipVisitFormPage() {
   // being registered on this form.
   const partySize = (withQuince ? 1 : 0) + (hasG1 ? 1 : 0) + (hasG2 ? 1 : 0);
 
+  // Declared before duplicateEmail, which reads the visit date off it to work
+  // out who is a minor.
+  const chosen = visits?.find((v) => v.id === f.visit_id);
+
   // Caught here as well as on the server, so it is visible while typing
   // rather than after pressing Register.
+  //
+  // Only ADULTS are checked. A minor's address is her guardian's — that is the
+  // whole point of collecting it — and the quinceañera herself is nearly
+  // always one of them.
   const duplicateEmail = useMemo(() => {
+    const on = chosen?.visit_date;
     const seen = new Map<string, number>();
-    const entries: [string, string][] = [];
-    if (withQuince) entries.push(["quince", f.quince_email]);
-    if (hasG1) entries.push(["guest1", f.guest1_email]);
-    if (hasG2) entries.push(["guest2", f.guest2_email]);
-    for (const [who, raw] of entries) {
+    const entries: [string, string, string][] = [];
+    if (withQuince) entries.push(["quince", f.quince_email, f.quince_dob]);
+    if (hasG1) entries.push(["guest1", f.guest1_email, f.guest1_dob]);
+    if (hasG2) entries.push(["guest2", f.guest2_email, f.guest2_dob]);
+    for (const [who, raw, dob] of entries) {
       const e = raw.trim().toLowerCase();
       if (!e) continue;
+      if (!isAdultAt(dob, on)) continue;
       seen.set(e, (seen.get(e) ?? 0) + 1);
       if (seen.get(e)! > 1) return { email: e, who };
     }
     return null;
-  }, [withQuince, hasG1, hasG2, f.quince_email, f.guest1_email, f.guest2_email]);
+  }, [withQuince, hasG1, hasG2, chosen?.visit_date,
+      f.quince_email, f.guest1_email, f.guest2_email,
+      f.quince_dob, f.guest1_dob, f.guest2_dob]);
 
-  const chosen = visits?.find((v) => v.id === f.visit_id);
   const wontFit = !!chosen && partySize > chosen.remaining;
   const noPeople = partySize === 0;
 
@@ -333,12 +358,12 @@ export default function ShipVisitFormPage() {
               </h1>
               <p className="mt-3 text-slate-600">
                 Come aboard and see the ship before you sail. Everyone attending must be registered
-                with the exact name on the photo ID they will bring to the port, and their own
-                email address.
+                with the exact name on the photo ID they will bring to the port. Every adult needs
+                their own email address; anyone under 18 uses their guardian’s.
               </p>
               <p className="mt-2 text-sm text-slate-500">
-                Todos deben presentar la misma identificación con foto que ingresen aquí, y cada
-                persona necesita su propio correo electrónico.
+                Todos deben presentar la misma identificación con foto que ingresen aquí. Cada
+                adulto necesita su propio correo electrónico; los menores de 18 usan el de su tutor.
               </p>
             </div>
 
@@ -506,7 +531,7 @@ export default function ShipVisitFormPage() {
                       <Field id="qe" en="Email Address" es="Correo Electrónico" required type="email"
                              value={f.quince_email} onChange={set("quince_email")}
                              bad={duplicateEmail?.who === "quince"}
-                             hint={duplicateEmail?.who === "quince" ? "This address is already used by someone else on this form." : "Her own address"} />
+                             hint={duplicateEmail?.who === "quince" ? "This address is already used by another adult on this form." : "Her guardian\u2019s address is fine"} />
                       <Field id="qt" en="Type of ID" es="Tipo de Identificación" required options={ID_TYPES} value={f.quince_id_type} onChange={set("quince_id_type")} />
                       <Field id="qn" en="ID #" es="Número de Identificación" required value={f.quince_id_number} onChange={set("quince_id_number")} />
                     </>
@@ -526,7 +551,7 @@ export default function ShipVisitFormPage() {
                   <Field id="g1e" en="Email Address" es="Correo Electrónico" required={hasG1} type="email"
                          value={f.guest1_email} onChange={set("guest1_email")}
                          bad={duplicateEmail?.who === "guest1"}
-                         hint={duplicateEmail?.who === "guest1" ? "This address is already used by someone else on this form." : "Their own address"} />
+                         hint={duplicateEmail?.who === "guest1" ? "This address is already used by another adult on this form." : "Their own address \u2014 a minor may use their guardian\u2019s"} />
                   <Field id="g1t" en="Type of ID" es="Tipo de Identificación" required={hasG1} options={ID_TYPES} value={f.guest1_id_type} onChange={set("guest1_id_type")} />
                   <Field id="g1n" en="Guest #1 ID" es="ID del Invitado #1" required={hasG1} value={f.guest1_id_number} onChange={set("guest1_id_number")} />
                 </div>
@@ -544,7 +569,7 @@ export default function ShipVisitFormPage() {
                   <Field id="g2e" en="Email Address" es="Correo Electrónico" required={hasG2} type="email"
                          value={f.guest2_email} onChange={set("guest2_email")}
                          bad={duplicateEmail?.who === "guest2"}
-                         hint={duplicateEmail?.who === "guest2" ? "This address is already used by someone else on this form." : undefined} />
+                         hint={duplicateEmail?.who === "guest2" ? "This address is already used by another adult on this form." : undefined} />
                   <Field id="g2t" en="Type of ID" es="Tipo de Identificación" required={hasG2} options={ID_TYPES} value={f.guest2_id_type} onChange={set("guest2_id_type")} />
                   <Field id="g2n" en="Guest #2 ID" es="ID del Invitado #2" required={hasG2} value={f.guest2_id_number} onChange={set("guest2_id_number")} />
                 </div>
@@ -581,9 +606,11 @@ export default function ShipVisitFormPage() {
 
               {duplicateEmail && (
                 <p role="alert" className="rounded-xl bg-rosa-50 px-4 py-3 text-center text-sm font-medium text-rosa-600 ring-1 ring-rosa-200">
-                  {duplicateEmail.email} is entered twice. Each person needs their own email address.
+                  {duplicateEmail.email} is entered twice. Each adult needs their own email address —
+                  only a minor may share their guardian’s.
                   <span className="mt-1 block font-normal">
-                    Cada persona necesita su propio correo electrónico.
+                    Cada adulto necesita su propio correo electrónico; solo un menor puede usar el de
+                    su tutor.
                   </span>
                 </p>
               )}
