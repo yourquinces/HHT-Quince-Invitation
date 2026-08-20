@@ -1,12 +1,15 @@
--- Ship visits repair, second attempt.
+-- Ship visits repair, step 1 of 2: install only.
 --
--- The first attempt failed on `min(r.id)` — Postgres has no min() aggregate
--- for uuid — which threw inside resolve_ship_visit_cabin and rolled the whole
--- batch back, so nothing at all was applied, including the price fix. The
--- resolver now collects candidates into an array instead, which gives both the
--- count and the single id without a cast.
+-- Pure DDL. There is no function CALL anywhere in this file, deliberately: the
+-- previous version ended by running the catch-up, that threw on a data error,
+-- and Postgres reverted every create statement above it — so nothing was ever
+-- installed even though the file "ran". Whatever happens now, what succeeds
+-- here stays.
 --
--- Everything here is idempotent. Run as ONE batch; if it stops, send the error.
+-- Note that plpgsql bodies are only syntax-checked at create time. This file
+-- succeeding proves the functions EXIST, not that they work. Step 2 proves that.
+--
+-- Safe to re-run.
 
 create or replace function public.list_ship_visit_registrations(p_key text)
 returns json
@@ -188,32 +191,18 @@ grant execute on function public.resolve_ship_visit_cabins() to authenticated;
 revoke all on function public.resolve_ship_visit_cabin(text, text) from public, anon;
 grant execute on function public.resolve_ship_visit_cabin(text, text) to authenticated;
 
--- Run it once now, so everything already registered is attached and billed.
-select public.resolve_ship_visit_cabins();
+-- Deliberately NOT calling resolve_ship_visit_cabins() here. A runtime call in
+-- the same batch as the DDL above means one bad row reverts every create
+-- statement with it — which is exactly how an earlier version of this file
+-- silently installed nothing at all, twice. Run it as its own statement:
+--
+--   select public.resolve_ship_visit_cabins();
+--
+-- QRS also calls it every time the Ship Visits tab is opened.
 
--- ---------------------------------------------------------------------------
--- Report
--- ---------------------------------------------------------------------------
+-- Confirm the install. Every one of these should be true / 1.
 select
   to_regprocedure('public.svis_norm(text)')                     is not null as fn_norm,
   to_regprocedure('public.resolve_ship_visit_cabin(text,text)') is not null as fn_resolve_one,
   to_regprocedure('public.resolve_ship_visit_cabins()')         is not null as fn_catchup,
-  to_regprocedure('public.recompute_ship_visit_charge(uuid)')   is not null as fn_recompute,
-  (select count(*) from pg_trigger where tgname = 'ship_visit_autolink_trg')    as trg_autolink,
-  (select count(*) from pg_trigger where tgname = 'ship_visit_charge_sync_trg') as trg_charge,
-  (select price_per_person from public.ship_visits order by visit_date desc limit 1) as visit_price;
-
--- Every live cabin whose quinceañera name contains both parts, and which of
--- them is flagged as hers. More than one flagged means the resolver refuses to
--- guess, and that would be why nothing attached.
-select r.cabin_number, r.booking_number, r.quinceanera_name, r.status, r.is_quinceanera
-  from public.reservations r
- where public.svis_norm(r.quinceanera_name) like '%jamie%'
-   and public.svis_norm(r.quinceanera_name) like '%darias%'
- order by r.is_quinceanera desc, r.cabin_number;
-
--- What the resolver returns for her, and where the money stands.
-select
-  public.resolve_ship_visit_cabin('Jamie', 'Darias') as resolved_cabin_id,
-  (select count(*) from public.ship_visit_registrations where reservation_id is null) as still_unattached,
-  (select coalesce(sum(ship_visit_charge), 0) from public.reservations)               as total_ship_visit_charged;
+  (select count(*) from pg_trigger where tgname = 'ship_visit_autolink_trg') as trg_autolink;

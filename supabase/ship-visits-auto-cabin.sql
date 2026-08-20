@@ -148,5 +148,11 @@ grant execute on function public.resolve_ship_visit_cabins() to authenticated;
 revoke all on function public.resolve_ship_visit_cabin(text, text) from public, anon;
 grant execute on function public.resolve_ship_visit_cabin(text, text) to authenticated;
 
--- Run it once now, so everything already registered is attached and billed.
-select public.resolve_ship_visit_cabins();
+-- Deliberately NOT calling resolve_ship_visit_cabins() here. A runtime call in
+-- the same batch as the DDL above means one bad row reverts every create
+-- statement with it — which is exactly how an earlier version of this file
+-- silently installed nothing at all, twice. Run it as its own statement:
+--
+--   select public.resolve_ship_visit_cabins();
+--
+-- QRS also calls it every time the Ship Visits tab is opened.
