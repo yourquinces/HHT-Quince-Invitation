@@ -228,7 +228,50 @@ export default function ShipVisitFormPage() {
         <Header />
         <main className="px-5 py-14">
           <div className="mx-auto max-w-2xl text-center">
-            <h1 className="font-display text-3xl font-bold text-royal-800 sm:text-4xl">
+            {/* Payment is the first thing on this screen, above the thank-you.
+                It is the only part that still needs doing, and a 15-second
+                countdown sitting underneath two languages of confirmation is a
+                countdown nobody reaches in time. Same shape as the booking and
+                Cozumel forms: say the spot is not secured, give a button, then
+                the timer. */}
+            {chosen && chosen.price_per_person > 0 && (
+              <div className="rounded-2xl bg-gold-100/60 px-5 py-5 text-left ring-1 ring-gold-200">
+                <h3 className="font-display text-lg font-bold text-royal-800">
+                  ⚠️ Your spot is not yet reserved
+                  <span className="mt-0.5 block text-base font-semibold text-slate-600">
+                    ⚠️ Su lugar aún no está reservado
+                  </span>
+                </h3>
+                <p className="mt-2 text-slate-700">
+                  The ship visit is ${chosen.price_per_person.toFixed(2)} per person —{" "}
+                  <strong className="text-royal-800">
+                    ${(partySize * chosen.price_per_person).toFixed(2)}
+                  </strong>{" "}
+                  for your {partySize === 1 ? "registration" : `${partySize} people`}. Please
+                  complete your payment now to secure it.
+                  <span className="mt-1 block text-sm text-slate-600">
+                    La visita al barco cuesta ${chosen.price_per_person.toFixed(2)} por persona.
+                    Complete su pago ahora para asegurar su lugar.
+                  </span>
+                </p>
+                <a
+                  href={DEPOSIT_URL}
+                  className="mt-4 inline-block rounded-full bg-gradient-to-r from-rosa-500 to-royal-500 px-8 py-3 font-semibold text-white shadow-lg shadow-royal-800/20"
+                >
+                  💳 Pay Now → / Pagar Ahora →
+                </a>
+                {secondsLeft !== null && (
+                  <p className="mt-3 text-sm text-slate-600">
+                    You’ll be redirected to the payment page in{" "}
+                    <strong>{secondsLeft}</strong> seconds…
+                    <span className="mt-0.5 block text-slate-500">
+                      Será redirigido a la página de pago en <strong>{secondsLeft}</strong> segundos…
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
+            <h1 className="mt-10 border-t border-blush-200 pt-8 font-display text-3xl font-bold text-royal-800 sm:text-4xl">
               🚢 Ship Visit Registration Confirmed!
             </h1>
             <div className="mt-5 space-y-3 text-left text-slate-700">
@@ -281,46 +324,6 @@ export default function ShipVisitFormPage() {
               </div>
             </div>
 
-            {/* Payment, same shape as the booking and Cozumel forms: say the
-                spot is not secured, give a button, and fall back to a timer for
-                families who would otherwise close the tab. */}
-            {chosen && chosen.price_per_person > 0 && (
-              <div className="mt-8 rounded-2xl bg-gold-100/60 px-5 py-5 ring-1 ring-gold-200">
-                <h3 className="font-display text-lg font-bold text-royal-800">
-                  ⚠️ Your spot is not yet reserved
-                  <span className="mt-0.5 block text-base font-semibold text-slate-600">
-                    ⚠️ Su lugar aún no está reservado
-                  </span>
-                </h3>
-                <p className="mt-2 text-slate-700">
-                  The ship visit is ${chosen.price_per_person.toFixed(2)} per person —{" "}
-                  <strong className="text-royal-800">
-                    ${(partySize * chosen.price_per_person).toFixed(2)}
-                  </strong>{" "}
-                  for your {partySize === 1 ? "registration" : `${partySize} people`}. Please
-                  complete your payment now to secure it.
-                  <span className="mt-1 block text-sm text-slate-600">
-                    La visita al barco cuesta ${chosen.price_per_person.toFixed(2)} por persona.
-                    Complete su pago ahora para asegurar su lugar.
-                  </span>
-                </p>
-                <a
-                  href={DEPOSIT_URL}
-                  className="mt-4 inline-block rounded-full bg-gradient-to-r from-rosa-500 to-royal-500 px-8 py-3 font-semibold text-white shadow-lg shadow-royal-800/20"
-                >
-                  💳 Pay Now → / Pagar Ahora →
-                </a>
-                {secondsLeft !== null && (
-                  <p className="mt-3 text-sm text-slate-600">
-                    You’ll be redirected to the payment page in{" "}
-                    <strong>{secondsLeft}</strong> seconds…
-                    <span className="mt-0.5 block text-slate-500">
-                      Será redirigido a la página de pago en <strong>{secondsLeft}</strong> segundos…
-                    </span>
-                  </p>
-                )}
-              </div>
-            )}
           </div>
 
           {/* The pass sits below payment on purpose. Printing it calls off the
