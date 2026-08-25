@@ -116,7 +116,7 @@ export default async (request: Request, context: { next: () => Promise<Response>
         tags({
           title: "Icon of the Seas Ship Visit · September 26",
           description:
-            "Our first official Quinceanera Cruise event. Walk aboard Icon of the Seas, " +
+            "Our first official Quinceañera Cruise event. Walk aboard Icon of the Seas, " +
             "meet the other girls in your group and take your first pictures together. " +
             "Saturday, September 26, 2026 at 10:00 AM, Port of Miami. Space is limited.",
           image: origin + SHIP_IMAGE["Icon of the Seas"],
