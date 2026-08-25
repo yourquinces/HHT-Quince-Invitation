@@ -6,3 +6,8 @@ dist
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts
+
+# Campaign recipient lists and send failures — real family email addresses.
+# These are pulled or pasted locally and must never reach the repo.
+recipients.txt
+scripts/.ship-visit-failed.txt

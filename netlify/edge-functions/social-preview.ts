@@ -105,6 +105,28 @@ export default async (request: Request, context: { next: () => Promise<Response>
   const origin = url.origin;
   const path = url.pathname.replace(/\/+$/, "");
 
+  // The ship-visit announcement belongs to no family, so there is nothing to
+  // look up: fixed wording, the ship's own share crop. It is forwarded through
+  // WhatsApp far more than it is clicked from the email, so the card matters.
+  if (path === "/ship-visit-invite") {
+    const html = await res.text();
+    return new Response(
+      html.replace(
+        /<!--SOCIAL:START-->[\s\S]*?<!--SOCIAL:END-->/,
+        tags({
+          title: "Icon of the Seas Ship Visit · September 26",
+          description:
+            "Our first official Quinceanera Cruise event. Walk aboard Icon of the Seas, " +
+            "meet the other girls in your group and take your first pictures together. " +
+            "Saturday, September 26, 2026 at 10:00 AM, Port of Miami. Space is limited.",
+          image: origin + SHIP_IMAGE["Icon of the Seas"],
+          url: origin + "/ship-visit-invite",
+        }),
+      ),
+      { status: res.status, headers: res.headers },
+    );
+  }
+
   const codeMatch = path.match(/^\/c\/([A-Za-z0-9_-]+)$/);
   const slugMatch = path.match(/^\/i\/([^/]+)(?:\/.*)?$/);
 
@@ -163,4 +185,4 @@ export default async (request: Request, context: { next: () => Promise<Response>
   });
 };
 
-export const config = { path: ["/i/*", "/c/*"] };
+export const config = { path: ["/i/*", "/c/*", "/ship-visit-invite"] };
