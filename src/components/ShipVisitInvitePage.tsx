@@ -94,8 +94,21 @@ export default function ShipVisitInvitePage() {
 
       <main className="px-5 pb-16 sm:px-8">
         <div className="mx-auto max-w-3xl">
+          {/* The ship itself. Fixed heights with object-cover rather than a
+              natural-height image: the source is nearly 4:3, which as a
+              full-width banner pushes everything below it off the screen. */}
+          <figure className="-mt-4 overflow-hidden rounded-[2rem] shadow-xl ring-1 ring-royal-800/10">
+            <img
+              src="/images/icon-dusk.jpg"
+              alt="Icon of the Seas at dusk, lit up and under way at sea"
+              width={1200}
+              height={937}
+              className="h-56 w-full object-cover sm:h-80 lg:h-96"
+            />
+          </figure>
+
           {/* The letter */}
-          <section className="rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-blush-200 sm:p-10">
+          <section className="mt-8 rounded-[2rem] bg-white p-7 shadow-sm ring-1 ring-blush-200 sm:p-10">
             <p className="font-display text-xl text-royal-800">
               Dear Quinceañeras &amp; Parents,
             </p>
