@@ -28,6 +28,20 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
+// A local .env is the durable way to hold the key — it is gitignored, and it
+// saves pulling the value out of Netlify on every run. Anything already in the
+// real environment wins, so a one-off inline KEY=… still overrides the file.
+(function loadDotEnv() {
+  const file = join(root, ".env");
+  if (!existsSync(file)) return;
+  for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)$/i);
+    if (!m) continue;
+    const value = m[2].trim().replace(/^["']|["']$/g, "");
+    if (!(m[1] in process.env)) process.env[m[1]] = value;
+  }
+})();
+
 const HTML_FILE = "emails/ship-visit-2026-09-26.html";
 const FAILED_FILE = join(root, "scripts/.ship-visit-failed.txt");
 
