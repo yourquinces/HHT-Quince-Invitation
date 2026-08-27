@@ -203,6 +203,34 @@ export async function saveShipVisit(
 }
 
 /** Set one attendee's citizenship. Blank clears it back to the USA default. */
+/**
+ * Removes one person from a ship visit.
+ *
+ * The row is one party — quinceañera plus up to two guests — so this clears
+ * that person's columns and re-counts, and the database deletes the row only
+ * when the person removed was the last one on it. `party_deleted` says which
+ * happened, because the caller has to drop the row from the roster rather
+ * than just blanking a name.
+ *
+ * The cabin's ship visit charge re-posts itself: the charge trigger fires on
+ * both the update and the delete.
+ */
+export async function deleteShipVisitPerson(
+  key: string,
+  registrationId: string,
+  who: Who,
+): Promise<{ ok: boolean; error?: string; name?: string | null; party_deleted?: boolean; party_size?: number }> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/delete_ship_visit_person`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ p_key: key, p_id: registrationId, p_who: who }),
+  });
+  if (!res.ok) return { ok: false, error: `Delete failed (${res.status})` };
+  return (await res.json()) as {
+    ok: boolean; error?: string; name?: string | null; party_deleted?: boolean; party_size?: number;
+  };
+}
+
 export async function setShipVisitCitizenship(
   key: string,
   registrationId: string,

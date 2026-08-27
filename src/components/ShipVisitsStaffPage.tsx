@@ -6,6 +6,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  deleteShipVisitPerson,
   fetchShipVisitsStaff,
   saveShipVisit,
   setShipVisitCitizenship,
@@ -220,6 +221,31 @@ export default function ShipVisitsStaffPage() {
     });
   }
 
+  /* Removing a person is a real deletion, not a hide: the manifest goes to the
+     port and a name on it that is not boarding is a problem at the gate. The
+     database decides whether the party row survives — the last person out
+     takes the row with them — so the reply drives whether we drop the whole
+     registration from the roster or just blank that person. */
+  const [removing, setRemoving] = useState<string | null>(null);
+
+  async function removePerson(reg: ShipVisitRegistration, who: Who, name: string) {
+    const others = attendees(reg).filter((a) => a.key !== who).length;
+    const warning = others === 0
+      ? `Remove ${name}?\n\nThey are the last person on this registration, so the whole booking will be deleted and the spot freed.`
+      : `Remove ${name} from this ship visit?\n\nThe other ${others === 1 ? "person" : `${others} people`} on this booking stay.`;
+    if (!window.confirm(`${warning}\n\nThis cannot be undone.`)) return;
+
+    const token = `${reg.id}:${who}`;
+    setRemoving(token);
+    const res = await deleteShipVisitPerson(key, reg.id, who);
+    setRemoving(null);
+    if (!res.ok) { alert(res.error || "Could not remove that person."); return; }
+    // Re-read rather than patching state by hand: this changes party_size,
+    // the visit's booked count and the spots-left figure, and those are
+    // computed server-side.
+    await load();
+  }
+
   if (state === "loading") {
     return (<><Header /><main className="px-5 py-20"><p className="text-center font-display text-2xl text-royal-800">Loading…</p></main><Footer /></>);
   }
@@ -371,7 +397,7 @@ export default function ShipVisitsStaffPage() {
                         {regs.length === 0 ? (
                           <p className="text-sm text-slate-500">Nobody registered for this date yet.</p>
                         ) : (
-                          <table className="w-full min-w-[1000px] text-left text-sm">
+                          <table className="w-full min-w-[1100px] text-left text-sm">
                             <thead>
                               <tr className="border-b border-blush-200 text-xs uppercase tracking-wider text-slate-500">
                                 <th className="py-2 pr-3">Name</th>
@@ -382,7 +408,8 @@ export default function ShipVisitsStaffPage() {
                                 <th className="py-2 pr-3">Email</th>
                                 <th className="py-2 pr-3">Phone</th>
                                 <th className="py-2 pr-3">Agent</th>
-                                <th className="py-2">Pass</th>
+                                <th className="py-2 pr-3">Pass</th>
+                                <th className="py-2"><span className="sr-only">Remove</span></th>
                               </tr>
                             </thead>
                             <tbody>
@@ -417,13 +444,24 @@ export default function ShipVisitsStaffPage() {
                                     <td className="py-2 pr-3 text-slate-600">{i === 0 ? r.agent ?? "—" : ""}</td>
                                     {/* One pass per registration, not per person — the pass
                                         lists the whole party, so it belongs on the first row. */}
-                                    <td className="py-2">
+                                    <td className="py-2 pr-3">
                                       {i === 0 && (
                                         <button onClick={() => setPass(r)}
                                                 className="rounded-full border border-blush-200 px-3 py-1 text-xs font-semibold text-royal-700 hover:border-royal-400">
                                           🖨 Pass
                                         </button>
                                       )}
+                                    </td>
+                                    <td className="py-2">
+                                      <button
+                                        onClick={() => removePerson(r, a.key, a.name)}
+                                        disabled={removing === `${r.id}:${a.key}`}
+                                        title={`Remove ${a.name} from this ship visit`}
+                                        aria-label={`Remove ${a.name} from this ship visit`}
+                                        className="rounded-full border border-blush-200 px-3 py-1 text-xs font-semibold text-slate-500 transition hover:border-rosa-400 hover:bg-rosa-50 hover:text-rosa-600 disabled:opacity-40"
+                                      >
+                                        {removing === `${r.id}:${a.key}` ? "…" : "Remove"}
+                                      </button>
                                     </td>
                                   </tr>
                                 )),
