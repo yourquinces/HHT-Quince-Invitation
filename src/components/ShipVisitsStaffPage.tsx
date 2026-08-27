@@ -9,9 +9,9 @@ import {
   deleteShipVisitPerson,
   fetchShipVisitsStaff,
   saveShipVisit,
-  setShipVisitCitizenship,
+  setShipVisitField,
 } from "../lib/shipVisits";
-import type { ShipVisitRegistration, StaffShipVisit, StaffShipVisitData, Who } from "../lib/shipVisits";
+import type { ShipVisitRegistration, StaffShipVisit, StaffShipVisitData, Who, WhoOrParty } from "../lib/shipVisits";
 import Header from "./Header";
 import Footer from "./Footer";
 import ShipVisitPass from "./ShipVisitPass";
@@ -43,6 +43,9 @@ const person = (first: string | null, last: string | null) =>
 const REASON_FOR_BOARDING = "IC Ship Tour";
 const COMPANY = "Happy Holidays Travel";
 const DEFAULT_CITIZENSHIP = "USA";
+// Same list the public form offers, so a corrected row cannot end up with an
+// ID type the family could never have chosen.
+const ID_TYPES = ["Passport", "Driver's License", "State ID", "School ID", "Birth Certificate", "Other"];
 
 /** Our ID labels in Royal Caribbean's vocabulary. Anything that is not a
  *  passport or a driver's licence is a government ID as far as the manifest is
@@ -210,14 +213,34 @@ export default function ShipVisitsStaffPage() {
   /** Citizenship is the one manifest column staff ever have to touch, so it is
    *  edited in place in the table rather than behind a form. Saved on blur, and
    *  written back into local state so the next export uses it without a reload. */
-  async function saveCitizenship(regId: string, who: Who, value: string) {
-    const res = await setShipVisitCitizenship(key, regId, who, value);
-    if (!res.ok) { alert(res.error || "Could not save that citizenship."); return; }
-    const stored = res.citizenship ?? null;
+  /* Every roster cell saves on blur, the way the citizenship box already did.
+     The manifest goes to the port and has to match the document each person
+     actually brings, so a typo in a passport number or a surname has to be
+     fixable here — re-registering the family instead would double-count the
+     capacity.
+
+     The database normalises (names up, emails down) and returns what it
+     stored, so we show that rather than what was typed. Clearing a name
+     removes a person and changes the headcount, which is computed
+     server-side, so those two fields re-read instead of patching state. */
+  const [savingCell, setSavingCell] = useState<string | null>(null);
+
+  async function saveField(regId: string, who: WhoOrParty, field: string, value: string) {
+    const token = `${regId}:${who}:${field}`;
+    setSavingCell(token);
+    const res = await setShipVisitField(key, regId, who, field, value);
+    setSavingCell(null);
+    if (!res.ok) {
+      alert(res.error || "Could not save that.");
+      await load();
+      return;
+    }
+    if (field === "first" || field === "last") { await load(); return; }
+    const col = who === "party" ? field : `${who}_${field}`;
     setData((prev) => prev && {
       ...prev,
       registrations: prev.registrations.map((r) =>
-        r.id === regId ? { ...r, [`${who}_citizenship`]: stored } : r),
+        r.id === regId ? { ...r, [col]: res.value ?? null } : r),
     });
   }
 
@@ -403,68 +426,125 @@ export default function ShipVisitsStaffPage() {
                                 <th className="py-2 pr-3">Name</th>
                                 <th className="py-2 pr-3">Who</th>
                                 <th className="py-2 pr-3">Date of birth</th>
-                                <th className="py-2 pr-3">Citizenship</th>
-                                <th className="py-2 pr-3">ID</th>
+                                <th className="py-2 pr-3">Cit.</th>
+                                <th className="py-2 pr-3">ID type</th>
+                                <th className="py-2 pr-3">ID number</th>
                                 <th className="py-2 pr-3">Email</th>
                                 <th className="py-2 pr-3">Phone</th>
                                 <th className="py-2 pr-3">Agent</th>
-                                <th className="py-2 pr-3">Pass</th>
-                                <th className="py-2"><span className="sr-only">Remove</span></th>
+                                {/* Pinned: the table is wider than the card, and an
+                                    action nobody can scroll to is an action nobody has. */}
+                                <th className="sticky right-0 min-w-[190px] bg-white py-2 pl-3 text-right shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)]">
+                                  Actions
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
                               {regs.map((r) =>
-                                attendees(r).map((a, i) => (
-                                  <tr key={`${r.id}-${i}`} className="border-b border-blush-100">
-                                    <td className="py-2 pr-3 font-medium text-slate-800">{a.name}</td>
-                                    <td className="py-2 pr-3 text-slate-500">{a.who}</td>
-                                    <td className="py-2 pr-3 text-slate-600">{a.dob ?? "—"}</td>
-                                    {/* The only manifest column staff edit. Blank shows the
-                                        USA the export will use, greyed, so an untouched row
-                                        reads as "USA by default" rather than as missing. */}
-                                    <td className="py-2 pr-3">
-                                      <input
-                                        defaultValue={a.citizenship ?? ""}
-                                        placeholder={DEFAULT_CITIZENSHIP}
-                                        maxLength={3}
-                                        aria-label={`Citizenship for ${a.name}`}
-                                        onBlur={(e) => {
-                                          const v = e.target.value.trim().toUpperCase();
-                                          e.target.value = v;
-                                          if (v !== (a.citizenship ?? "")) saveCitizenship(r.id, a.key, v);
-                                        }}
-                                        className="w-16 rounded border border-blush-200 bg-white px-2 py-1 text-sm uppercase text-slate-700 placeholder:normal-case placeholder:text-slate-400 focus:border-royal-400"
-                                      />
+                                attendees(r).map((a, i) => {
+                                  // No width here on purpose: each field sets its own, and a w-full in the
+                                  // base competes with those at equal specificity, so Tailwind's
+                                  // stylesheet order decides — which silently squashed every column.
+                                  const cell = "rounded border border-transparent bg-transparent px-1.5 py-1 text-sm text-slate-700 hover:border-blush-200 focus:border-royal-400 focus:bg-white";
+                                  const busy = (f: string) => savingCell === `${r.id}:${a.key}:${f}`;
+                                  return (
+                                  <tr key={`${r.id}-${a.key}`} className="border-b border-blush-100">
+                                    <td className="py-1 pr-3">
+                                      <div className="flex gap-1">
+                                        <input defaultValue={a.first ?? ""} placeholder="First"
+                                          aria-label={`First name for ${a.name}`} disabled={busy("first")}
+                                          onBlur={(e) => { const v = e.target.value.trim();
+                                            if (v !== (a.first ?? "")) saveField(r.id, a.key, "first", v); }}
+                                          className={`${cell} w-28 font-medium uppercase`} />
+                                        <input defaultValue={a.last ?? ""} placeholder="Last"
+                                          aria-label={`Last name for ${a.name}`} disabled={busy("last")}
+                                          onBlur={(e) => { const v = e.target.value.trim();
+                                            if (v !== (a.last ?? "")) saveField(r.id, a.key, "last", v); }}
+                                          className={`${cell} w-28 font-medium uppercase`} />
+                                      </div>
                                     </td>
-                                    <td className="py-2 pr-3 text-slate-600">
-                                      {a.idType ? `${a.idType} ${a.id ?? ""}` : "—"}
+                                    <td className="py-1 pr-3 text-slate-500">{a.who}</td>
+                                    <td className="py-1 pr-3">
+                                      <input type="date" defaultValue={a.dob ?? ""}
+                                        aria-label={`Date of birth for ${a.name}`} disabled={busy("dob")}
+                                        onBlur={(e) => { const v = e.target.value;
+                                          if (v !== (a.dob ?? "")) saveField(r.id, a.key, "dob", v); }}
+                                        className={`${cell} w-36`} />
                                     </td>
-                                    <td className="py-2 pr-3 text-slate-600">{a.email ?? "—"}</td>
-                                    <td className="py-2 pr-3 text-slate-600">{i === 0 ? r.cell_phone ?? "—" : ""}</td>
-                                    <td className="py-2 pr-3 text-slate-600">{i === 0 ? r.agent ?? "—" : ""}</td>
-                                    {/* One pass per registration, not per person — the pass
-                                        lists the whole party, so it belongs on the first row. */}
-                                    <td className="py-2 pr-3">
-                                      {i === 0 && (
-                                        <button onClick={() => setPass(r)}
-                                                className="rounded-full border border-blush-200 px-3 py-1 text-xs font-semibold text-royal-700 hover:border-royal-400">
-                                          🖨 Pass
+                                    {/* Blank shows the USA the export will use, greyed, so an
+                                        untouched row reads as "USA by default", not as missing. */}
+                                    <td className="py-1 pr-3">
+                                      <input defaultValue={a.citizenship ?? ""} placeholder={DEFAULT_CITIZENSHIP}
+                                        maxLength={3} aria-label={`Citizenship for ${a.name}`} disabled={busy("citizenship")}
+                                        onBlur={(e) => { const v = e.target.value.trim().toUpperCase(); e.target.value = v;
+                                          if (v !== (a.citizenship ?? "")) saveField(r.id, a.key, "citizenship", v); }}
+                                        className={`${cell} w-14 uppercase placeholder:normal-case placeholder:text-slate-400`} />
+                                    </td>
+                                    <td className="py-1 pr-3">
+                                      <select defaultValue={a.idType ?? ""}
+                                        aria-label={`ID type for ${a.name}`} disabled={busy("id_type")}
+                                        onChange={(e) => saveField(r.id, a.key, "id_type", e.target.value)}
+                                        className={`${cell} w-36`}>
+                                        <option value="">—</option>
+                                        {ID_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                                      </select>
+                                    </td>
+                                    <td className="py-1 pr-3">
+                                      <input defaultValue={a.id ?? ""} placeholder="—"
+                                        aria-label={`ID number for ${a.name}`} disabled={busy("id_number")}
+                                        onBlur={(e) => { const v = e.target.value.trim();
+                                          if (v !== (a.id ?? "")) saveField(r.id, a.key, "id_number", v); }}
+                                        className={`${cell} w-40`} />
+                                    </td>
+                                    <td className="py-1 pr-3">
+                                      <input type="email" defaultValue={a.email ?? ""} placeholder="—"
+                                        aria-label={`Email for ${a.name}`} disabled={busy("email")}
+                                        onBlur={(e) => { const v = e.target.value.trim();
+                                          if (v !== (a.email ?? "")) saveField(r.id, a.key, "email", v); }}
+                                        className={`${cell} w-56`} />
+                                    </td>
+                                    {/* Phone and agent belong to the party, so only the first
+                                        row of a booking edits them. */}
+                                    <td className="py-1 pr-3">
+                                      {i === 0 ? (
+                                        <input defaultValue={r.cell_phone ?? ""} placeholder="—"
+                                          aria-label="Phone for this booking" disabled={savingCell === `${r.id}:party:cell_phone`}
+                                          onBlur={(e) => { const v = e.target.value.trim();
+                                            if (v !== (r.cell_phone ?? "")) saveField(r.id, "party", "cell_phone", v); }}
+                                          className={`${cell} w-32`} />
+                                      ) : null}
+                                    </td>
+                                    <td className="py-1 pr-3">
+                                      {i === 0 ? (
+                                        <input defaultValue={r.agent ?? ""} placeholder="—"
+                                          aria-label="Agent for this booking" disabled={savingCell === `${r.id}:party:agent`}
+                                          onBlur={(e) => { const v = e.target.value.trim();
+                                            if (v !== (r.agent ?? "")) saveField(r.id, "party", "agent", v); }}
+                                          className={`${cell} w-24`} />
+                                      ) : null}
+                                    </td>
+                                    <td className="sticky right-0 min-w-[190px] bg-white py-1 pl-3 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)]">
+                                      <div className="flex items-center justify-end gap-1.5">
+                                        {i === 0 && (
+                                          <button onClick={() => setPass(r)}
+                                                  className="rounded-full border border-blush-200 px-3 py-1 text-xs font-semibold text-royal-700 hover:border-royal-400">
+                                            🖨 Pass
+                                          </button>
+                                        )}
+                                        <button
+                                          onClick={() => removePerson(r, a.key, a.name)}
+                                          disabled={removing === `${r.id}:${a.key}`}
+                                          title={`Remove ${a.name} from this ship visit`}
+                                          aria-label={`Remove ${a.name} from this ship visit`}
+                                          className="rounded-full border border-blush-200 px-3 py-1 text-xs font-semibold text-slate-500 transition hover:border-rosa-400 hover:bg-rosa-50 hover:text-rosa-600 disabled:opacity-40"
+                                        >
+                                          {removing === `${r.id}:${a.key}` ? "…" : "Remove"}
                                         </button>
-                                      )}
-                                    </td>
-                                    <td className="py-2">
-                                      <button
-                                        onClick={() => removePerson(r, a.key, a.name)}
-                                        disabled={removing === `${r.id}:${a.key}`}
-                                        title={`Remove ${a.name} from this ship visit`}
-                                        aria-label={`Remove ${a.name} from this ship visit`}
-                                        className="rounded-full border border-blush-200 px-3 py-1 text-xs font-semibold text-slate-500 transition hover:border-rosa-400 hover:bg-rosa-50 hover:text-rosa-600 disabled:opacity-40"
-                                      >
-                                        {removing === `${r.id}:${a.key}` ? "…" : "Remove"}
-                                      </button>
+                                      </div>
                                     </td>
                                   </tr>
-                                )),
+                                  );
+                                }),
                               )}
                             </tbody>
                           </table>

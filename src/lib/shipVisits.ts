@@ -215,6 +215,34 @@ export async function saveShipVisit(
  * The cabin's ship visit charge re-posts itself: the charge trigger fires on
  * both the update and the delete.
  */
+/** Party-level fields live on the row itself rather than on one person. */
+export type WhoOrParty = Who | "party";
+
+/**
+ * Corrects one field on the roster.
+ *
+ * The database owns what is editable — a closed list of per-person and
+ * party-level fields — so a typo in `field` comes back as a refusal rather
+ * than reaching a column it should not. It also normalises (names up, emails
+ * down) and returns the stored value, so the caller should display what comes
+ * back instead of what was typed.
+ */
+export async function setShipVisitField(
+  key: string,
+  registrationId: string,
+  who: WhoOrParty,
+  field: string,
+  value: string,
+): Promise<{ ok: boolean; error?: string; value?: string | null }> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/set_ship_visit_field`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ p_key: key, p_id: registrationId, p_who: who, p_field: field, p_value: value }),
+  });
+  if (!res.ok) return { ok: false, error: `Save failed (${res.status})` };
+  return (await res.json()) as { ok: boolean; error?: string; value?: string | null };
+}
+
 export async function deleteShipVisitPerson(
   key: string,
   registrationId: string,
