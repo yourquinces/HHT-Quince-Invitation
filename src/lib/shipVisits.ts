@@ -150,6 +150,9 @@ export interface ShipVisitRegistration {
    *  confirms it in QRS — a party belongs to a cabin, not to a passenger, so
    *  a relative with no booking of her own is still charged here. */
   reservation_id: string | null;
+  /** pending until an agent confirms payment. A rejected party is holding no
+   *  place, which is why moving one needs no capacity check. */
+  status: "pending" | "approved" | "rejected";
 }
 
 /** Which of the three people on a registration a value belongs to. */
@@ -277,4 +280,31 @@ export async function setShipVisitCitizenship(
   });
   if (!res.ok) return { ok: false, error: `Save failed (${res.status})` };
   return (await res.json()) as { ok: boolean; error?: string; citizenship?: string | null };
+}
+
+/**
+ * Moves a whole booking to a different visit date.
+ *
+ * The row keeps its id, so the pass code, the cabin link and every person on
+ * it survive the move — the alternative agents were driving to (remove
+ * everybody, register them again) changed all three. The cabin re-bills
+ * itself at the new date's price through the charge trigger.
+ *
+ * The database re-runs what a new registration on that date would face:
+ * capacity, and one email address per adult. Both come back as a plain
+ * sentence in `error` rather than a code, because an agent on the phone is
+ * the one reading it.
+ */
+export async function moveShipVisitRegistration(
+  key: string,
+  registrationId: string,
+  visitId: string,
+): Promise<{ ok: boolean; error?: string; moved?: boolean; remaining?: number }> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/move_ship_visit_registration`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ p_key: key, p_id: registrationId, p_visit_id: visitId }),
+  });
+  if (!res.ok) return { ok: false, error: `Move failed (${res.status})` };
+  return (await res.json()) as { ok: boolean; error?: string; moved?: boolean; remaining?: number };
 }

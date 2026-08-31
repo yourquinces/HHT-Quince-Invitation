@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   deleteShipVisitPerson,
   fetchShipVisitsStaff,
+  moveShipVisitRegistration,
   saveShipVisit,
   setShipVisitField,
 } from "../lib/shipVisits";
@@ -269,6 +270,31 @@ export default function ShipVisitsStaffPage() {
     await load();
   }
 
+  /* Moving a family to another date is a move of the ROW, not a re-registration:
+     the id survives, so the pass code, the cabin link and everyone on the
+     booking come with it. Agents were otherwise removing three people and
+     typing them back in on the new date, which changed the pass code and
+     double-counted the capacity while both versions existed.
+
+     The database owns the two rules — room on the new date, and one email per
+     adult on it — so this asks and reports rather than pre-judging. The one
+     thing decided here is which dates are worth OFFERING: a date without room
+     for this whole party is shown greyed rather than hidden, because an agent
+     needs to see that it exists and is full. */
+  const [moveReg, setMoveReg] = useState<ShipVisitRegistration | null>(null);
+  const [movingTo, setMovingTo] = useState<string | null>(null);
+
+  async function moveTo(reg: ShipVisitRegistration, visitId: string) {
+    setMovingTo(visitId);
+    const res = await moveShipVisitRegistration(key, reg.id, visitId);
+    setMovingTo(null);
+    if (!res.ok) { alert(res.error || "Could not move that booking."); return; }
+    setMoveReg(null);
+    // Both dates' booked counts and spots-left change, and both are computed
+    // server-side, so re-read rather than patching two cards by hand.
+    await load();
+  }
+
   if (state === "loading") {
     return (<><Header /><main className="px-5 py-20"><p className="text-center font-display text-2xl text-royal-800">Loading…</p></main><Footer /></>);
   }
@@ -434,7 +460,7 @@ export default function ShipVisitsStaffPage() {
                                 <th className="py-2 pr-3">Agent</th>
                                 {/* Pinned: the table is wider than the card, and an
                                     action nobody can scroll to is an action nobody has. */}
-                                <th className="sticky right-0 min-w-[190px] bg-white py-2 pl-3 text-right shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)]">
+                                <th className="sticky right-0 min-w-[250px] bg-white py-2 pl-3 text-right shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)]">
                                   Actions
                                 </th>
                               </tr>
@@ -523,8 +549,17 @@ export default function ShipVisitsStaffPage() {
                                           className={`${cell} w-24`} />
                                       ) : null}
                                     </td>
-                                    <td className="sticky right-0 min-w-[190px] bg-white py-1 pl-3 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)]">
+                                    <td className="sticky right-0 min-w-[250px] bg-white py-1 pl-3 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)]">
                                       <div className="flex items-center justify-end gap-1.5">
+                                        {/* Party-level, like the pass: a booking moves
+                                            whole, never one guest out of a family. */}
+                                        {i === 0 && (
+                                          <button onClick={() => setMoveReg(r)}
+                                                  title="Move this whole booking to another visit date"
+                                                  className="rounded-full border border-blush-200 px-3 py-1 text-xs font-semibold text-royal-700 hover:border-royal-400">
+                                            Move
+                                          </button>
+                                        )}
                                         {i === 0 && (
                                           <button onClick={() => setPass(r)}
                                                   className="rounded-full border border-blush-200 px-3 py-1 text-xs font-semibold text-royal-700 hover:border-royal-400">
@@ -558,6 +593,83 @@ export default function ShipVisitsStaffPage() {
           )}
         </div>
       </main>
+
+      {/* Move a booking to another date. Dates run earliest-first here rather
+          than newest-first as the cards do — an agent moving a family is
+          picking from what is coming up, not reviewing history. */}
+      {moveReg && (() => {
+        const from = visits.find((x) => x.id === moveReg.visit_id) ?? null;
+        const people = attendees(moveReg);
+        // A rejected party is holding no place, so nothing can be too full for it.
+        const needsRoom = moveReg.status !== "rejected";
+        const options = visits
+          .filter((v) => v.id !== moveReg.visit_id)
+          .slice()
+          .sort((a, b) => a.visit_date.localeCompare(b.visit_date));
+        const today = new Date().toISOString().slice(0, 10);
+        return (
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/50 px-4 py-10"
+               onClick={() => movingTo || setMoveReg(null)}>
+            <div onClick={(e) => e.stopPropagation()}
+                 className="w-full max-w-lg rounded-2xl bg-white p-6 ring-1 ring-blush-200">
+              <h2 className="font-display text-xl font-semibold text-royal-800">Move this booking</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                {people.map((p) => p.name).join(", ")} — {moveReg.party_size}{" "}
+                {moveReg.party_size === 1 ? "person" : "people"}
+                {from ? `, currently on ${pretty(from.visit_date)}` : ""}.
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
+                Everyone on the booking moves together, and the pass code stays the same.
+                {moveReg.reservation_id
+                  ? " The $ charge on her cabin re-bills itself at the new date's price."
+                  : ""}
+              </p>
+
+              {options.length === 0 ? (
+                <p className="mt-6 text-sm text-slate-500">
+                  There is nowhere to move it to — this is the only visit date. Add another one first.
+                </p>
+              ) : (
+                <div className="mt-5 space-y-2">
+                  {options.map((v) => {
+                    const left = Math.max(v.capacity - v.booked, 0);
+                    const fits = !needsRoom || moveReg.party_size <= left;
+                    const busy = movingTo === v.id;
+                    return (
+                      <button key={v.id} disabled={!fits || !!movingTo}
+                        onClick={() => moveTo(moveReg, v.id)}
+                        className="flex w-full items-center justify-between gap-3 rounded-xl border border-blush-200 px-4 py-3 text-left transition hover:border-royal-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-blush-200">
+                        <span>
+                          <span className="block text-sm font-semibold text-royal-800">
+                            {pretty(v.visit_date)}
+                            {v.visit_time ? ` · ${v.visit_time}` : ""}
+                            {v.ship ? ` · ${v.ship}` : ""}
+                          </span>
+                          <span className="block text-xs text-slate-500">
+                            ${Number(v.price_per_person ?? 0).toFixed(0)} per person
+                            {!v.active && " · closed to the public"}
+                            {v.visit_date < today && " · past"}
+                          </span>
+                        </span>
+                        <span className={`shrink-0 text-xs font-semibold ${fits ? "text-royal-700" : "text-rosa-600"}`}>
+                          {busy ? "Moving…" : fits ? `${left} left` : `Full — ${left} left`}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="mt-5 flex justify-end">
+                <button onClick={() => setMoveReg(null)} disabled={!!movingTo}
+                        className="rounded-full border border-blush-200 px-5 py-2 text-sm font-semibold text-slate-600 disabled:opacity-50">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Reprint. Rendered over the page rather than on its own route so an
           agent never loses their place in the monitor. */}
