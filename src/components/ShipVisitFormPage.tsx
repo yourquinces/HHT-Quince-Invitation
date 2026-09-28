@@ -120,13 +120,13 @@ export default function ShipVisitFormPage() {
   );
   const [f, setF] = useState({
     visit_id: "", quince_first: "", quince_last: "", quince_dob: "", quince_email: "",
-    quince_id_type: "", quince_id_number: "", sail_date: "", cell_phone: "",
+    quince_id_type: "", quince_id_number: "", quince_id_expiration: "", sail_date: "", cell_phone: "",
     guest1_first: "", guest1_last: "", guest1_dob: "", guest1_email: "",
-    guest1_id_type: "", guest1_id_number: "",
+    guest1_id_type: "", guest1_id_number: "", guest1_id_expiration: "",
     guest2_first: "", guest2_last: "", guest2_dob: "", guest2_email: "",
-    guest2_id_type: "", guest2_id_number: "",
+    guest2_id_type: "", guest2_id_number: "", guest2_id_expiration: "",
     guest3_first: "", guest3_last: "", guest3_dob: "", guest3_email: "",
-    guest3_id_type: "", guest3_id_number: "",
+    guest3_id_type: "", guest3_id_number: "", guest3_id_expiration: "",
     agent: "", notes: "", botField: "",
   });
   const set = (k: keyof typeof f) => (v: string) => setF((p) => ({ ...p, [k]: v }));
@@ -543,6 +543,7 @@ export default function ShipVisitFormPage() {
                              hint={duplicateEmail?.who === "quince" ? "This address is already used by another adult on this form." : "Her guardian\u2019s address is fine"} />
                       <Field id="qt" en="Type of ID" es="Tipo de Identificación" required options={ID_TYPES} value={f.quince_id_type} onChange={set("quince_id_type")} />
                       <Field id="qn" en="ID #" es="Número de Identificación" required value={f.quince_id_number} onChange={set("quince_id_number")} />
+                      <Field id="qx" en="ID Expiration Date (if applicable)" es="Fecha de Vencimiento (si aplica)" type="date" value={f.quince_id_expiration} onChange={set("quince_id_expiration")} />
                     </>
                   )}
                 </div>
@@ -563,6 +564,7 @@ export default function ShipVisitFormPage() {
                          hint={duplicateEmail?.who === "guest1" ? "This address is already used by another adult on this form." : "Their own address \u2014 a minor may use their guardian\u2019s"} />
                   <Field id="g1t" en="Type of ID" es="Tipo de Identificación" required={hasG1} options={ID_TYPES} value={f.guest1_id_type} onChange={set("guest1_id_type")} />
                   <Field id="g1n" en="Guest #1 ID" es="ID del Invitado #1" required={hasG1} value={f.guest1_id_number} onChange={set("guest1_id_number")} />
+                  <Field id="g1x" en="ID Expiration Date (if applicable)" es="Fecha de Vencimiento (si aplica)" type="date" value={f.guest1_id_expiration} onChange={set("guest1_id_expiration")} />
                 </div>
               </fieldset>
 
@@ -581,6 +583,7 @@ export default function ShipVisitFormPage() {
                          hint={duplicateEmail?.who === "guest2" ? "This address is already used by another adult on this form." : undefined} />
                   <Field id="g2t" en="Type of ID" es="Tipo de Identificación" required={hasG2} options={ID_TYPES} value={f.guest2_id_type} onChange={set("guest2_id_type")} />
                   <Field id="g2n" en="Guest #2 ID" es="ID del Invitado #2" required={hasG2} value={f.guest2_id_number} onChange={set("guest2_id_number")} />
+                  <Field id="g2x" en="ID Expiration Date (if applicable)" es="Fecha de Vencimiento (si aplica)" type="date" value={f.guest2_id_expiration} onChange={set("guest2_id_expiration")} />
                 </div>
               </fieldset>
 
@@ -599,6 +602,7 @@ export default function ShipVisitFormPage() {
                          hint={duplicateEmail?.who === "guest3" ? "This address is already used by another adult on this form." : undefined} />
                   <Field id="g3t" en="Type of ID" es="Tipo de Identificación" required={hasG3} options={ID_TYPES} value={f.guest3_id_type} onChange={set("guest3_id_type")} />
                   <Field id="g3n" en="Guest #3 ID" es="ID del Invitado #3" required={hasG3} value={f.guest3_id_number} onChange={set("guest3_id_number")} />
+                  <Field id="g3x" en="ID Expiration Date (if applicable)" es="Fecha de Vencimiento (si aplica)" type="date" value={f.guest3_id_expiration} onChange={set("guest3_id_expiration")} />
                 </div>
               </fieldset>
 

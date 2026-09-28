@@ -80,7 +80,7 @@ function attendees(r: ShipVisitRegistration) {
   const mobile = barePhone(r.cell_phone);
   const rows: {
     key: Who; who: string; first: string | null; last: string | null; name: string;
-    dob: string | null; idType: string | null; id: string | null;
+    dob: string | null; idType: string | null; id: string | null; idExp: string | null;
     email: string | null; mobile: string; citizenship: string | null;
   }[] = [
     ...(r.registering_quince === false
@@ -88,25 +88,25 @@ function attendees(r: ShipVisitRegistration) {
       : [{
           key: "quince" as Who, who: "Quinceañera",
           first: r.quince_first, last: r.quince_last, name: person(r.quince_first, r.quince_last),
-          dob: r.quince_dob, idType: r.quince_id_type, id: r.quince_id_number,
+          dob: r.quince_dob, idType: r.quince_id_type, id: r.quince_id_number, idExp: r.quince_id_expiration,
           email: r.quince_email, mobile, citizenship: r.quince_citizenship,
         }]),
     {
       key: "guest1", who: "Guest 1",
       first: r.guest1_first, last: r.guest1_last, name: person(r.guest1_first, r.guest1_last),
-      dob: r.guest1_dob, idType: r.guest1_id_type, id: r.guest1_id_number,
+      dob: r.guest1_dob, idType: r.guest1_id_type, id: r.guest1_id_number, idExp: r.guest1_id_expiration,
       email: r.guest1_email, mobile, citizenship: r.guest1_citizenship,
     },
     {
       key: "guest2", who: "Guest 2",
       first: r.guest2_first, last: r.guest2_last, name: person(r.guest2_first, r.guest2_last),
-      dob: r.guest2_dob, idType: r.guest2_id_type, id: r.guest2_id_number,
+      dob: r.guest2_dob, idType: r.guest2_id_type, id: r.guest2_id_number, idExp: r.guest2_id_expiration,
       email: r.guest2_email, mobile, citizenship: r.guest2_citizenship,
     },
     {
       key: "guest3", who: "Guest 3",
       first: r.guest3_first, last: r.guest3_last, name: person(r.guest3_first, r.guest3_last),
-      dob: r.guest3_dob, idType: r.guest3_id_type, id: r.guest3_id_number,
+      dob: r.guest3_dob, idType: r.guest3_id_type, id: r.guest3_id_number, idExp: r.guest3_id_expiration,
       email: r.guest3_email, mobile, citizenship: r.guest3_citizenship,
     },
   ];
@@ -452,7 +452,7 @@ export default function ShipVisitsStaffPage() {
                         {regs.length === 0 ? (
                           <p className="text-sm text-slate-500">Nobody registered for this date yet.</p>
                         ) : (
-                          <table className="w-full min-w-[1100px] text-left text-sm">
+                          <table className="w-full min-w-[1250px] text-left text-sm">
                             <thead>
                               <tr className="border-b border-blush-200 text-xs uppercase tracking-wider text-slate-500">
                                 <th className="py-2 pr-3">Name</th>
@@ -461,6 +461,7 @@ export default function ShipVisitsStaffPage() {
                                 <th className="py-2 pr-3">Cit.</th>
                                 <th className="py-2 pr-3">ID type</th>
                                 <th className="py-2 pr-3">ID number</th>
+                                <th className="py-2 pr-3">ID expires</th>
                                 <th className="py-2 pr-3">Email</th>
                                 <th className="py-2 pr-3">Phone</th>
                                 <th className="py-2 pr-3">Agent</th>
@@ -527,6 +528,13 @@ export default function ShipVisitsStaffPage() {
                                         onBlur={(e) => { const v = e.target.value.trim();
                                           if (v !== (a.id ?? "")) saveField(r.id, a.key, "id_number", v); }}
                                         className={`${cell} w-40`} />
+                                    </td>
+                                    <td className="py-1 pr-3">
+                                      <input type="date" defaultValue={a.idExp ?? ""}
+                                        aria-label={`ID expiration date for ${a.name}`} disabled={busy("id_expiration")}
+                                        onBlur={(e) => { const v = e.target.value;
+                                          if (v !== (a.idExp ?? "")) saveField(r.id, a.key, "id_expiration", v); }}
+                                        className={`${cell} w-36`} />
                                     </td>
                                     <td className="py-1 pr-3">
                                       <input type="email" defaultValue={a.email ?? ""} placeholder="—"
