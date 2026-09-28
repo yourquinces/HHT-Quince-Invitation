@@ -125,6 +125,8 @@ export default function ShipVisitFormPage() {
     guest1_id_type: "", guest1_id_number: "",
     guest2_first: "", guest2_last: "", guest2_dob: "", guest2_email: "",
     guest2_id_type: "", guest2_id_number: "",
+    guest3_first: "", guest3_last: "", guest3_dob: "", guest3_email: "",
+    guest3_id_type: "", guest3_id_number: "",
     agent: "", notes: "", botField: "",
   });
   const set = (k: keyof typeof f) => (v: string) => setF((p) => ({ ...p, [k]: v }));
@@ -147,10 +149,12 @@ export default function ShipVisitFormPage() {
 
   const hasG1 = !!f.guest1_first.trim();
   const hasG2 = !!f.guest2_first.trim();
+  const hasG3 = !!f.guest3_first.trim();
 
   // Has to match what the server counts: she only takes a place when she is
   // being registered on this form.
-  const partySize = (withQuince ? 1 : 0) + (hasG1 ? 1 : 0) + (hasG2 ? 1 : 0);
+  const partySize = (withQuince ? 1 : 0) + (hasG1 ? 1 : 0) + (hasG2 ? 1 : 0)
+    + (hasG3 ? 1 : 0);
 
   // Declared before duplicateEmail, which reads the visit date off it to work
   // out who is a minor.
@@ -169,6 +173,7 @@ export default function ShipVisitFormPage() {
     if (withQuince) entries.push(["quince", f.quince_email, f.quince_dob]);
     if (hasG1) entries.push(["guest1", f.guest1_email, f.guest1_dob]);
     if (hasG2) entries.push(["guest2", f.guest2_email, f.guest2_dob]);
+    if (hasG3) entries.push(["guest3", f.guest3_email, f.guest3_dob]);
     for (const [who, raw, dob] of entries) {
       const e = raw.trim().toLowerCase();
       if (!e) continue;
@@ -177,9 +182,9 @@ export default function ShipVisitFormPage() {
       if (seen.get(e)! > 1) return { email: e, who };
     }
     return null;
-  }, [withQuince, hasG1, hasG2, chosen?.visit_date,
-      f.quince_email, f.guest1_email, f.guest2_email,
-      f.quince_dob, f.guest1_dob, f.guest2_dob]);
+  }, [withQuince, hasG1, hasG2, hasG3, chosen?.visit_date,
+      f.quince_email, f.guest1_email, f.guest2_email, f.guest3_email,
+      f.quince_dob, f.guest1_dob, f.guest2_dob, f.guest3_dob]);
 
   const wontFit = !!chosen && partySize > chosen.remaining;
   const noPeople = partySize === 0;
@@ -222,6 +227,7 @@ export default function ShipVisitFormPage() {
         : []),
       ...(hasG1 ? [{ who: "Guest 1", name: `${f.guest1_first} ${f.guest1_last}`.trim(), idType: f.guest1_id_type }] : []),
       ...(hasG2 ? [{ who: "Guest 2", name: `${f.guest2_first} ${f.guest2_last}`.trim(), idType: f.guest2_id_type }] : []),
+      ...(hasG3 ? [{ who: "Guest 3", name: `${f.guest3_first} ${f.guest3_last}`.trim(), idType: f.guest3_id_type }] : []),
     ];
     return (
       <>
@@ -575,6 +581,24 @@ export default function ShipVisitFormPage() {
                          hint={duplicateEmail?.who === "guest2" ? "This address is already used by another adult on this form." : undefined} />
                   <Field id="g2t" en="Type of ID" es="Tipo de Identificación" required={hasG2} options={ID_TYPES} value={f.guest2_id_type} onChange={set("guest2_id_type")} />
                   <Field id="g2n" en="Guest #2 ID" es="ID del Invitado #2" required={hasG2} value={f.guest2_id_number} onChange={set("guest2_id_number")} />
+                </div>
+              </fieldset>
+
+              {/* Guest 3 — optional */}
+              <fieldset className="space-y-4">
+                <legend className="font-display text-xl font-semibold text-royal-800">
+                  Guest #3 <span className="text-base font-normal text-slate-400">(optional / opcional)</span>
+                </legend>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field id="g3f" en="First Name" es="Nombre del Tercer Invitado" value={f.guest3_first} onChange={set("guest3_first")} />
+                  <Field id="g3l" en="Last Name" es="Apellido del Tercer Invitado" required={hasG3} value={f.guest3_last} onChange={set("guest3_last")} />
+                  <Field id="g3d" en="Date of Birth" es="Fecha de Nacimiento" required={hasG3} type="date" value={f.guest3_dob} onChange={set("guest3_dob")} />
+                  <Field id="g3e" en="Email Address" es="Correo Electrónico" required={hasG3} type="email"
+                         value={f.guest3_email} onChange={set("guest3_email")}
+                         bad={duplicateEmail?.who === "guest3"}
+                         hint={duplicateEmail?.who === "guest3" ? "This address is already used by another adult on this form." : undefined} />
+                  <Field id="g3t" en="Type of ID" es="Tipo de Identificación" required={hasG3} options={ID_TYPES} value={f.guest3_id_type} onChange={set("guest3_id_type")} />
+                  <Field id="g3n" en="Guest #3 ID" es="ID del Invitado #3" required={hasG3} value={f.guest3_id_number} onChange={set("guest3_id_number")} />
                 </div>
               </fieldset>
 

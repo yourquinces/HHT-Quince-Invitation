@@ -103,6 +103,12 @@ function attendees(r: ShipVisitRegistration) {
       dob: r.guest2_dob, idType: r.guest2_id_type, id: r.guest2_id_number,
       email: r.guest2_email, mobile, citizenship: r.guest2_citizenship,
     },
+    {
+      key: "guest3", who: "Guest 3",
+      first: r.guest3_first, last: r.guest3_last, name: person(r.guest3_first, r.guest3_last),
+      dob: r.guest3_dob, idType: r.guest3_id_type, id: r.guest3_id_number,
+      email: r.guest3_email, mobile, citizenship: r.guest3_citizenship,
+    },
   ];
   return rows.filter((x) => x.name);
 }

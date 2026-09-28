@@ -47,6 +47,12 @@ export interface ShipVisitSubmission {
   guest2_email?: string;
   guest2_id_type?: string;
   guest2_id_number?: string;
+  guest3_first?: string;
+  guest3_last?: string;
+  guest3_dob?: string;
+  guest3_email?: string;
+  guest3_id_type?: string;
+  guest3_id_number?: string;
   agent?: string;
   notes?: string;
 }
@@ -137,6 +143,12 @@ export interface ShipVisitRegistration {
   guest2_email: string | null;
   guest2_id_type: string | null;
   guest2_id_number: string | null;
+  guest3_first: string | null;
+  guest3_last: string | null;
+  guest3_dob: string | null;
+  guest3_email: string | null;
+  guest3_id_type: string | null;
+  guest3_id_number: string | null;
   agent: string | null;
   notes: string | null;
   party_size: number;
@@ -146,6 +158,7 @@ export interface ShipVisitRegistration {
   quince_citizenship: string | null;
   guest1_citizenship: string | null;
   guest2_citizenship: string | null;
+  guest3_citizenship: string | null;
   /** The quinceañera cabin this whole party bills to. Null until an agent
    *  confirms it in QRS — a party belongs to a cabin, not to a passenger, so
    *  a relative with no booking of her own is still charged here. */
@@ -155,8 +168,8 @@ export interface ShipVisitRegistration {
   status: "pending" | "approved" | "rejected";
 }
 
-/** Which of the three people on a registration a value belongs to. */
-export type Who = "quince" | "guest1" | "guest2";
+/** Which of the people on a registration a value belongs to. */
+export type Who = "quince" | "guest1" | "guest2" | "guest3";
 
 export interface StaffShipVisitData {
   visits: StaffShipVisit[];

@@ -37,6 +37,7 @@ function sheetRows(d, visit) {
       : [["Quinceañera", d.quince_first, d.quince_last, d.quince_dob, d.quince_email, d.quince_id_type, d.quince_id_number]]),
     ["Guest #1", d.guest1_first, d.guest1_last, d.guest1_dob, d.guest1_email, d.guest1_id_type, d.guest1_id_number],
     ["Guest #2", d.guest2_first, d.guest2_last, d.guest2_dob, d.guest2_email, d.guest2_id_type, d.guest2_id_number],
+    ["Guest #3", d.guest3_first, d.guest3_last, d.guest3_dob, d.guest3_email, d.guest3_id_type, d.guest3_id_number],
   ];
   return people
     .filter(([, first]) => (first || "").trim())
