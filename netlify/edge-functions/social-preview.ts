@@ -127,6 +127,25 @@ export default async (request: Request, context: { next: () => Promise<Response>
     );
   }
 
+  if (path === "/ship-visit-allure") {
+    const html = await res.text();
+    return new Response(
+      html.replace(
+        /<!--SOCIAL:START-->[\s\S]*?<!--SOCIAL:END-->/,
+        tags({
+          title: "Allure of the Seas Ship Visit · October 11",
+          description:
+            "An exclusive Quinceañera Cruise ship visit. Walk aboard Allure of the Seas, " +
+            "meet the other girls in your group and take pictures together. " +
+            "Sunday, October 11, 2026 at 10:00 AM, Port Everglades. Space is limited.",
+          image: origin + SHIP_IMAGE["Allure of the Seas"],
+          url: origin + "/ship-visit-allure",
+        }),
+      ),
+      { status: res.status, headers: res.headers },
+    );
+  }
+
   const codeMatch = path.match(/^\/c\/([A-Za-z0-9_-]+)$/);
   const slugMatch = path.match(/^\/i\/([^/]+)(?:\/.*)?$/);
 
@@ -185,4 +204,4 @@ export default async (request: Request, context: { next: () => Promise<Response>
   });
 };
 
-export const config = { path: ["/i/*", "/c/*", "/ship-visit-invite"] };
+export const config = { path: ["/i/*", "/c/*", "/ship-visit-invite", "/ship-visit-allure"] };

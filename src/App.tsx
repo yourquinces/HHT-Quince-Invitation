@@ -18,6 +18,7 @@ import GroupCruisePage from "./components/GroupCruisePage";
 import GuestListPage from "./components/GuestListPage";
 import ShipVisitFormPage from "./components/ShipVisitFormPage";
 import ShipVisitInvitePage from "./components/ShipVisitInvitePage";
+import ShipVisitAllureInvitePage from "./components/ShipVisitAllureInvitePage";
 import ShipVisitsStaffPage from "./components/ShipVisitsStaffPage";
 import QuinceHubPage from "./components/QuinceHubPage";
 import QuinceRegistrationPage from "./components/QuinceRegistrationPage";
@@ -155,6 +156,8 @@ export default function App() {
   // The announcement families are texted — the page half of the ship-visit
   // email, since Resend gives a send no shareable URL of its own.
   const isShipVisitInvite = route === "/ship-visit-invite";
+  // Same announcement for the Oct 11 2026 Allure of the Seas visit.
+  const isShipVisitAllure = route === "/ship-visit-allure";
   const isStaffShipVisits = route === "/staff/ship-visits";
   const liveSlug = liveSlugFromPath(pathname);
 
@@ -167,7 +170,7 @@ export default function App() {
     !!editSlug || !!friendsSlug || !!groupCruiseSlug || !!groupCode || !!guestsSlug ||
     !!hubSlug || !!registerSlug || !!liveSlug ||
     isRegisterPage || isStaffRegistrations || isStaffHubs || isShipVisit ||
-    isShipVisitInvite || isStaffShipVisits;
+    isShipVisitInvite || isShipVisitAllure || isStaffShipVisits;
 
   useEffect(() => {
     if (pageOwnsTitle) return;
@@ -205,6 +208,7 @@ export default function App() {
   if (isStaffRegistrations) return <RegistrationsStaffPage />;
   if (isStaffHubs) return <HubsStaffPage />;
   if (isShipVisitInvite) return <ShipVisitInvitePage />;
+  if (isShipVisitAllure) return <ShipVisitAllureInvitePage />;
   if (isShipVisit) return <ShipVisitFormPage />;
   if (isStaffShipVisits) return <ShipVisitsStaffPage />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;
