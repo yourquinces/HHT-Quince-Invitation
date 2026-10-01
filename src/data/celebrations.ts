@@ -12,10 +12,11 @@
 export interface Celebration {
   /** Name as the guest of honour is known to her guests. */
   honoree: string;
-  /** Big line under her name, e.g. "70th Birthday". */
+  /** Big line under her name, in Spanish, e.g. "70 Cumpleaños". */
   occasion: string;
   /** ISO sail date — must match an id in sailings.ts. */
   sailDate: string;
+  /** First person, from the guest of honour herself. Page is in Spanish. */
   message: string;
   signature: string;
   /** Only Camila or Luisa — see the agent rule in the README. */
@@ -25,13 +26,14 @@ export interface Celebration {
 export const celebrations: Record<string, Celebration> = {
   "amandita-70": {
     honoree: "Amandita",
-    occasion: "70th Birthday",
+    occasion: "70 Cumpleaños",
     sailDate: "2027-07-24",
     message:
-      "Amandita is turning 70, and we are celebrating at sea! Join her family and friends " +
-      "for a week aboard Icon of the Seas — sunshine, great food, beautiful ports and many " +
-      "reasons to toast to seventy wonderful years. It would mean the world to have you with us.",
-    signature: "With love, Amandita’s family",
+      "¡Voy a cumplir 70 años y quiero celebrarlo en alta mar con ustedes! Los invito a " +
+      "acompañarme una semana a bordo del Icon of the Seas: sol, buena comida, puertos " +
+      "preciosos y muchos motivos para brindar por setenta años maravillosos. Tenerlos " +
+      "conmigo sería el mejor regalo.",
+    signature: "Con mucho cariño, Amandita",
     agentName: "Luisa",
   },
 };

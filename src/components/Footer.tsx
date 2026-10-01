@@ -1,6 +1,6 @@
 import { invitation } from "../data/invitation";
 
-export default function Footer() {
+export default function Footer({ lang }: { lang?: "es" } = {}) {
   const { office } = invitation;
   return (
     <footer className="bg-royal-900 px-5 py-12 text-center text-sm text-royal-200 sm:px-8">
@@ -25,7 +25,7 @@ export default function Footer() {
         </a>
       </p>
       <p className="mt-6 text-xs text-royal-300">
-        © {new Date().getFullYear()} {office.name}. All rights reserved.
+        © {new Date().getFullYear()} {office.name}. {lang === "es" ? "Todos los derechos reservados." : "All rights reserved."}
       </p>
     </footer>
   );

@@ -6,6 +6,10 @@
 // the hero is the ship, there is no registry or private-events list, and the
 // interest form feeds the regular-cruise `leads` pipeline, not `quince_leads`.
 //
+// The page is in Spanish, so it carries its own Spanish versions of the
+// shared sections (details, pricing, booking, contact) rather than the
+// English components the quince invitations use.
+//
 // Content lives in src/data/celebrations.ts.
 
 import { useEffect, useState } from "react";
@@ -14,10 +18,6 @@ import { invitation } from "../data/invitation";
 import { celebrations } from "../data/celebrations";
 import { applyGroupCruiseRow } from "../lib/liveInvitation";
 import type { InvitationRow } from "../lib/liveInvitation";
-import CruiseDetails from "./CruiseDetails";
-import PricingSection from "./PricingSection";
-import ReservationSection from "./ReservationSection";
-import ContactSection from "./ContactSection";
 import Header from "./Header";
 import Footer from "./Footer";
 import Icon from "./Icon";
@@ -29,6 +29,32 @@ type Status = "idle" | "submitting" | "success" | "error";
 
 // The regular (non-quince) quote pipeline. CORS is open on that function.
 const QUOTE_ENDPOINT = "https://hht-cruise-quote.netlify.app/.netlify/functions/quote-request";
+
+const MONTHS = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+/** "24 al 31 de julio de 2027" from the ISO sail date and length. */
+function spanishDates(iso: string, nights: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const start = new Date(Date.UTC(y, m - 1, d));
+  const end = new Date(Date.UTC(y, m - 1, d + nights));
+  const sm = MONTHS[start.getUTCMonth()];
+  const em = MONTHS[end.getUTCMonth()];
+  return sm === em
+    ? `${start.getUTCDate()} al ${end.getUTCDate()} de ${em} de ${end.getUTCFullYear()}`
+    : `${start.getUTCDate()} de ${sm} al ${end.getUTCDate()} de ${em} de ${end.getUTCFullYear()}`;
+}
+
+const ITINERARY_ES: Record<string, string> = {
+  "Western Caribbean": "Caribe Occidental",
+  "Eastern Caribbean": "Caribe Oriental",
+  "Southern Caribbean": "Caribe Sur",
+  Mediterranean: "Mediterráneo",
+};
+
+const GUESTS_ES: Record<string, string> = { "2": "Dos", "3": "Tres", "4": "Cuatro" };
 
 const inputClass =
   "w-full rounded-xl border border-blush-200 bg-white px-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:border-royal-400";
@@ -74,34 +100,35 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
   });
 
   const title = celebration
-    ? `${celebration.honoree}’s ${celebration.occasion} Cruise | ${invitation.cruise.ship}`
+    ? `${celebration.occasion} de ${celebration.honoree} | ${invitation.cruise.ship}`
     : "Happy Holidays Travel";
   useEffect(() => {
     document.title = title;
+    document.documentElement.lang = "es";
     // index.html's fallback description talks about quinceañeras.
     if (celebration)
       document
         .querySelector('meta[name="description"]')
         ?.setAttribute(
           "content",
-          `Celebrate ${celebration.honoree}'s ${celebration.occasion} aboard ` +
-            `${invitation.cruise.ship}, ${invitation.cruise.sailingDates}.`,
+          `Celebre el ${celebration.occasion} de ${celebration.honoree} a bordo del ` +
+            `${invitation.cruise.ship}.`,
         );
   }, [title, celebration]);
 
-  const { cruise, office } = invitation;
+  const { cruise, office, agent, pricing, reservationFormUrl, depositPaymentUrl } = invitation;
 
   if (!celebration || !ready) {
     return (
       <>
-        <Header />
+        <Header lang="es" />
         <main className="flex min-h-[60vh] items-center justify-center px-5 text-center">
           <div>
             <p className="font-display text-2xl font-semibold text-royal-800">
-              We could not find this invitation.
+              No pudimos encontrar esta invitación.
             </p>
             <p className="mt-3 text-slate-600">
-              Please double check the link you received, or contact Happy Holidays Travel at{" "}
+              Verifique el enlace que recibió, o llame a Happy Holidays Travel al{" "}
               <a href={`tel:+${office.phoneDial}`} className="font-medium text-royal-600">
                 {office.phoneDisplay}
               </a>
@@ -109,7 +136,7 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
             </p>
           </div>
         </main>
-        <Footer />
+        <Footer lang="es" />
       </>
     );
   }
@@ -127,7 +154,7 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
           last_name: fields.lastName.trim(),
           email: fields.email.trim(),
           phone: fields.phone.trim(),
-          language: "English",
+          language: "Spanish",
           cruise_type: `Group — ${celebration.occasion} (${celebration.honoree})`,
           dates: cruise.sailingDates,
           duration: `${cruise.nights} nights`,
@@ -150,16 +177,30 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
     }
   }
 
+  const datesEs = spanishDates(celebration.sailDate, cruise.nights);
+  const itineraryEs = ITINERARY_ES[cruise.itineraryName] ?? cruise.itineraryName;
   const details = [
     { icon: "ship", text: `${cruise.ship} · ${cruise.line}` },
-    { icon: "calendar", text: cruise.sailingDates },
-    { icon: "moon", text: `${cruise.nights}-Night ${cruise.itineraryName} Cruise` },
-    { icon: "anchor", text: `Departing from ${cruise.departurePort}` },
+    { icon: "calendar", text: datesEs },
+    { icon: "moon", text: `Crucero de ${cruise.nights} noches por el ${itineraryEs}` },
+    { icon: "anchor", text: `Saliendo de ${cruise.departurePort}` },
   ];
+  const cards = [
+    { icon: "ship", label: "Barco", value: `${cruise.ship} — ${cruise.line}` },
+    { icon: "calendar", label: "Fechas", value: datesEs },
+    { icon: "moon", label: "Duración", value: `${cruise.nights} noches · ${itineraryEs}` },
+    { icon: "anchor", label: "Puerto de salida", value: cruise.departurePort },
+  ];
+  const occupancyLinks = pricing.occupancyLinks
+    .map((l) => {
+      const guests = new URL(l.url, window.location.origin).searchParams.get("guests") ?? "";
+      return GUESTS_ES[guests] ? { label: `${GUESTS_ES[guests]} personas por cabina`, url: l.url } : null;
+    })
+    .filter((l): l is { label: string; url: string } => !!l);
 
   return (
     <>
-      <Header />
+      <Header lang="es" />
       <main>
         <section
           id="top"
@@ -180,13 +221,13 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
                 <Icon name="sparkles" className="h-7 w-7" />
               </div>
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-gold-600">
-                You’re Invited
+                Están Invitados
               </p>
               <p className="mt-4 font-display text-lg italic text-royal-600 sm:text-xl">
-                Celebrate with us at sea
+                Celebremos juntos en alta mar
               </p>
               <h1 className="mt-2 font-display text-4xl font-bold leading-tight text-royal-800 sm:text-5xl lg:text-6xl">
-                {celebration.honoree}’s
+                {celebration.honoree}
                 <span className="mt-1 block bg-gradient-to-r from-rosa-500 to-royal-500 bg-clip-text text-transparent">
                   {celebration.occasion}
                 </span>
@@ -204,8 +245,8 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
               </ul>
 
               <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center lg:justify-start">
-                <PrimaryButton href="#join">Join the Celebration</PrimaryButton>
-                <SecondaryButton href="#pricing">View Cabin Prices</SecondaryButton>
+                <PrimaryButton href="#join">Quiero Ir</PrimaryButton>
+                <SecondaryButton href="#pricing">Ver Precios</SecondaryButton>
               </div>
             </div>
 
@@ -238,18 +279,90 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
           </div>
         </Section>
 
-        <CruiseDetails />
+        <Section id="details" className="bg-blush-50">
+          <h2 className="text-center font-display text-3xl font-bold text-royal-800 sm:text-4xl">
+            Detalles del Crucero
+          </h2>
+          <div className="mt-10 grid items-center gap-10 lg:grid-cols-5 lg:gap-14">
+            <div className="lg:col-span-2">
+              <div className="overflow-hidden rounded-3xl shadow-lg shadow-royal-800/10 ring-1 ring-blush-200">
+                <img
+                  src={cruise.shipImage}
+                  alt={cruise.shipImageAlt}
+                  className="aspect-[4/3] w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+            <div className="lg:col-span-3">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {cards.map((c) => (
+                  <div
+                    key={c.label}
+                    className="flex items-start gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-blush-200"
+                  >
+                    <span className="mt-0.5 rounded-full bg-royal-50 p-2.5 text-royal-600">
+                      <Icon name={c.icon} className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gold-600">
+                        {c.label}
+                      </p>
+                      <p className="mt-1 font-medium text-royal-800">{c.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-blush-200">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gold-600">
+                  Destinos
+                </p>
+                <ul className="mt-3 flex flex-wrap gap-2.5">
+                  {cruise.destinations.map((d) => (
+                    <li
+                      key={d}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-rosa-100 px-4 py-2 text-sm font-medium text-rosa-600"
+                    >
+                      <Icon name="mapPin" className="h-4 w-4" />
+                      {d}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </Section>
 
-        <PricingSection />
+        <Section id="pricing" className="bg-white">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="font-display text-3xl font-bold text-royal-800 sm:text-4xl">
+              Escoja la Cabina Perfecta para Usted
+            </h2>
+            <p className="mt-4 text-slate-600">
+              Los precios son por persona y varían según la categoría de la cabina y cuántas
+              personas la comparten.
+            </p>
+            <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap">
+              {pricing.fullPricingUrl && (
+                <SecondaryButton href={pricing.fullPricingUrl}>Ver Todos los Precios</SecondaryButton>
+              )}
+              {occupancyLinks.map((link) => (
+                <SecondaryButton key={link.label} href={link.url}>
+                  {link.label}
+                </SecondaryButton>
+              ))}
+            </div>
+          </div>
+        </Section>
 
         <Section id="join" className="bg-white">
           <div className="mx-auto max-w-2xl">
             <h2 className="text-center font-display text-3xl font-bold text-royal-800 sm:text-4xl">
-              Coming to Celebrate?
+              ¿Viene a Celebrar?
             </h2>
             <p className="mt-4 text-center text-slate-600">
-              Leave your details and {celebration.agentName} from Happy Holidays Travel will call
-              you with cabin availability, current group pricing and the next steps.
+              Déjenos sus datos y {celebration.agentName}, de Happy Holidays Travel, le llamará
+              con la disponibilidad de cabinas, los precios del grupo y los próximos pasos.
             </p>
 
             {status === "success" ? (
@@ -257,7 +370,7 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
                 role="status"
                 className="mt-8 rounded-2xl bg-blush-50 px-6 py-8 text-center font-display text-xl text-royal-800"
               >
-                Thank you! {celebration.agentName} will be in touch shortly.
+                ¡Gracias! {celebration.agentName} se comunicará con usted muy pronto.
               </p>
             ) : (
               <form onSubmit={handleSubmit} className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -272,7 +385,7 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
                 />
                 <div>
                   <label className={labelClass} htmlFor="cel-first">
-                    First name
+                    Nombre
                   </label>
                   <input
                     id="cel-first"
@@ -284,7 +397,7 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="cel-last">
-                    Last name
+                    Apellido
                   </label>
                   <input
                     id="cel-last"
@@ -295,7 +408,7 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="cel-email">
-                    Email
+                    Correo electrónico
                   </label>
                   <input
                     id="cel-email"
@@ -308,7 +421,7 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="cel-phone">
-                    Phone
+                    Teléfono
                   </label>
                   <input
                     id="cel-phone"
@@ -320,8 +433,8 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
                 </div>
                 <div className="sm:col-span-2">
                   <label className={labelClass} htmlFor="cel-notes">
-                    How many guests, and anything we should know?{" "}
-                    <span className="font-normal text-slate-400">(optional)</span>
+                    ¿Cuántas personas, y algo más que debamos saber?{" "}
+                    <span className="font-normal text-slate-400">(opcional)</span>
                   </label>
                   <textarea
                     id="cel-notes"
@@ -337,11 +450,11 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
                     disabled={status === "submitting"}
                     className="w-full rounded-full bg-gradient-to-r from-rosa-500 to-royal-500 px-8 py-4 font-semibold text-white shadow-lg shadow-royal-800/20 disabled:opacity-60"
                   >
-                    {status === "submitting" ? "Sending…" : "Send My Details"}
+                    {status === "submitting" ? "Enviando…" : "Enviar Mis Datos"}
                   </button>
                   {status === "error" && (
                     <p role="alert" className="mt-3 text-center text-sm font-medium text-rosa-600">
-                      That did not go through. Please try again, or call us at{" "}
+                      No se pudo enviar. Intente de nuevo, o llámenos al{" "}
                       <a href={`tel:+${office.phoneDial}`} className="underline">
                         {office.phoneDisplay}
                       </a>
@@ -354,22 +467,88 @@ export default function CelebrationInvitePage({ slug }: { slug: string }) {
           </div>
         </Section>
 
-        <ReservationSection />
+        <Section id="reserve" className="bg-blush-50">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="font-display text-3xl font-bold text-royal-800 sm:text-4xl">
+              ¿Listo para Reservar?
+            </h2>
+            <p className="mt-4 text-slate-600">
+              Si ya sabe que viene, complete el formulario oficial de reservación de Happy
+              Holidays Travel.
+            </p>
+            <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row">
+              {reservationFormUrl && (
+                <PrimaryButton href={reservationFormUrl} className="px-12">
+                  Reservar mi Cabina
+                </PrimaryButton>
+              )}
+              {depositPaymentUrl && (
+                <SecondaryButton href={depositPaymentUrl}>Pagar el Depósito</SecondaryButton>
+              )}
+            </div>
+            <ol className="mt-12 grid gap-4 sm:grid-cols-3">
+              {[
+                "Revise los precios de las cabinas.",
+                "Complete el formulario de reservación.",
+                "Pague el depósito requerido.",
+              ].map((step, i) => (
+                <li
+                  key={step}
+                  className="rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-blush-200"
+                >
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-rosa-400 to-royal-500 font-display text-lg font-bold text-white">
+                    {i + 1}
+                  </span>
+                  <p className="mt-3 text-sm font-medium text-royal-800">{step}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </Section>
 
         <Section className="bg-blush-50">
           <div className="mx-auto max-w-2xl rounded-2xl bg-white px-6 py-7 text-center ring-1 ring-blush-200">
             <p className="text-slate-600">
-              To sail with the group on the group rate, cabins must be booked through Happy
-              Holidays Travel. A{" "}
-              <strong className="text-royal-800">{invitation.deposit.amount}</strong> nonrefundable
-              deposit per person starts the reservation, and the balance can be paid on a plan.
+              Para viajar con el grupo y obtener la tarifa de grupo, las cabinas deben reservarse
+              con Happy Holidays Travel. Un depósito no reembolsable de{" "}
+              <strong className="text-royal-800">{invitation.deposit.amount}</strong> por persona
+              inicia la reservación, y el balance se puede pagar a plazos.
             </p>
           </div>
         </Section>
 
-        <ContactSection />
+        <Section id="contact" className="bg-white">
+          <h2 className="text-center font-display text-3xl font-bold text-royal-800 sm:text-4xl">
+            ¿Preguntas? Estamos para Ayudarle
+          </h2>
+          <div className="mx-auto mt-10 max-w-xl rounded-3xl bg-blush-50 p-8 text-center ring-1 ring-blush-200">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold-600">
+              Su Agente de Happy Holidays Travel
+            </p>
+            <p className="mt-2 font-display text-2xl font-semibold text-royal-800">{agent.name}</p>
+            <p className="mt-1 text-slate-600">{agent.phoneDisplay}</p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {[
+                { icon: "phone", label: "Llamar", href: `tel:+${agent.phoneDial}` },
+                { icon: "whatsapp", label: "WhatsApp", href: agent.whatsappUrl },
+                { icon: "mail", label: "Correo", href: `mailto:${agent.email}` },
+              ].map((a) => (
+                <a
+                  key={a.label}
+                  href={a.href}
+                  target={a.href.startsWith("http") ? "_blank" : undefined}
+                  rel={a.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-royal-600 px-6 py-3.5 text-sm font-semibold text-white shadow transition hover:bg-royal-700"
+                >
+                  <Icon name={a.icon} className="h-4 w-4" />
+                  {a.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </Section>
       </main>
-      <Footer />
+      <Footer lang="es" />
     </>
   );
 }

@@ -158,10 +158,10 @@ export default async (request: Request, context: { next: () => Promise<Response>
       html.replace(
         /<!--SOCIAL:START-->[\s\S]*?<!--SOCIAL:END-->/,
         tags({
-          title: `${c.honoree}'s ${c.occasion} Cruise · Icon of the Seas`,
+          title: `${c.occasion} de ${c.honoree} · Icon of the Seas`,
           description:
-            `Celebrate ${c.honoree}'s ${c.occasion} with family and friends aboard Icon of the Seas, ` +
-            `July 24–31, 2027 from Miami. Cabin prices and how to reserve.`,
+            `Celebre el ${c.occasion} de ${c.honoree} a bordo del Icon of the Seas, ` +
+            `del 24 al 31 de julio de 2027 desde Miami. Precios de cabinas y cómo reservar.`,
           image: origin + SHIP_IMAGE["Icon of the Seas"],
           url: origin + path,
         }),

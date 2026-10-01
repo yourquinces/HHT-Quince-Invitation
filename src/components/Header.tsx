@@ -1,7 +1,7 @@
 import { invitation } from "../data/invitation";
 import Icon from "./Icon";
 
-export default function Header() {
+export default function Header({ lang }: { lang?: "es" } = {}) {
   const { agent, office, reservationFormUrl } = invitation;
   // On the public marketing page the visitor has no invitation and no
   // agent yet, so sending her straight to the booking form skips the
@@ -10,7 +10,11 @@ export default function Header() {
     typeof window !== "undefined" &&
     window.location.pathname.replace(/\/+$/, "") === "/quince-cruises";
   const ctaHref = isMarketingPage ? "#inquire" : reservationFormUrl;
-  const ctaLabel = isMarketingPage ? "Get My Free Quote" : "Reserve Your Cabin";
+  const ctaLabel = isMarketingPage
+    ? "Get My Free Quote"
+    : lang === "es"
+      ? "Reserve su Cabina"
+      : "Reserve Your Cabin";
 
   return (
     <header className="sticky top-0 z-40 border-b border-blush-200/70 bg-white/85 backdrop-blur">
