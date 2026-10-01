@@ -26,6 +26,7 @@ import RegistrationsStaffPage from "./components/RegistrationsStaffPage";
 import HubsStaffPage from "./components/HubsStaffPage";
 import PricingPage from "./components/PricingPage";
 import QuinceCruisesPage from "./components/QuinceCruisesPage";
+import CelebrationInvitePage from "./components/CelebrationInvitePage";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import PersonalMessage from "./components/PersonalMessage";
@@ -160,6 +161,8 @@ export default function App() {
   const isShipVisitAllure = route === "/ship-visit-allure";
   const isStaffShipVisits = route === "/staff/ship-visits";
   const liveSlug = liveSlugFromPath(pathname);
+  // Birthdays and other non-quince parties on a group sailing.
+  const celebrationSlug = route.match(/^\/celebrate\/([^/]+)$/)?.[1] ?? null;
 
   // Every page below sets its own tab title, and React runs a parent's effect
   // AFTER its children's — so a blanket title here overwrote all of them, and
@@ -170,7 +173,7 @@ export default function App() {
     !!editSlug || !!friendsSlug || !!groupCruiseSlug || !!groupCode || !!guestsSlug ||
     !!hubSlug || !!registerSlug || !!liveSlug ||
     isRegisterPage || isStaffRegistrations || isStaffHubs || isShipVisit ||
-    isShipVisitInvite || isShipVisitAllure || isStaffShipVisits;
+    isShipVisitInvite || isShipVisitAllure || isStaffShipVisits || !!celebrationSlug;
 
   useEffect(() => {
     if (pageOwnsTitle) return;
@@ -211,6 +214,7 @@ export default function App() {
   if (isShipVisitAllure) return <ShipVisitAllureInvitePage />;
   if (isShipVisit) return <ShipVisitFormPage />;
   if (isStaffShipVisits) return <ShipVisitsStaffPage />;
+  if (celebrationSlug) return <CelebrationInvitePage slug={decodeURIComponent(celebrationSlug)} />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;
   return <InvitationPage />;
 }

@@ -22,6 +22,8 @@
 
 // Same publishable key the browser bundle already ships. Row-level security
 // exposes active invitations only.
+import { celebrations } from "../../src/data/celebrations.ts";
+
 const SUPABASE_URL = "https://jpgwcfswnfytyqzklrba.supabase.co";
 const SUPABASE_KEY = "sb_publishable_122S5BZIb5_yjD2ofGDuuA_nDeB7fuZ";
 
@@ -146,6 +148,28 @@ export default async (request: Request, context: { next: () => Promise<Response>
     );
   }
 
+  // Birthday / celebration invitations: static config, ship photo, no quince.
+  const celebrateMatch = path.match(/^\/celebrate\/([^/]+)$/);
+  if (celebrateMatch) {
+    const c = celebrations[decodeURIComponent(celebrateMatch[1])];
+    if (!c) return res;
+    const html = await res.text();
+    return new Response(
+      html.replace(
+        /<!--SOCIAL:START-->[\s\S]*?<!--SOCIAL:END-->/,
+        tags({
+          title: `${c.honoree}'s ${c.occasion} Cruise · Icon of the Seas`,
+          description:
+            `Celebrate ${c.honoree}'s ${c.occasion} with family and friends aboard Icon of the Seas, ` +
+            `July 24–31, 2027 from Miami. Cabin prices and how to reserve.`,
+          image: origin + SHIP_IMAGE["Icon of the Seas"],
+          url: origin + path,
+        }),
+      ),
+      { status: res.status, headers: res.headers },
+    );
+  }
+
   const codeMatch = path.match(/^\/c\/([A-Za-z0-9_-]+)$/);
   const slugMatch = path.match(/^\/i\/([^/]+)(?:\/.*)?$/);
 
@@ -204,4 +228,4 @@ export default async (request: Request, context: { next: () => Promise<Response>
   });
 };
 
-export const config = { path: ["/i/*", "/c/*", "/ship-visit-invite", "/ship-visit-allure"] };
+export const config = { path: ["/i/*", "/c/*", "/ship-visit-invite", "/ship-visit-allure", "/celebrate/*"] };
