@@ -99,6 +99,14 @@ function LiveInvitation({ slug }: { slug: string }) {
           if (es) {
             invitation.invitationMessage = es.message;
             invitation.invitationSignature = es.signature;
+          } else if (!row.family_message) {
+            invitation.invitationMessage =
+              "Nos encantaría que nuestra familia y amigos más cercanos nos acompañen a " +
+              "celebrar este momento inolvidable " +
+              (/of the seas/i.test(invitation.cruise.ship)
+                ? `a bordo del ${invitation.cruise.ship}. `
+                : "en alta mar. ") +
+              "¡Vengan a vacacionar, celebrar y crear recuerdos con nosotros!";
           }
           document.documentElement.lang = "es";
           document.title =

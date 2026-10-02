@@ -285,6 +285,19 @@ export function applyInvitationRow(row: InvitationRow): void {
     invitation.hero.imageAlt = `Aboard ${invitation.cruise.line}'s ${invitation.cruise.ship}`;
   }
 
+  // The built-in default message names the sample ship, so a family who
+  // never wrote their own would be told they sail on Icon whatever they booked.
+  // Placeholder ship values like "Vip 2028" get generic wording instead.
+  if (!row.family_message) {
+    const aboard = /of the seas/i.test(invitation.cruise.ship)
+      ? `aboard ${invitation.cruise.ship}`
+      : "at sea";
+    invitation.invitationMessage =
+      "We would love for our closest family and friends to join us as we celebrate " +
+      `this unforgettable milestone ${aboard}. ` +
+      "Come vacation, celebrate and make memories with us!";
+  }
+
   invitation.social.title = `Celebrate ${name}'s Quinceañera Cruise | ${invitation.cruise.ship}`;
   invitation.social.description =
     `Join ${name}, her family and friends aboard ${invitation.cruise.ship} ` +
