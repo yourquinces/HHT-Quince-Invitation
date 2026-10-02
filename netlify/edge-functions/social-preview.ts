@@ -23,6 +23,7 @@
 // Same publishable key the browser bundle already ships. Row-level security
 // exposes active invitations only.
 import { celebrations } from "../../src/data/celebrations.ts";
+import { datesEs } from "../../src/lib/spanish.ts";
 
 const SUPABASE_URL = "https://jpgwcfswnfytyqzklrba.supabase.co";
 const SUPABASE_KEY = "sb_publishable_122S5BZIb5_yjD2ofGDuuA_nDeB7fuZ";
@@ -206,10 +207,18 @@ export default async (request: Request, context: { next: () => Promise<Response>
     image = shipImage;
   } else {
     const name = row.preferred_name || row.quinceanera_name || "our quinceañera";
-    title = `Celebrate ${name}'s Quinceañera Cruise | ${ship}`;
-    description =
-      `Join ${name}, her family and friends aboard ${ship}${dates}. ` +
-      `Cruise details, cabin prices and how to reserve your cabin.`;
+    if (url.searchParams.get("lang") === "es") {
+      const fechas = row.sailing_dates ? ` del ${datesEs(row.sailing_dates)}` : "";
+      title = `Crucero de Quinceañera de ${name} | ${ship}`;
+      description =
+        `Acompañe a ${name}, su familia y amigos a bordo del ${ship}${fechas}. ` +
+        `Detalles del crucero, precios de cabinas y cómo reservar.`;
+    } else {
+      title = `Celebrate ${name}'s Quinceañera Cruise | ${ship}`;
+      description =
+        `Join ${name}, her family and friends aboard ${ship}${dates}. ` +
+        `Cruise details, cabin prices and how to reserve your cabin.`;
+    }
     // Her own photo is the picture people actually want to see.
     image = row.hero_image_url || shipImage;
   }
@@ -219,7 +228,7 @@ export default async (request: Request, context: { next: () => Promise<Response>
   const html = await res.text();
   const replaced = html.replace(
     /<!--SOCIAL:START-->[\s\S]*?<!--SOCIAL:END-->/,
-    tags({ title, description, image: absolute, url: origin + url.pathname }),
+    tags({ title, description, image: absolute, url: origin + url.pathname + (url.searchParams.get("lang") === "es" ? "?lang=es" : "") }),
   );
 
   return new Response(replaced, {

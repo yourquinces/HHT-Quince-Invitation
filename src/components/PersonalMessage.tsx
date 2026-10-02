@@ -9,7 +9,7 @@ export default function PersonalMessage() {
         <span aria-hidden="true" className="font-display text-6xl leading-none text-rosa-300">
           “
         </span>
-        <p className="-mt-4 font-display text-xl italic leading-relaxed text-royal-800 sm:text-2xl">
+        <p className="-mt-4 whitespace-pre-line font-display text-xl italic leading-relaxed text-royal-800 sm:text-2xl">
           {invitationMessage}
         </p>
         {invitationSignature && (

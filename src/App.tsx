@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { invitation } from "./data/invitation";
+import { spanishMessages } from "./data/spanishMessages";
+import { inviteLang, say } from "./lib/inviteLang";
 import {
   applyInvitationRow,
   editSlugFromPath,
@@ -42,9 +44,10 @@ import ContactSection from "./components/ContactSection";
 import Footer from "./components/Footer";
 
 function InvitationPage() {
+  const lang = inviteLang === "es" ? "es" : undefined;
   return (
     <>
-      <Header />
+      <Header lang={lang} />
       <main>
         <Hero />
         <PersonalMessage />
@@ -58,7 +61,7 @@ function InvitationPage() {
         <RegistrySection />
         <ContactSection />
       </main>
-      <Footer />
+      <Footer lang={lang} />
     </>
   );
 }
@@ -90,6 +93,18 @@ function LiveInvitation({ slug }: { slug: string }) {
         }
         applyInvitationRow(row);
         document.title = invitation.social.title;
+        if (inviteLang === "es") {
+          // Her family's own words, translated by hand — see spanishMessages.ts.
+          const es = spanishMessages[slug];
+          if (es) {
+            invitation.invitationMessage = es.message;
+            invitation.invitationSignature = es.signature;
+          }
+          document.documentElement.lang = "es";
+          document.title =
+            `Crucero de Quinceañera de ${invitation.quinceanera.preferredName} | ` +
+            invitation.cruise.ship;
+        }
         setState("ready");
       })
       .catch(() => {
@@ -104,7 +119,7 @@ function LiveInvitation({ slug }: { slug: string }) {
     return (
       <CenteredNotice>
         <p role="status" className="font-display text-2xl text-royal-800">
-          Opening your invitation…
+          {say("Opening your invitation…", "Abriendo su invitación…")}
         </p>
       </CenteredNotice>
     );
@@ -113,10 +128,13 @@ function LiveInvitation({ slug }: { slug: string }) {
     return (
       <CenteredNotice>
         <p className="font-display text-2xl font-semibold text-royal-800">
-          We could not find this invitation.
+          {say("We could not find this invitation.", "No pudimos encontrar esta invitación.")}
         </p>
         <p className="mt-3 text-slate-600">
-          Please double check the link you received, or contact Happy Holidays Travel at{" "}
+          {say(
+            "Please double check the link you received, or contact Happy Holidays Travel at",
+            "Por favor revise el enlace que recibió, o comuníquese con Happy Holidays Travel al",
+          )}{" "}
           <a href={`tel:+${invitation.office.phoneDial}`} className="font-medium text-royal-600">
             {invitation.office.phoneDisplay}
           </a>

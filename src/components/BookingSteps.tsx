@@ -1,7 +1,12 @@
+import { say } from "../lib/inviteLang";
+
 const STEPS = [
-  "Review the available cabin prices.",
-  "Complete the Happy Holidays Travel reservation form.",
-  "Submit the required deposit.",
+  say("Review the available cabin prices.", "Revise los precios de las cabinas disponibles."),
+  say(
+    "Complete the Happy Holidays Travel reservation form.",
+    "Complete el formulario de reservación de Happy Holidays Travel.",
+  ),
+  say("Submit the required deposit.", "Envíe el depósito requerido."),
 ];
 
 export default function BookingSteps() {
@@ -21,8 +26,10 @@ export default function BookingSteps() {
         ))}
       </ol>
       <p className="mt-6 text-center text-sm text-slate-600">
-        A Happy Holidays Travel agent will contact you to confirm your cabin, pricing and payment
-        schedule.
+        {say(
+          "A Happy Holidays Travel agent will contact you to confirm your cabin, pricing and payment schedule.",
+          "Un agente de Happy Holidays Travel se comunicará con usted para confirmar su cabina, el precio y el plan de pagos.",
+        )}
       </p>
     </div>
   );

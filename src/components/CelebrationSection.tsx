@@ -1,4 +1,5 @@
 import { invitation } from "../data/invitation";
+import { say } from "../lib/inviteLang";
 import Icon from "./Icon";
 
 export default function CelebrationSection() {
@@ -14,9 +15,12 @@ export default function CelebrationSection() {
           <Icon name="sparkles" className="h-8 w-8" />
         </div>
         <h2 className="font-display text-3xl font-bold leading-snug text-white sm:text-4xl">
-          {celebration.heading}
+          {say(celebration.heading, "¡Celebremos, Vacacionemos y Creemos Recuerdos Juntos!")}
         </h2>
-        <p className="mt-5 text-lg leading-relaxed text-royal-100">{celebration.description}</p>
+        <p className="mt-5 text-lg leading-relaxed text-royal-100">{say(
+            celebration.description,
+            "Acompañe a nuestra familia y amigos en una semana inolvidable llena de destinos hermosos, celebraciones privadas y recuerdos que durarán toda la vida.",
+          )}</p>
       </div>
     </section>
   );

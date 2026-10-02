@@ -1,4 +1,6 @@
 import { invitation } from "../data/invitation";
+import { say } from "../lib/inviteLang";
+import { datesEs, itineraryEs } from "../lib/spanish";
 import Icon from "./Icon";
 import PrimaryButton from "./PrimaryButton";
 import SecondaryButton from "./SecondaryButton";
@@ -8,9 +10,13 @@ export default function Hero() {
 
   const details = [
     { icon: "ship", text: `${cruise.ship} · ${cruise.line}` },
-    { icon: "calendar", text: cruise.sailingDates },
-    { icon: "moon", text: `${cruise.nights}-Night ${cruise.itineraryName} Cruise` },
-    { icon: "anchor", text: `Departing from ${cruise.departurePort}` },
+    { icon: "calendar", text: say(cruise.sailingDates, datesEs(cruise.sailingDates)) },
+    { icon: "moon", text: say(
+        `${cruise.nights}-Night ${cruise.itineraryName} Cruise`,
+        `Crucero de ${cruise.nights} noches por el ${itineraryEs(cruise.itineraryName)}`,
+      ),
+    },
+    { icon: "anchor", text: say(`Departing from ${cruise.departurePort}`, `Saliendo de ${cruise.departurePort}`) },
   ];
 
   return (
@@ -31,15 +37,15 @@ export default function Hero() {
             <Icon name="crown" className="h-7 w-7" />
           </div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-gold-600">
-            You’re Invited
+            {say("You’re Invited", "Está Invitado")}
           </p>
           <p className="mt-4 font-display text-lg italic text-royal-600 sm:text-xl">
-            Join us as we celebrate
+            {say("Join us as we celebrate", "Acompáñenos a celebrar")}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold leading-tight text-royal-800 sm:text-5xl lg:text-6xl">
-            {quinceanera.preferredName}’s
+            {say(`${quinceanera.preferredName}’s`, "El Crucero de Quinceañera de")}
             <span className="mt-1 block bg-gradient-to-r from-rosa-500 to-royal-500 bg-clip-text text-transparent">
-              Quinceañera Cruise
+              {say("Quinceañera Cruise", quinceanera.preferredName)}
             </span>
           </h1>
 
@@ -56,9 +62,9 @@ export default function Hero() {
 
           <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center lg:justify-start">
             {reservationFormUrl && (
-              <PrimaryButton href={reservationFormUrl}>Reserve Your Cabin</PrimaryButton>
+              <PrimaryButton href={reservationFormUrl}>{say("Reserve Your Cabin", "Reserve su Cabina")}</PrimaryButton>
             )}
-            <SecondaryButton href="#pricing">View Cabin Prices</SecondaryButton>
+            <SecondaryButton href="#pricing">{say("View Cabin Prices", "Ver Precios de Cabinas")}</SecondaryButton>
           </div>
         </div>
 

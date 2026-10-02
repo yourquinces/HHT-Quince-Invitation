@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { invitation } from "../data/invitation";
+import { inviteLang, say } from "../lib/inviteLang";
 import { submitQuinceLead } from "../lib/quinceLeads";
 import Icon from "./Icon";
 import PrimaryButton from "./PrimaryButton";
@@ -36,6 +37,22 @@ const CONTACT_METHODS = ["Phone call", "Text message", "WhatsApp", "Email"];
 const GUEST_OPTIONS = ["1", "2", "3", "4", "5", "6 or more", "Not sure yet"];
 const CABIN_OPTIONS = ["Interior", "Ocean View", "Balcony", "Suite", "Not sure yet"];
 
+// What a Spanish-reading guest sees for each option. The value submitted stays
+// English, so the agent's lead notes read the same whichever page it came from.
+const OPTION_ES: Record<string, string> = {
+  "Phone call": "Llamada",
+  "Text message": "Mensaje de texto",
+  WhatsApp: "WhatsApp",
+  Email: "Correo electrónico",
+  "6 or more": "6 o más",
+  "Not sure yet": "Aún no sé",
+  Interior: "Interior",
+  "Ocean View": "Vista al mar",
+  Balcony: "Balcón",
+  Suite: "Suite",
+};
+const optionLabel = (o: string) => say(o, OPTION_ES[o] ?? o);
+
 const inputClass =
   "w-full rounded-xl border border-blush-200 bg-white px-4 py-3.5 text-slate-800 placeholder:text-slate-400 focus:border-royal-400";
 const labelClass = "mb-1.5 block text-sm font-semibold text-royal-800";
@@ -64,7 +81,12 @@ export default function GuestInterestForm() {
 
   if (!leadForm.enabled) return null;
 
-  const successMessage = leadForm.successMessage.split("{name}").join(quinceanera.preferredName);
+  const successMessage = say(
+    leadForm.successMessage,
+    "¡Gracias! Un agente de Happy Holidays Travel se comunicará con usted pronto con más información para acompañar a {name} en su crucero.",
+  )
+    .split("{name}")
+    .join(quinceanera.preferredName);
 
   const set = (key: keyof Fields, value: string | boolean) => {
     setFields((f) => ({ ...f, [key]: value }));
@@ -73,15 +95,24 @@ export default function GuestInterestForm() {
 
   const validate = (): boolean => {
     const next: Partial<Record<keyof Fields, string>> = {};
-    if (!fields.name.trim()) next.name = "Please enter your first and last name.";
+    if (!fields.name.trim()) next.name = say("Please enter your first and last name.", "Por favor escriba su nombre y apellido.");
     if (!fields.email.trim()) {
-      next.email = "Please enter your email address.";
+      next.email = say("Please enter your email address.", "Por favor escriba su correo electrónico.");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim())) {
-      next.email = "Please enter a valid email address (example: name@email.com).";
+      next.email = say(
+        "Please enter a valid email address (example: name@email.com).",
+        "Por favor escriba un correo electrónico válido (ejemplo: nombre@correo.com).",
+      );
     }
-    if (!fields.phone.trim()) next.phone = "Please enter your phone number.";
-    if (!fields.preferredContact) next.preferredContact = "Please choose how we should contact you.";
-    if (!fields.consent) next.consent = "Please check this box so we may contact you.";
+    if (!fields.phone.trim()) next.phone = say("Please enter your phone number.", "Por favor escriba su número de teléfono.");
+    if (!fields.preferredContact) next.preferredContact = say(
+        "Please choose how we should contact you.",
+        "Por favor elija cómo prefiere que le contactemos.",
+      );
+    if (!fields.consent) next.consent = say(
+        "Please check this box so we may contact you.",
+        "Por favor marque esta casilla para que podamos contactarle.",
+      );
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -115,6 +146,7 @@ export default function GuestInterestForm() {
         client_notes: [
           `Invited guest — ${groupName}`,
           `Sailing: ${cruise.sailingDates}`,
+          inviteLang === "es" ? "Came from the Spanish invitation" : "",
           fields.preferredContact ? `Prefers ${fields.preferredContact}` : "",
           fields.guests ? `Guests traveling: ${fields.guests}` : "",
           fields.cabinInterest ? `Cabin interest: ${fields.cabinInterest}` : "",
@@ -136,9 +168,14 @@ export default function GuestInterestForm() {
       <div className="mx-auto max-w-2xl">
         <div className="text-center">
           <h2 className="font-display text-3xl font-bold text-royal-800 sm:text-4xl">
-            {leadForm.heading}
+            {say(leadForm.heading, "¿Le Gustaría Acompañarnos?")}
           </h2>
-          <p className="mt-4 text-slate-600">{leadForm.description}</p>
+          <p className="mt-4 text-slate-600">
+            {say(
+              leadForm.description,
+              "Comparta su información y un agente de Happy Holidays Travel se comunicará con usted con la disponibilidad de cabinas, los precios actuales y los próximos pasos.",
+            )}
+          </p>
         </div>
 
         {status === "success" ? (
@@ -175,7 +212,7 @@ export default function GuestInterestForm() {
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label htmlFor="lead-name" className={labelClass}>
-                  First and last name <span className="text-rosa-500">*</span>
+                  {say("First and last name", "Nombre y apellido")} <span className="text-rosa-500">*</span>
                 </label>
                 <input
                   id="lead-name"
@@ -198,7 +235,7 @@ export default function GuestInterestForm() {
 
               <div>
                 <label htmlFor="lead-email" className={labelClass}>
-                  Email address <span className="text-rosa-500">*</span>
+                  {say("Email address", "Correo electrónico")} <span className="text-rosa-500">*</span>
                 </label>
                 <input
                   id="lead-email"
@@ -221,7 +258,7 @@ export default function GuestInterestForm() {
 
               <div>
                 <label htmlFor="lead-phone" className={labelClass}>
-                  Phone number <span className="text-rosa-500">*</span>
+                  {say("Phone number", "Número de teléfono")} <span className="text-rosa-500">*</span>
                 </label>
                 <input
                   id="lead-phone"
@@ -244,7 +281,7 @@ export default function GuestInterestForm() {
 
               <div>
                 <label htmlFor="lead-contact" className={labelClass}>
-                  Preferred contact method <span className="text-rosa-500">*</span>
+                  {say("Preferred contact method", "Forma de contacto preferida")} <span className="text-rosa-500">*</span>
                 </label>
                 <select
                   id="lead-contact"
@@ -256,10 +293,10 @@ export default function GuestInterestForm() {
                   aria-describedby={errors.preferredContact ? "lead-contact-error" : undefined}
                   required
                 >
-                  <option value="">Choose one…</option>
+                  <option value="">{say("Choose one…", "Elija una opción…")}</option>
                   {CONTACT_METHODS.map((m) => (
                     <option key={m} value={m}>
-                      {m}
+                      {optionLabel(m)}
                     </option>
                   ))}
                 </select>
@@ -272,7 +309,7 @@ export default function GuestInterestForm() {
 
               <div>
                 <label htmlFor="lead-guests" className={labelClass}>
-                  Number of guests who may travel
+                  {say("Number of guests who may travel", "Número de personas que podrían viajar")}
                 </label>
                 <select
                   id="lead-guests"
@@ -281,10 +318,10 @@ export default function GuestInterestForm() {
                   onChange={(e) => set("guests", e.target.value)}
                   className={inputClass}
                 >
-                  <option value="">Choose one…</option>
+                  <option value="">{say("Choose one…", "Elija una opción…")}</option>
                   {GUEST_OPTIONS.map((g) => (
                     <option key={g} value={g}>
-                      {g}
+                      {optionLabel(g)}
                     </option>
                   ))}
                 </select>
@@ -292,7 +329,7 @@ export default function GuestInterestForm() {
 
               <div className="sm:col-span-2">
                 <label htmlFor="lead-cabin" className={labelClass}>
-                  Cabin interest
+                  {say("Cabin interest", "Tipo de cabina de interés")}
                 </label>
                 <select
                   id="lead-cabin"
@@ -301,10 +338,10 @@ export default function GuestInterestForm() {
                   onChange={(e) => set("cabinInterest", e.target.value)}
                   className={inputClass}
                 >
-                  <option value="">Choose one…</option>
+                  <option value="">{say("Choose one…", "Elija una opción…")}</option>
                   {CABIN_OPTIONS.map((c) => (
                     <option key={c} value={c}>
-                      {c}
+                      {optionLabel(c)}
                     </option>
                   ))}
                 </select>
@@ -312,7 +349,8 @@ export default function GuestInterestForm() {
 
               <div className="sm:col-span-2">
                 <label htmlFor="lead-comments" className={labelClass}>
-                  Questions or comments <span className="font-normal text-slate-400">(optional)</span>
+                  {say("Questions or comments", "Preguntas o comentarios")}{" "}
+                  <span className="font-normal text-slate-400">{say("(optional)", "(opcional)")}</span>
                 </label>
                 <textarea
                   id="lead-comments"
@@ -337,7 +375,10 @@ export default function GuestInterestForm() {
                     required
                   />
                   <span>
-                    I agree to be contacted by Happy Holidays Travel regarding this cruise.{" "}
+                    {say(
+                      "I agree to be contacted by Happy Holidays Travel regarding this cruise.",
+                      "Acepto que Happy Holidays Travel me contacte sobre este crucero.",
+                    )}{" "}
                     <span className="text-rosa-500">*</span>
                   </span>
                 </label>
@@ -354,20 +395,27 @@ export default function GuestInterestForm() {
                 role="alert"
                 className="mt-6 rounded-xl bg-rosa-100 p-4 text-sm text-rosa-600 ring-1 ring-rosa-200"
               >
-                Something went wrong sending your information. Please try again, or call Happy
-                Holidays Travel at {invitation.office.phoneDisplay}.
+                {say(
+                  "Something went wrong sending your information. Please try again, or call Happy Holidays Travel at",
+                  "Hubo un problema al enviar su información. Intente de nuevo, o llame a Happy Holidays Travel al",
+                )}{" "}
+                {invitation.office.phoneDisplay}.
               </div>
             )}
 
             <div className="mt-7">
               <PrimaryButton type="submit" disabled={status === "submitting"} className="w-full sm:w-full">
-                {status === "submitting" ? "Sending…" : "Send Me More Information"}
+                {status === "submitting"
+                  ? say("Sending…", "Enviando…")
+                  : say("Send Me More Information", "Quiero Más Información")}
               </PrimaryButton>
             </div>
 
             <p className="mt-4 text-center text-xs text-slate-500">
-              Your information will only be used by Happy Holidays Travel to follow up about this
-              cruise.
+              {say(
+                "Your information will only be used by Happy Holidays Travel to follow up about this cruise.",
+                "Su información solo será usada por Happy Holidays Travel para darle seguimiento sobre este crucero.",
+              )}
             </p>
           </form>
         )}

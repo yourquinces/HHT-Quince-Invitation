@@ -1,4 +1,5 @@
 import { invitation } from "../data/invitation";
+import { say } from "../lib/inviteLang";
 import Icon from "./Icon";
 import Section from "./Section";
 
@@ -6,7 +7,8 @@ export default function RegistrySection() {
   const { registry, quinceanera } = invitation;
   if (!registry.enabled || !registry.url) return null;
 
-  const heading = registry.heading || `${quinceanera.preferredName}’s Gift Registry`;
+  const heading = registry.heading ||
+    say(`${quinceanera.preferredName}’s Gift Registry`, `Lista de Regalos de ${quinceanera.preferredName}`);
 
   return (
     <Section id="registry" className="bg-blush-50">
@@ -17,7 +19,12 @@ export default function RegistrySection() {
         <h2 className="mt-5 font-display text-2xl font-bold text-royal-800 sm:text-3xl">
           {heading}
         </h2>
-        <p className="mt-4 text-slate-600">{registry.description}</p>
+        <p className="mt-4 text-slate-600">
+          {say(
+            registry.description,
+            "¿Prefiere hacer un regalo? Visite la lista de regalos para contribuir a la celebración — cada regalo, grande o pequeño, significa muchísimo para nosotros.",
+          )}
+        </p>
         <div className="mt-7 flex justify-center">
           <a
             href={registry.url}
@@ -26,7 +33,7 @@ export default function RegistrySection() {
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rosa-600 to-royal-600 px-10 py-4 text-sm font-semibold uppercase tracking-wider text-white shadow-lg shadow-rosa-500/25 transition hover:from-rosa-500 hover:to-royal-500 sm:w-auto"
           >
             <Icon name="gift" className="h-4 w-4" />
-            {registry.buttonLabel}
+            {say(registry.buttonLabel, "VER LA LISTA DE REGALOS")}
           </a>
         </div>
       </div>

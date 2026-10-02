@@ -1,4 +1,5 @@
 import { invitation } from "../data/invitation";
+import { say } from "../lib/inviteLang";
 import Icon from "./Icon";
 import Section from "./Section";
 
@@ -6,15 +7,15 @@ export default function ContactSection() {
   const { agent, office } = invitation;
 
   const actions = [
-    { icon: "phone", label: "Call", href: `tel:+${agent.phoneDial}` },
+    { icon: "phone", label: say("Call", "Llamar"), href: `tel:+${agent.phoneDial}` },
     { icon: "whatsapp", label: "WhatsApp", href: agent.whatsappUrl },
-    { icon: "mail", label: "Email", href: `mailto:${agent.email}` },
+    { icon: "mail", label: say("Email", "Correo"), href: `mailto:${agent.email}` },
   ];
 
   return (
     <Section id="contact" className="bg-white">
       <h2 className="text-center font-display text-3xl font-bold text-royal-800 sm:text-4xl">
-        Questions? We’re Here to Help
+        {say("Questions? We’re Here to Help", "¿Preguntas? Estamos para Ayudarle")}
       </h2>
 
       <div className="mx-auto mt-10 max-w-xl rounded-3xl bg-blush-50 p-8 text-center ring-1 ring-blush-200">
@@ -27,7 +28,7 @@ export default function ContactSection() {
           />
         )}
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold-600">
-          Your Happy Holidays Travel Agent
+          {say("Your Happy Holidays Travel Agent", "Su Agente de Happy Holidays Travel")}
         </p>
         <p className="mt-2 font-display text-2xl font-semibold text-royal-800">{agent.name}</p>
         <p className="mt-1 text-slate-600">{agent.phoneDisplay}</p>

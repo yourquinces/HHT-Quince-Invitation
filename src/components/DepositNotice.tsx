@@ -1,4 +1,5 @@
 import { invitation } from "../data/invitation";
+import { say } from "../lib/inviteLang";
 import Icon from "./Icon";
 import Section from "./Section";
 
@@ -13,10 +14,17 @@ export default function DepositNotice() {
             <Icon name="info" className="h-5 w-5" />
           </span>
           <div className="space-y-3 text-[0.95rem] leading-relaxed text-slate-700">
-            <p>{deposit.policy}</p>
             <p>
-              To participate in the private group celebrations, reservations must be made through
-              Happy Holidays Travel under {quinceanera.preferredName}’s group.
+              {say(
+                deposit.policy,
+                `Se requiere un depósito no reembolsable de ${deposit.amount} por persona para comenzar el proceso de reservación.`,
+              )}
+            </p>
+            <p>
+              {say(
+                `To participate in the private group celebrations, reservations must be made through Happy Holidays Travel under ${quinceanera.preferredName}’s group.`,
+                `Para participar en las celebraciones privadas del grupo, las reservaciones deben hacerse a través de Happy Holidays Travel dentro del grupo de ${quinceanera.preferredName}.`,
+              )}
             </p>
           </div>
         </div>
