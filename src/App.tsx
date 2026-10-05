@@ -42,6 +42,7 @@ import DepositNotice from "./components/DepositNotice";
 import RegistrySection from "./components/RegistrySection";
 import ContactSection from "./components/ContactSection";
 import Footer from "./components/Footer";
+import InvitationV2 from "./components/v2/InvitationV2";
 
 function InvitationPage() {
   const lang = inviteLang === "es" ? "es" : undefined;
@@ -79,8 +80,9 @@ function CenteredNotice({ children }: { children: React.ReactNode }) {
 }
 
 /** Live invitation page (/i/<slug>) — loads its content from Supabase. */
-function LiveInvitation({ slug }: { slug: string }) {
+function LiveInvitation({ slug, v2 = false }: { slug: string; v2?: boolean }) {
   const [state, setState] = useState<"loading" | "ready" | "missing" | "error">("loading");
+  const [sailDate, setSailDate] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,6 +94,7 @@ function LiveInvitation({ slug }: { slug: string }) {
           return;
         }
         applyInvitationRow(row);
+        setSailDate(row.sail_date ?? null);
         document.title = invitation.social.title;
         if (inviteLang === "es") {
           // Her family's own words, translated by hand — see spanishMessages.ts.
@@ -151,7 +154,7 @@ function LiveInvitation({ slug }: { slug: string }) {
       </CenteredNotice>
     );
   }
-  return <InvitationPage />;
+  return v2 ? <InvitationV2 sailDate={sailDate} /> : <InvitationPage />;
 }
 
 const MARKETING_TITLE = "2027 Quinceañera Cruises | Happy Holidays Travel";
@@ -187,6 +190,8 @@ export default function App() {
   const isShipVisitAllure = route === "/ship-visit-allure";
   const isStaffShipVisits = route === "/staff/ship-visits";
   const liveSlug = liveSlugFromPath(pathname);
+  // V2 design preview of the same invitation, built alongside V1 for comparison.
+  const v2Slug = route.match(/^\/i\/([^/]+)\/v2$/)?.[1] ?? null;
   // Birthdays and other non-quince parties on a group sailing.
   const celebrationSlug = route.match(/^\/celebrate\/([^/]+)$/)?.[1] ?? null;
 
@@ -197,7 +202,7 @@ export default function App() {
   // sample invitation at the root, the pricing table, and the marketing page.
   const pageOwnsTitle =
     !!editSlug || !!friendsSlug || !!groupCruiseSlug || !!groupCode || !!guestsSlug ||
-    !!hubSlug || !!registerSlug || !!liveSlug ||
+    !!hubSlug || !!registerSlug || !!liveSlug || !!v2Slug ||
     isRegisterPage || isStaffRegistrations || isStaffHubs || isShipVisit ||
     isShipVisitInvite || isShipVisitAllure || isStaffShipVisits || !!celebrationSlug;
 
@@ -242,5 +247,6 @@ export default function App() {
   if (isStaffShipVisits) return <ShipVisitsStaffPage />;
   if (celebrationSlug) return <CelebrationInvitePage slug={decodeURIComponent(celebrationSlug)} />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;
+  if (v2Slug) return <LiveInvitation slug={decodeURIComponent(v2Slug)} v2 />;
   return <InvitationPage />;
 }
