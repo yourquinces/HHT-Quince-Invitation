@@ -205,7 +205,7 @@ export const invitation: InvitationConfig = {
     phoneDisplay: "(305) 267-4004",
     // Replace the number after wa.me/ with the agent's WhatsApp number.
     whatsappUrl: "https://wa.me/13052674004",
-    email: "info@hhtcruises.com",
+    email: "info@hhtcruises.net",
     photo: "", // Optional: "/images/agent.jpg" — leave "" for no photo.
   },
 
