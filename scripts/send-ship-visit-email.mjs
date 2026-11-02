@@ -47,13 +47,13 @@ const FAILED_FILE = join(root, "scripts/.ship-visit-failed.txt");
 
 const SUBJECT = "🚢✨ Our First Official Quinceañera Cruise Event Is Here!";
 const FROM = "Happy Holidays Travel <quinces@hhtcruises.net>";
-const REPLY_TO = "info@hhtcruises.com";
+const REPLY_TO = "info@hhtcruises.net";
 
 // Resend's own unsubscribe only applies to Broadcasts, not to API sends like
 // these, so the template carries a *|UNSUB|* token we fill with a mailto and
 // mirror into the headers Gmail and Apple Mail turn into a real button.
 // Same approach as HHT-Quinces-Leads/netlify/functions/_warm-caller-email.js.
-const UNSUB_ADDRESS = "info@hhtcruises.com";
+const UNSUB_ADDRESS = "info@hhtcruises.net";
 const UNSUB_MAILTO =
   "mailto:" + UNSUB_ADDRESS + "?subject=" + encodeURIComponent("Unsubscribe");
 
