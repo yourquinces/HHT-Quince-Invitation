@@ -23,6 +23,7 @@
 // Same publishable key the browser bundle already ships. Row-level security
 // exposes active invitations only.
 import { celebrations } from "../../src/data/celebrations.ts";
+import { groupInvites } from "../../src/data/groupInvites.ts";
 import { datesEs } from "../../src/lib/spanish.ts";
 
 const SUPABASE_URL = "https://jpgwcfswnfytyqzklrba.supabase.co";
@@ -171,6 +172,28 @@ export default async (request: Request, context: { next: () => Promise<Response>
     );
   }
 
+  // Group quinceañera invitations (/g/<slug>): static config, ship photo.
+  const groupMatch = path.match(/^\/g\/([^/]+)$/);
+  if (groupMatch) {
+    const g = groupInvites[decodeURIComponent(groupMatch[1])];
+    if (!g) return res;
+    const html = await res.text();
+    return new Response(
+      html.replace(
+        /<!--SOCIAL:START-->[\s\S]*?<!--SOCIAL:END-->/,
+        tags({
+          title: `The ${g.groupName} Family Quinceañera Cruise · Icon of the Seas`,
+          description:
+            `The ${g.groupName} family is invited to celebrate their quinceañeras at sea aboard ` +
+            `Icon of the Seas, July 24–31, 2027 from Miami. Cabin prices and how to reserve.`,
+          image: origin + SHIP_IMAGE["Icon of the Seas"],
+          url: origin + path,
+        }),
+      ),
+      { status: res.status, headers: res.headers },
+    );
+  }
+
   const codeMatch = path.match(/^\/c\/([A-Za-z0-9_-]+)$/);
   const slugMatch = path.match(/^\/i\/([^/]+)(?:\/.*)?$/);
 
@@ -237,4 +260,4 @@ export default async (request: Request, context: { next: () => Promise<Response>
   });
 };
 
-export const config = { path: ["/i/*", "/c/*", "/ship-visit-invite", "/ship-visit-allure", "/celebrate/*"] };
+export const config = { path: ["/i/*", "/c/*", "/ship-visit-invite", "/ship-visit-allure", "/celebrate/*", "/g/*"] };

@@ -29,6 +29,7 @@ import HubsStaffPage from "./components/HubsStaffPage";
 import PricingPage from "./components/PricingPage";
 import QuinceCruisesPage from "./components/QuinceCruisesPage";
 import CelebrationInvitePage from "./components/CelebrationInvitePage";
+import GroupInvitePage from "./components/GroupInvitePage";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import PersonalMessage from "./components/PersonalMessage";
@@ -194,6 +195,8 @@ export default function App() {
   const v2Slug = route.match(/^\/i\/([^/]+)\/v2$/)?.[1] ?? null;
   // Birthdays and other non-quince parties on a group sailing.
   const celebrationSlug = route.match(/^\/celebrate\/([^/]+)$/)?.[1] ?? null;
+  // Quince cruise invitations addressed to a whole group (e.g. /g/lpm).
+  const groupInviteSlug = route.match(/^\/g\/([^/]+)$/)?.[1] ?? null;
 
   // Every page below sets its own tab title, and React runs a parent's effect
   // AFTER its children's — so a blanket title here overwrote all of them, and
@@ -204,7 +207,8 @@ export default function App() {
     !!editSlug || !!friendsSlug || !!groupCruiseSlug || !!groupCode || !!guestsSlug ||
     !!hubSlug || !!registerSlug || !!liveSlug || !!v2Slug ||
     isRegisterPage || isStaffRegistrations || isStaffHubs || isShipVisit ||
-    isShipVisitInvite || isShipVisitAllure || isStaffShipVisits || !!celebrationSlug;
+    isShipVisitInvite || isShipVisitAllure || isStaffShipVisits || !!celebrationSlug ||
+    !!groupInviteSlug;
 
   useEffect(() => {
     if (pageOwnsTitle) return;
@@ -246,6 +250,7 @@ export default function App() {
   if (isShipVisit) return <ShipVisitFormPage />;
   if (isStaffShipVisits) return <ShipVisitsStaffPage />;
   if (celebrationSlug) return <CelebrationInvitePage slug={decodeURIComponent(celebrationSlug)} />;
+  if (groupInviteSlug) return <GroupInvitePage slug={decodeURIComponent(groupInviteSlug)} />;
   if (liveSlug) return <LiveInvitation slug={liveSlug} />;
   if (v2Slug) return <LiveInvitation slug={decodeURIComponent(v2Slug)} v2 />;
   return <InvitationPage />;

@@ -13,6 +13,8 @@ import { useEffect, useMemo, useState } from "react";
 import { SUPABASE_URL, SUPABASE_KEY } from "../lib/supabase";
 import Header from "./Header";
 import Footer from "./Footer";
+import { groupInvites } from "../data/groupInvites";
+import { sailingById } from "../data/sailings";
 
 type State = "loading" | "denied" | "ready";
 
@@ -144,6 +146,52 @@ export default function HubsStaffPage() {
             {rows.length} active {rows.length === 1 ? "invitation" : "invitations"}. “Copy her
             link” gives the private hub link — send her that one and everything else is inside it.
           </p>
+
+          {Object.keys(groupInvites).length > 0 && (
+            <section className="mt-8">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Group invitations · not tied to one girl
+              </h2>
+              <div className="space-y-3">
+                {Object.entries(groupInvites).map(([gslug, g]) => {
+                  const link = `${origin}/g/${encodeURIComponent(gslug)}`;
+                  const sailing = sailingById(g.sailDate);
+                  return (
+                    <article key={gslug} className="rounded-2xl bg-white p-5 ring-1 ring-blush-200">
+                      <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 className="font-display text-xl font-semibold text-royal-800">
+                          {g.groupName} Family
+                        </h3>
+                        <span className="text-xs text-slate-500">
+                          {sailing ? `${sailing.ship} · ${sailing.label}` : g.sailDate} · {g.agentName}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(link);
+                              setCopied(`g:${gslug}`);
+                              setTimeout(() => setCopied(""), 2200);
+                            } catch {
+                              setCopied("");
+                            }
+                          }}
+                          className="rounded-full bg-royal-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-royal-700"
+                        >
+                          {copied === `g:${gslug}` ? "Copied!" : "Copy group link"}
+                        </button>
+                        <a className={linkCls} href={link} target="_blank" rel="noopener">
+                          Invitation
+                        </a>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           <input
             value={q}
