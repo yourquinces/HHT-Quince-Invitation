@@ -1,9 +1,9 @@
 // A group quinceañera invitation — /g/<slug>
 //
 // The quince cruise, addressed to a whole community (e.g. the LPM family)
-// instead of one girl. No girl's name, photo or registry: the hero is the
-// ship, the copy speaks to every family in the group, and each family that
-// raises its hand is booking its own daughter's quinceañera on the sailing.
+// instead of one girl. Written for TWO audiences, and every line must hold for
+// both: girls celebrating their own quinceañera on the sailing, and guests
+// coming along to celebrate their friends. No girl's name, photo or registry.
 // Leads go to the normal quince_leads pipeline, tagged with the group.
 //
 // Content lives in src/data/groupInvites.ts.
@@ -45,6 +45,7 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
   const [fields, setFields] = useState({
     parentFirst: "",
     parentLast: "",
+    role: "",
     quinceName: "",
     email: "",
     phone: "",
@@ -87,7 +88,7 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
 
   const { cruise, office } = invitation;
   const title = group
-    ? `${group.groupName} Family Quinceañera Cruise | ${cruise.ship}`
+    ? `Join the ${group.groupName} Family Quinceañera Cruise | ${cruise.ship}`
     : "Happy Holidays Travel";
 
   useEffect(() => {
@@ -97,8 +98,8 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
         .querySelector('meta[name="description"]')
         ?.setAttribute(
           "content",
-          `The ${group.groupName} family is invited to the HHT Quinceañera Cruise aboard ` +
-            `${cruise.ship}, ${cruise.sailingDates}.`,
+          `Join the ${group.groupName} family aboard ${cruise.ship}, ${cruise.sailingDates} — ` +
+            `celebrate your own quinceañera or come as a guest to celebrate with friends.`,
         );
   }, [title, group, cruise.ship, cruise.sailingDates]);
 
@@ -106,7 +107,13 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
     e.preventDefault();
     if (fields.botField || !group) return; // honeypot
     setStatus("submitting");
-    const quince = fields.quinceName.trim();
+    const quince = fields.role === "celebrating" ? fields.quinceName.trim() : "";
+    const roleNote =
+      fields.role === "celebrating"
+        ? "Celebrating her own quinceañera"
+        : fields.role === "guest"
+          ? "Coming as a guest to celebrate"
+          : "";
     try {
       await submitQuinceLead({
         quince_first: quince.split(/\s+/)[0] || "",
@@ -121,6 +128,7 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
         source_url: window.location.href,
         heard_about: `${group.groupName} family group invitation`,
         client_notes: [
+          roleNote,
           fields.notes.trim(),
           `${group.groupName} family group, sailing ${cruise.sailingDates}. Agent: ${group.agentName}.`,
         ]
@@ -189,19 +197,20 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
                 You’re Invited
               </p>
               <p className="mt-4 font-display text-lg italic text-royal-600 sm:text-xl">
-                Calling the {group.groupName} family
+                Everyone is invited
               </p>
               <h1 className="mt-2 font-display text-4xl font-bold leading-tight text-royal-800 sm:text-5xl lg:text-6xl">
-                The {group.groupName} Family
+                Join the {group.groupName} Family
                 <span className="mt-1 block bg-gradient-to-r from-rosa-500 to-royal-500 bg-clip-text text-transparent">
                   Quinceañera Cruise
                 </span>
               </h1>
 
               <p className="mt-5 text-[1.02rem] leading-relaxed text-slate-600 sm:mx-auto sm:max-w-md lg:mx-0">
-                Celebrate her fifteen at sea, together. Families from {group.groupName} sailing as
-                one group — each quinceañera with her own celebration, all of us on the same ship,
-                the same week.
+                Join the {group.groupName} family for an unforgettable week at sea! Whether she’s
+                celebrating her own quinceañera or joining her friends for the fun, everyone is
+                invited to be part of the experience. Individual quinceañera celebrations, one
+                incredible ship, and a week of memories together!
               </p>
 
               <ul className="mt-8 space-y-2.5 text-left text-[0.95rem] text-slate-600 sm:mx-auto sm:max-w-md lg:mx-0">
@@ -216,7 +225,7 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
               </ul>
 
               <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center lg:justify-start">
-                <PrimaryButton href="#join">Reserve Her Spot</PrimaryButton>
+                <PrimaryButton href="#join">Join the Group</PrimaryButton>
                 <SecondaryButton href="#pricing">View Cabin Prices</SecondaryButton>
               </div>
             </div>
@@ -250,7 +259,7 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
                 Come See the Ship in Person
               </span>
               <span className="mt-0.5 block text-sm text-white/90">
-                Register for a ship visit — walk aboard, tour the ship and meet the other families.
+                Register for a ship visit — walk aboard, tour the ship and meet the families sailing with us.
               </span>
             </span>
             <span className="shrink-0 rounded-full bg-white px-5 py-2.5 text-sm font-semibold uppercase tracking-wide text-royal-700">
@@ -279,7 +288,8 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
             </h2>
             <p className="mt-4 text-center text-slate-600">
               Leave your details and {group.agentName} from Happy Holidays Travel will call you
-              with cabin availability, group pricing and the next steps for her quinceañera.
+              with cabin availability, group pricing and the next steps — whether you are
+              celebrating a quinceañera or coming along to celebrate.
             </p>
 
             {status === "success" ? (
@@ -287,7 +297,8 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
                 role="status"
                 className="mt-8 rounded-2xl bg-blush-50 px-6 py-8 text-center font-display text-xl text-royal-800"
               >
-                Thank you! {group.agentName} will be in touch shortly.
+                Thank you! {group.agentName} will be in touch shortly. We can’t wait to celebrate
+                with you!
               </p>
             ) : (
               <form onSubmit={handleSubmit} className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -302,7 +313,7 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
                 />
                 <div>
                   <label className={labelClass} htmlFor="gi-first">
-                    Parent first name
+                    First name
                   </label>
                   <input
                     id="gi-first"
@@ -314,7 +325,7 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="gi-last">
-                    Parent last name
+                    Last name
                   </label>
                   <input
                     id="gi-last"
@@ -323,18 +334,49 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
                     onChange={(e) => setFields({ ...fields, parentLast: e.target.value })}
                   />
                 </div>
-                <div className="sm:col-span-2">
-                  <label className={labelClass} htmlFor="gi-quince">
-                    Quinceañera’s name{" "}
-                    <span className="font-normal text-slate-400">(optional)</span>
-                  </label>
-                  <input
-                    id="gi-quince"
-                    className={inputClass}
-                    value={fields.quinceName}
-                    onChange={(e) => setFields({ ...fields, quinceName: e.target.value })}
-                  />
-                </div>
+                <fieldset className="sm:col-span-2">
+                  <legend className={labelClass}>How are you joining us?</legend>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {[
+                      { v: "celebrating", label: "Celebrating her quinceañera" },
+                      { v: "guest", label: "Coming as a guest to celebrate" },
+                    ].map((o) => (
+                      <label
+                        key={o.v}
+                        className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3.5 text-slate-800 ${
+                          fields.role === o.v
+                            ? "border-royal-400 bg-royal-50"
+                            : "border-blush-200 bg-white"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="gi-role"
+                          value={o.v}
+                          required
+                          checked={fields.role === o.v}
+                          onChange={() => setFields({ ...fields, role: o.v })}
+                          className="accent-royal-600"
+                        />
+                        {o.label}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                {fields.role === "celebrating" && (
+                  <div className="sm:col-span-2">
+                    <label className={labelClass} htmlFor="gi-quince">
+                      Quinceañera’s name{" "}
+                      <span className="font-normal text-slate-400">(optional)</span>
+                    </label>
+                    <input
+                      id="gi-quince"
+                      className={inputClass}
+                      value={fields.quinceName}
+                      onChange={(e) => setFields({ ...fields, quinceName: e.target.value })}
+                    />
+                  </div>
+                )}
                 <div>
                   <label className={labelClass} htmlFor="gi-email">
                     Email

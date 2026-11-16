@@ -182,10 +182,10 @@ export default async (request: Request, context: { next: () => Promise<Response>
       html.replace(
         /<!--SOCIAL:START-->[\s\S]*?<!--SOCIAL:END-->/,
         tags({
-          title: `The ${g.groupName} Family Quinceañera Cruise · Icon of the Seas`,
+          title: `Join the ${g.groupName} Family Quinceañera Cruise · Icon of the Seas`,
           description:
-            `The ${g.groupName} family is invited to celebrate their quinceañeras at sea aboard ` +
-            `Icon of the Seas, July 24–31, 2027 from Miami. Cabin prices and how to reserve.`,
+            `Celebrate your own quinceañera or come as a guest to celebrate with friends — ` +
+            `Icon of the Seas, July 24–31, 2027 from Miami. Everyone is invited.`,
           image: origin + SHIP_IMAGE["Icon of the Seas"],
           url: origin + path,
         }),
