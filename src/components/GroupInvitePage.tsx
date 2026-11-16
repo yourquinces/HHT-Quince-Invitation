@@ -236,6 +236,29 @@ export default function GroupInvitePage({ slug }: { slug: string }) {
           </div>
         </section>
 
+        {/* Ship visit — walk aboard before booking. Near the top on purpose. */}
+        <div className="bg-white px-5 sm:px-8">
+          <a
+            href="/ship-visit"
+            className="relative z-10 mx-auto -mt-6 flex w-full max-w-3xl flex-col items-center gap-4 rounded-2xl bg-gradient-to-r from-royal-600 to-rosa-500 px-6 py-5 text-center text-white shadow-lg shadow-royal-800/20 transition hover:shadow-xl sm:flex-row sm:text-left"
+          >
+            <span className="inline-flex shrink-0 rounded-full bg-white/20 p-3">
+              <Icon name="ship" className="h-6 w-6" />
+            </span>
+            <span className="flex-1">
+              <span className="block font-display text-xl font-semibold">
+                Come See the Ship in Person
+              </span>
+              <span className="mt-0.5 block text-sm text-white/90">
+                Register for a ship visit — walk aboard, tour the ship and meet the other families.
+              </span>
+            </span>
+            <span className="shrink-0 rounded-full bg-white px-5 py-2.5 text-sm font-semibold uppercase tracking-wide text-royal-700">
+              Register for a Visit
+            </span>
+          </a>
+        </div>
+
         <Section className="bg-white">
           <div className="mx-auto max-w-2xl text-center">
             <p className="font-display text-xl italic leading-relaxed text-royal-700 sm:text-2xl">
