@@ -27,10 +27,10 @@ export const groupInvites: Record<string, GroupInvite> = {
     groupName: "LPM",
     sailDate: "2027-07-24",
     message:
-      "Whether she is celebrating her own quinceañera or coming along to celebrate her " +
-      "friends, there is a place for her on this cruise. Bring the whole family and sail with " +
-      "the LPM family — private celebrations, a week of beautiful ports, and memories " +
-      "everyone will keep for a lifetime.",
+      "Some of our LPM girls will turn fifteen on board, and the rest are coming to cheer " +
+      "them on — that is what makes this sailing so special. Pack something fancy for the " +
+      "celebrations and a swimsuit for the beaches, and get ready for seven days of dancing, " +
+      "laughing and making memories with the friends you love most.",
     signature: "With love, Happy Holidays Travel",
     agentName: "Luisa",
   },
